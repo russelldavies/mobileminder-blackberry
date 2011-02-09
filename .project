@@ -1,29 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SpotLight</name>
+	<name>BBOSX</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>net.rim.eide.RIMResourcesBuilder</name>
+			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>net.rim.eide.PreprocessBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>net.rim.eide.JavaIncrementalProjectBuilder</name>
+			<name>eclipseme.core.preverifier</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>net.rim.eide.rimnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>net.rim.eide.PreprocessingNature</nature>
+		<nature>eclipseme.core.nature</nature>
 	</natures>
 </projectDescription>
