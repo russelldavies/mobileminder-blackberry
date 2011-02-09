@@ -1,10 +1,3 @@
-/**
- * 
- * Call listener class
- * 
- *
- */
-
 package com.spotlight.track;
 
 import java.io.IOException;
@@ -52,7 +45,12 @@ import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 
-//TODO look up abstractphonelistener
+/**
+ * 
+ * MyCallListener monitors and registers call based events.
+ *
+ */
+
 public class MyCallListener extends AbstractPhoneListener
 {
 	private LocalDataAccess actLog;
@@ -66,18 +64,24 @@ public class MyCallListener extends AbstractPhoneListener
 	private 	  String    Prefix    = "";
 	//private		  Date		callStartTime
 	//return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+/**
+ * The constructor initialises the action store location and registers the callListener for the device.
+ * 
+ * @param inputAccess log of actions
+ */
 	
-	public MyCallListener(LocalDataAccess inputAccess)
-	{
-		actLog = inputAccess;
-		Phone.addPhoneListener(this);//TODO look up addPhonelistener
-	}
+public MyCallListener(LocalDataAccess inputAccess)
+{
+	actLog = inputAccess;
+	Phone.addPhoneListener(this);//TODO look up addPhonelistener
+}
 	
 /**
- * @brief
- * 		returns the phone number of the caller	
- * @param [in] callId <integer representing the phone call id>
- * @return String is returned containing the callers phone number
+ * Returns the phone number of the caller	
+ * 
+ * @param  callId integer representing the phone call id
+ * @return A string is returned containing the callers phone number
  */
 	//TODO what is this function used for? Deosn't seem to be used anywhere in the code
 	private String getPhoneNumber(int callId)
@@ -93,16 +97,14 @@ public class MyCallListener extends AbstractPhoneListener
 	
 	
 /**
+ * Stores call information to action log.
  * 
- * @brief
- * 		Stores call information to action log
+ * <p>
+ * Retrieves the call information from the device and stores it in the action log as type Call
  * 
- * @detail
- * 		retrieves the call information from the device and stores it in the action log as type Call
- * 
- * @param [in] ehandler <String consisting of a prefix and the status of the call i.e. connected>
+ * @param ehandler String consisting of a prefix and the status of the call i.e. connected
  * 		
- * @param [in] callid <
+ * @param callid The address of the caller
  * 
  *
  */
@@ -134,12 +136,30 @@ public class MyCallListener extends AbstractPhoneListener
 	//{ addToLog("callConferenceCallEstablished", callId); }
 	
 	// Network indicates a connected event
+	
+/**
+ * Adds action to log when the call has been connected
+ * 
+ * @param callId call address
+ */
 	public void callConnected(int callId)
 	{ addToLog(Prefix+Connected, callId); }//{ addToLog("callConnected", callId); }
-	
+
+	/**
+	 * Adds action to log when the call has been directly connected
+	 * 
+	 * @param callId call address
+	 */	
+
 	// Direct-connect call connected
 	public void callDirectConnectConnected(int callId)
 	{ addToLog(Prefix+Connected, callId); }//{ addToLog("callDirectConnectConnected", callId); }
+
+	/**
+	 * Adds action to log when the call has been directly disconnected
+	 * 
+	 * @param callId call address
+	 */
 	
 	// Direct-connect call disconnected
 	public void callDirectConnectDisconnected(int callId)
@@ -150,7 +170,13 @@ public class MyCallListener extends AbstractPhoneListener
 			Prefix = "";
 		}
 	}//{ addToLog("callDirectConnectDisconnected", callId); }
+
 	
+	/**
+	 * Adds action to log when the call has been disconnected
+	 * 
+	 * @param callId call address
+	 */
 	// Call disconnected
 	public void callDisconnected(int callId)
 	{ 
@@ -164,18 +190,36 @@ public class MyCallListener extends AbstractPhoneListener
 	// User ended call.. this will be called as well as "callDisconnected(int)"
 	//public void callEndedByUser(int callId)
 	//{ addToLog("Finished", callId); }//{ addToLog("callEndedByUser", callId); }
-
+	
+	/**
+	 * Adds action to log when the call has been put on hold
+	 * 
+	 * @param callId call address
+	 */
 	// Call has been placed on "hold"
 	public void callHeld(int callId)
 	{ addToLog(Prefix+Hold_ON, callId); }//{ addToLog("callHeld", callId); }
+
 	
+	/**
+	 * Adds action to log when the call has arrived
+	 * 
+	 * @param callId call address
+	 */
 	// New call has arrived
 	public void callIncoming(int callId)
 	{
 		Prefix = action.Incoming + " ";
 		//addToLog(Dial_IN, callId); 
 	}//{ addToLog("callIncoming", callId); }
+
 	
+	
+	/**
+	 * Adds action to log when the call has been initiated by the handheld
+	 * 
+	 * @param callId call address
+	 */
 	// Outbound call initiated by the handheld
 	public void callInitiated(int callId)
 	{ 
@@ -186,7 +230,14 @@ public class MyCallListener extends AbstractPhoneListener
 	// Call removed from a conference call
 	//public void callRemoved(int callId)
 	//{ addToLog("callRemoved", callId); }
+
 	
+	
+	/**
+	 * Adds action to log when the call has been taken off hold
+	 * 
+	 * @param callId call address
+	 */
 	// Call taken off of "hold"
 	public void callResumed(int callId)
 	{ addToLog(Prefix+Hold_OFF, callId); }//{ addToLog("callResumed", callId); }
@@ -199,7 +250,15 @@ public class MyCallListener extends AbstractPhoneListener
 	// (all members disconnected)
 	//public void conferenceCallDisconnected(int callId)
 	//{ addToLog("conferenceCallDisconnected", callId); }
+
 	
+	
+	/**
+	 * Adds action to log when the call has failed
+	 * 
+	 * @param callId call address
+	 * @param reason failure reason
+	 */
 	public void callFailed(int callId,int reason)
 	{
 		//actLog.addAction(true,action.TYPE_CALL,"callFailed:"+reason);

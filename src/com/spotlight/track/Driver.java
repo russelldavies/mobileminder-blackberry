@@ -60,7 +60,6 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
  *
  */
 
-
 class Controller extends Application
 {       
     
@@ -75,6 +74,9 @@ class Controller extends Application
         new Controller().enterEventDispatcher();
     }
      
+/**
+ * Initialises the objects that will register themselves with the appropriate event listeners
+ */
     public Controller()
     {
         int employerID  = 1;
@@ -102,12 +104,6 @@ class Controller extends Application
     }
     
 }
-
-
-
-
-
-
 
 
 

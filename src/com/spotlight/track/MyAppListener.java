@@ -47,7 +47,7 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 /**
  * 
- * The Application Listener class stores the application currently running on the device at specific intervals in the action log in the form of an action of type app.
+ * MyAppListener monitors and registers application based events.
  *
  */
 
@@ -55,6 +55,14 @@ public class MyAppListener extends Thread
 {
 	private LocalDataAccess actLog;
 	private int AppTimer;
+	
+/**
+ * The AppListener constructor initialise the action store location and the interval value.
+ * Calls the start() method on the thread which invokes the run() method of the thread.
+ * 
+ * @param inputAccess log of actions
+ * @param inputAppTimer interval value
+ */
 	public MyAppListener(LocalDataAccess inputAccess, int inputAppTimer)
 	{
 		actLog = inputAccess;
@@ -64,8 +72,8 @@ public class MyAppListener extends Thread
 
 /**
 * 
-* 		Stores the Application currently running on the device.
-* 
+* 		The Application Listener class stores the application currently running on the device at specific intervals in the action log in the form of an action of type app.
+* <p>
 * 		The inherited run method is called when the constructor starts, the function obtains the id of the application running in the foreground on the device. 
 * 		It compares the id to the application heap. 
 * 		The application heap holds the application that have been running on the device stored on the devices memory

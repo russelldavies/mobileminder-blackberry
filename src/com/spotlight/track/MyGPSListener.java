@@ -1,12 +1,3 @@
-/**
-* GPS Listener class
-* 
-* @brief
-* 		Stores GPS location information about the device in the form of an action to the action log
-* 
-*
-*/	
-
 package com.spotlight.track;
 
 
@@ -55,13 +46,26 @@ import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 
+/**
+ * 
+ * MyGPSListener monitors and registers location based events.
+ *
+ */
 
 public class MyGPSListener extends Thread
 {
 	private LocalDataAccess actLog;
 	private int 			timer;
-	
-	public MyGPSListener(LocalDataAccess inputAccess, int inputGPSTimer)
+
+/**
+ * The GPSListener constructor initialise the action store location and the interval value.
+ * Calls the start() method on the thread which invokes the run() method of the thread.
+ * 
+ * @param inputAccess log of actions
+ * @param inputGPSTimer interval value
+ */
+
+public MyGPSListener(LocalDataAccess inputAccess, int inputGPSTimer)
 	{
 		actLog = inputAccess;
 		timer  = inputGPSTimer;
@@ -69,12 +73,10 @@ public class MyGPSListener extends Thread
 	}
 	
 /**
-* 
-* @brief
+ * When this function is started it poles the GPS service based on the interval specified in the constructor.
+ * When the location changes this recorded in local data access.  
 * 		Stores GPS location information about the device in the form of an action to the action log
-* 
-* @detail
-* 		This function is called when the constructor starts. Its sets the criteria for the type of location information needed.
+* <p>   Its sets the criteria for the type of location information needed.
 * 		It retrieves the location and saves it to the action log.
 *
 */	

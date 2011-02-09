@@ -1,10 +1,3 @@
-/**
- * 
- * E-Mail listener class
- * 
- *
- */
-
 package com.spotlight.track;
 
 import java.io.IOException;
@@ -51,10 +44,21 @@ import net.rim.blackberry.api.mail.SendListener;
 import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.NoSuchServiceException;
 
+
+/**
+ * 
+ * MyMailListener monitors and registers e-mail based events.
+ *
+ */
 public class MyMailListener implements SendListener
 {
 	private LocalDataAccess actLog;
-	
+
+/**
+ * The constructor initialises the action store location and registers a SendListener for the device.
+ * 
+ * @param inputAccess log of actions
+ */
 	public MyMailListener(LocalDataAccess inputAccess)
 	{
 		actLog = inputAccess;
@@ -72,11 +76,10 @@ public class MyMailListener implements SendListener
 	}
 
 /**
- * @brief
- * 		Retrieves and formats e-mail data and adds it to the action log
+ * Retrieves and formats e-mail data and adds it to the action log
  * 
- * @param [in] arg0 device e-mail data
- * @return boolean
+ * @param arg0 device e-mail data
+ * @return boolean error value
  */
 	
 	

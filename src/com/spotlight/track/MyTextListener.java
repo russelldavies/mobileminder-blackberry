@@ -1,10 +1,3 @@
-/**
- * 
- * Text listener class
- * 
- *
- */
-
 package com.spotlight.track;
 
 import java.io.IOException;
@@ -55,10 +48,21 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 
 //TODO find out what this implement.
+
+/**
+* 
+* MyTextListener monitors and registers text message based events.
+* 
+*/
 public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener 
 {
 	private LocalDataAccess actLog;
-	
+
+/**
+ * The constructor initialises the action store location and registers a MessageListener for the device.
+ * 
+ * @param inputAccess log of actions
+ */
 	public MyTextListener(LocalDataAccess inputAccess)
 	{
 		actLog = inputAccess;
@@ -76,11 +80,10 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	
 	
 /**
- * @brief
- * 		Adds a message and its address to the action log	
+ * Adds a message and its address to the action log	
  * 
- * @param [in] inputStatus message structure
- * @param [in] inputDestinationAddress message address
+ * @param inputStatus message structure
+ * @param inputDestinationAddress message address
  */
 	
 	  private void addToLog(String inputStatus,
@@ -90,11 +93,9 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	  }
 	  
 /**
+ * Adds an outgoing message to the action log
  * 
- * @brief
- * 		Adds an outgoing message to the action log
- * 
- * @param [in] message <message structure>
+ * @param message message structure
  */
 
 	public void notifyOutgoingMessage(Message message)
@@ -103,11 +104,9 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	}
 	
 /**
+* Adds an incoming message to the action log
 * 
-* @brief
-* 		Adds an incoming message to the action log
-* 
-* @param [in] message <message structure>
+* @param message message structure
 */
 	public void notifyIncomingMessage(MessageConnection conn) 
 	{

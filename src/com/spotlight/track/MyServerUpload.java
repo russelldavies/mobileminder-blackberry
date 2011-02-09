@@ -1,10 +1,3 @@
-/**
- * 
- * MyServerUpload.java - A class that 
- * 
- *
- */
-
 package com.spotlight.track;
 
 import java.io.IOException;
@@ -51,6 +44,12 @@ import net.rim.blackberry.api.mail.SendListener;
 import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.NoSuchServiceException;
 
+/**
+ * 
+ * MyServerUpload establishes the connection to the server and facilitates in the routine delivery of triggered event data to the server
+ * 
+ */
+
 public class MyServerUpload extends Thread
 {
 	private LocalDataAccess actLog;
@@ -58,6 +57,15 @@ public class MyServerUpload extends Thread
 	private int 			deviceID;
 	private int				employerID;
 	
+/**
+ * Initialises the ServerUpload thread with the appropriate parameters.
+ * Calls the start() method on the thread which invokes the run() method of the thread.
+ * 
+ * @param inputAccess log of actions
+ * @param inputEmployerID user identifier
+ * @param inputDeviceID device identifier
+ * @param inputUploadTimer interval value
+ */
 	public MyServerUpload(LocalDataAccess inputAccess,
 						  int			  inputEmployerID,
 						  int 			  inputDeviceID,
@@ -74,10 +82,9 @@ public class MyServerUpload extends Thread
 	
 /** 
  * 
- * @brief
  * 		Sends all device actions to the server within specific intervals
  * 
- * @details
+ * <p>
  *  	This function is called when the constructor starts, it stores the actions to the action log.
  *  	It sleeps for a certain interval, then sends a batch to the server of all the actions during the interval.
  *  	Each action is loaded, sent and then removed and the same process is used for the next action.
