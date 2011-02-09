@@ -10,32 +10,15 @@ import javax.microedition.xml.rpc.Type;
 import javax.microedition.xml.rpc.ComplexType;
 import javax.microedition.xml.rpc.Element;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class SLDBserviceSoap_Stub.
- */
 public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap, javax.xml.rpc.Stub {
-	
-	/** The _property names. */
 	private String[] _propertyNames;
-	
-	/** The _property values. */
 	private Object[] _propertyValues;
 
-	/**
-	 * Instantiates a new sLD bservice soap_ stub.
-	 */
 	public SLDBserviceSoap_Stub() {
 		_propertyNames = new String[] {ENDPOINT_ADDRESS_PROPERTY};
 		_propertyValues = new Object[] {"http://217.115.115.141/SLDBservice.asmx"};
 	}
 
-	/**
-	 * _set property.
-	 *
-	 * @param name the name
-	 * @param value the value
-	 */
 	public void _setProperty(String name, Object value) {
 		int size = _propertyNames.length;
 		for (int i = 0; i < size; ++i) {
@@ -56,12 +39,6 @@ public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap
 		_propertyValues[size] = value;
 	}
 
-	/**
-	 * _get property.
-	 *
-	 * @param name the name
-	 * @return the object
-	 */
 	public Object _getProperty(String name) {
 		for (int i = 0; i < _propertyNames.length; ++i) {
 			if (_propertyNames[i].equals(name)) {
@@ -77,11 +54,6 @@ public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap
 		throw new JAXRPCException("Stub does not recognize property: "+name);
 	}
 
-	/**
-	 * _prep operation.
-	 *
-	 * @param op the op
-	 */
 	protected void _prepOperation(Operation op) {
 		for (int i = 0; i < _propertyNames.length; ++i) {
 			op.setProperty(_propertyNames[i], _propertyValues[i].toString());
@@ -92,9 +64,6 @@ public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap
 	//  Begin user methods
 	// 
 
-	/* (non-Javadoc)
-	 * @see com.spotlight.track.SLDBserviceSoap#addAction(int, int, boolean, int, java.lang.String, java.lang.String, java.lang.String)
-	 */
 	public java.lang.String addAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress) throws java.rmi.RemoteException {
 		// Copy the incoming values into an Object array if needed.
 		Object[] inputObject = new Object[7];
@@ -130,40 +99,17 @@ public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap
 	//  End user methods
 	// 
 
-	/** The Constant _qname_DestinationAddress. */
 	protected static final QName _qname_DestinationAddress = new QName("http://www.SLDB.net/", "DestinationAddress");
-	
-	/** The Constant _qname_Status. */
 	protected static final QName _qname_Status = new QName("http://www.SLDB.net/", "Status");
-	
-	/** The Constant _qname_TimeStamp. */
 	protected static final QName _qname_TimeStamp = new QName("http://www.SLDB.net/", "TimeStamp");
-	
-	/** The Constant _qname_Type. */
 	protected static final QName _qname_Type = new QName("http://www.SLDB.net/", "Type");
-	
-	/** The Constant _qname_addAction. */
 	protected static final QName _qname_addAction = new QName("http://www.SLDB.net/", "addAction");
-	
-	/** The Constant _qname_addActionResponse. */
 	protected static final QName _qname_addActionResponse = new QName("http://www.SLDB.net/", "addActionResponse");
-	
-	/** The Constant _qname_addActionResult. */
 	protected static final QName _qname_addActionResult = new QName("http://www.SLDB.net/", "addActionResult");
-	
-	/** The Constant _qname_deviceID. */
 	protected static final QName _qname_deviceID = new QName("http://www.SLDB.net/", "deviceID");
-	
-	/** The Constant _qname_employerID. */
 	protected static final QName _qname_employerID = new QName("http://www.SLDB.net/", "employerID");
-	
-	/** The Constant _qname_error. */
 	protected static final QName _qname_error = new QName("http://www.SLDB.net/", "error");
-	
-	/** The Constant _type_addAction. */
 	protected static final Element _type_addAction;
-	
-	/** The Constant _type_addActionResponse. */
 	protected static final Element _type_addActionResponse;
 	static {
 		// Create all of the Type's that this stub uses, once.

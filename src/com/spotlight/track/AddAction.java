@@ -5,50 +5,18 @@
 package com.spotlight.track;
 
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class AddAction.
- */
 public class AddAction {
-    
-    /** The employer id. */
     protected int employerID;
-    
-    /** The device id. */
     protected int deviceID;
-    
-    /** The error. */
     protected boolean error;
-    
-    /** The type. */
     protected int type;
-    
-    /** The time stamp. */
     protected java.lang.String timeStamp;
-    
-    /** The status. */
     protected java.lang.String status;
-    
-    /** The destination address. */
     protected java.lang.String destinationAddress;
     
-    /**
-     * Instantiates a new adds the action.
-     */
     public AddAction() {
     }
     
-    /**
-     * Instantiates a new adds the action.
-     *
-     * @param employerID the employer id
-     * @param deviceID the device id
-     * @param error the error
-     * @param type the type
-     * @param timeStamp the time stamp
-     * @param status the status
-     * @param destinationAddress the destination address
-     */
     public AddAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress) {
         this.employerID = employerID;
         this.deviceID = deviceID;
@@ -59,128 +27,58 @@ public class AddAction {
         this.destinationAddress = destinationAddress;
     }
     
-    /**
-     * Gets the employer id.
-     *
-     * @return the employer id
-     */
     public int getEmployerID() {
         return employerID;
     }
     
-    /**
-     * Sets the employer id.
-     *
-     * @param employerID the new employer id
-     */
     public void setEmployerID(int employerID) {
         this.employerID = employerID;
     }
     
-    /**
-     * Gets the device id.
-     *
-     * @return the device id
-     */
     public int getDeviceID() {
         return deviceID;
     }
     
-    /**
-     * Sets the device id.
-     *
-     * @param deviceID the new device id
-     */
     public void setDeviceID(int deviceID) {
         this.deviceID = deviceID;
     }
     
-    /**
-     * Checks if is error.
-     *
-     * @return true, if is error
-     */
     public boolean isError() {
         return error;
     }
     
-    /**
-     * Sets the error.
-     *
-     * @param error the new error
-     */
     public void setError(boolean error) {
         this.error = error;
     }
     
-    /**
-     * Gets the type.
-     *
-     * @return the type
-     */
     public int getType() {
         return type;
     }
     
-    /**
-     * Sets the type.
-     *
-     * @param type the new type
-     */
     public void setType(int type) {
         this.type = type;
     }
     
-    /**
-     * Gets the time stamp.
-     *
-     * @return the time stamp
-     */
     public java.lang.String getTimeStamp() {
         return timeStamp;
     }
     
-    /**
-     * Sets the time stamp.
-     *
-     * @param timeStamp the new time stamp
-     */
     public void setTimeStamp(java.lang.String timeStamp) {
         this.timeStamp = timeStamp;
     }
     
-    /**
-     * Gets the status.
-     *
-     * @return the status
-     */
     public java.lang.String getStatus() {
         return status;
     }
     
-    /**
-     * Sets the status.
-     *
-     * @param status the new status
-     */
     public void setStatus(java.lang.String status) {
         this.status = status;
     }
     
-    /**
-     * Gets the destination address.
-     *
-     * @return the destination address
-     */
     public java.lang.String getDestinationAddress() {
         return destinationAddress;
     }
     
-    /**
-     * Sets the destination address.
-     *
-     * @param destinationAddress the new destination address
-     */
     public void setDestinationAddress(java.lang.String destinationAddress) {
         this.destinationAddress = destinationAddress;
     }

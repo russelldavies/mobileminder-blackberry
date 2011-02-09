@@ -4,25 +4,7 @@
 
 package com.spotlight.track;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Interface SLDBserviceSoap.
- */
 public interface SLDBserviceSoap extends java.rmi.Remote {
-	
-	/**
-	 * Adds the action.
-	 *
-	 * @param employerID the employer id
-	 * @param deviceID the device id
-	 * @param error the error
-	 * @param type the type
-	 * @param timeStamp the time stamp
-	 * @param status the status
-	 * @param destinationAddress the destination address
-	 * @return the java.lang. string
-	 * @throws RemoteException the remote exception
-	 */
 	public java.lang.String addAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress) throws java.rmi.RemoteException;
 
 }

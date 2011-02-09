@@ -5,44 +5,20 @@
 package com.spotlight.track;
 
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class AddActionResponse.
- */
 public class AddActionResponse {
-    
-    /** The add action result. */
     protected java.lang.String addActionResult;
     
-    /**
-     * Instantiates a new adds the action response.
-     */
     public AddActionResponse() {
     }
     
-    /**
-     * Instantiates a new adds the action response.
-     *
-     * @param addActionResult the add action result
-     */
     public AddActionResponse(java.lang.String addActionResult) {
         this.addActionResult = addActionResult;
     }
     
-    /**
-     * Gets the adds the action result.
-     *
-     * @return the adds the action result
-     */
     public java.lang.String getAddActionResult() {
         return addActionResult;
     }
     
-    /**
-     * Sets the adds the action result.
-     *
-     * @param addActionResult the new adds the action result
-     */
     public void setAddActionResult(java.lang.String addActionResult) {
         this.addActionResult = addActionResult;
     }
