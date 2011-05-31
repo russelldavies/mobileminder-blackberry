@@ -241,7 +241,7 @@ public class LocalDataAccess
  * The action class is used to instantiate action objects to remain persistent in the devices storage.
  *
  */
-public class action implements Persistable
+class action implements Persistable
 { 
 	public static final int TYPE_UNKNOWN = 0;
 	public static final int TYPE_IDEL    = 1;
