@@ -17,7 +17,8 @@ public class AddAction {
     public AddAction() {
     }
     
-    public AddAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress) {
+    public AddAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress)
+    {
         this.employerID = employerID;
         this.deviceID = deviceID;
         this.error = error;

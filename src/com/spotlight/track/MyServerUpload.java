@@ -1,62 +1,21 @@
 package com.spotlight.track;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.util.Date;
-import java.util.Vector;
-  
-import javax.microedition.io.Connector;
-import javax.microedition.location.Criteria;
-import javax.microedition.location.Location;
-import javax.microedition.location.LocationException;
-import javax.microedition.location.LocationProvider;
-
-import javax.wireless.messaging.Message;
-import javax.wireless.messaging.MessageConnection;
-
-import net.rim.device.api.system.Application;
-import net.rim.device.api.system.ApplicationDescriptor;
-import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.system.PersistentObject;
-import net.rim.device.api.i18n.SimpleDateFormat;
-import net.rim.device.api.ui.Manager;
-import net.rim.device.api.ui.Screen;
-import net.rim.device.api.ui.Ui;
-import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.UiEngine;
-import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.Status;
-import net.rim.device.api.ui.container.MainScreen;
-import net.rim.device.api.util.Persistable;
-
-
-import net.rim.blackberry.api.phone.Phone;
-import net.rim.blackberry.api.phone.PhoneCall;
-import net.rim.blackberry.api.phone.AbstractPhoneListener;
-import net.rim.blackberry.api.sms.OutboundMessageListener;
-
-import net.rim.blackberry.api.mail.Store;
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.SendListener;
-import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.NoSuchServiceException;
+import com.kids.prototypes.LocalDataReader;
 
 /**
  * 
- * MyServerUpload establishes the connection to the server and facilitates in the routine delivery of triggered event data to the server
+ * MyServerUpload establishes the connection to the server
+ * and facilitates in the routine delivery of triggered event data to the server
  * 
  */
 
 public class MyServerUpload extends Thread
 {
-	private LocalDataAccess actLog;
+	private LocalDataReader actLog;
 	private int             sendToServerTime;
 	private int 			deviceID;
 	private int				employerID;
-	
+	Debug log = Logger.getInstance();
 /**
  * Initialises the ServerUpload thread with the appropriate parameters.
  * Calls the start() method on the thread which invokes the run() method of the thread.
@@ -66,7 +25,7 @@ public class MyServerUpload extends Thread
  * @param inputDeviceID device identifier
  * @param inputUploadTimer interval value
  */
-	public MyServerUpload(LocalDataAccess inputAccess,
+	public MyServerUpload(LocalDataReader inputAccess,
 						  int			  inputEmployerID,
 						  int 			  inputDeviceID,
 						  int			  inputUploadTimer)
@@ -75,10 +34,9 @@ public class MyServerUpload extends Thread
 		employerID 		 = inputEmployerID;
 		deviceID 		 = inputDeviceID;
 		sendToServerTime = inputUploadTimer;
-				
+		log.log("MyServerUpload begin...");
 		this.start();
 	}
-
 	
 /** 
  * 
@@ -94,7 +52,8 @@ public class MyServerUpload extends Thread
 	
 	public void run()
 	{
-		actLog.addAction(action.TYPE_SERVER,"Starting: MyServerUpload");
+		log.log("In MyServerUpload->run()");
+		actLog.addMessage(action.TYPE_SERVER,"Starting: MyServerUpload");
 		
 		try
 		{
@@ -103,10 +62,10 @@ public class MyServerUpload extends Thread
 			while(true)
 			{
 				this.sleep(sendToServerTime);
-
-				while(0 != actLog.length())//Dont send Start Upload
+				log.log("Length of actLog="+actLog.length());
+				
+				while(0 < actLog.length())	//Dont send Start Upload
 				{
-					
 					action anAction = actLog.getAction(0);
 					String result = server.addAction(
 										employerID,
@@ -116,26 +75,36 @@ public class MyServerUpload extends Thread
 										anAction.getTimeStamp(),
 										anAction.getStatus(),
 										anAction.getDestinationAddress());
-	
+					
+					
+					log.log("MyServerUpload::Server.addAction DONE");
+					log.log("Result="+result);
 					if("ok".equals(result))
 					{
 						actLog.removeAction(0);//remove the First Action
-						System.err.println(result);
+						log.log(""+result);
 					}
 					else
 					{
-						actLog.addAction(true, action.TYPE_SERVER,"Error uploading Action to server: "+result);//.replace('\n', ' '));
-						System.err.println(result);
+						log.log("Not equal OK");
+						actLog.addMessage(true, action.TYPE_SERVER,"Error uploading Action to server: "+result);//.replace('\n', ' '));
+						log.log(""+result);
 						break;//jump out of loop!
 					}
 				}
-
+				System.out.println("MyServerUpload::Out of while(true)");
 			}
 		} 
 		catch(InterruptedException e)
-		{actLog.addAction(true,action.TYPE_SERVER,e.toString());}
+			{
+			log.log("InterruptException in MyServerUpload");
+			actLog.addMessage(true,action.TYPE_SERVER,e.toString());
+			}
 		catch(Exception e)
-		{actLog.addAction(true,action.TYPE_SERVER,e.toString());}
+			{
+			log.log("Exception in MyServerUpload");
+			actLog.addMessage(true,action.TYPE_SERVER,e.toString());
+			}
     }
 }
 

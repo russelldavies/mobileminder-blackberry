@@ -1,93 +1,91 @@
 /**
  * 
- * Driver contains the main entry point of the application, this is housed within the controller class. 
- * 
+ * Driver contains the main entry point of the application, 
+ * this is housed within the controller class. 
  * 
  */
 
 
 package com.spotlight.track;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.util.Date;
-import java.util.Vector;
-  
-import javax.microedition.io.Connector;
-import javax.microedition.location.Criteria;
-import javax.microedition.location.Location;
-import javax.microedition.location.LocationException;
-import javax.microedition.location.LocationProvider;
-
-import javax.wireless.messaging.Message;
-import javax.wireless.messaging.MessageConnection;
-
+import com.kids.prototypes.LocalDataReader;
 import net.rim.device.api.system.Application;
-import net.rim.device.api.system.ApplicationDescriptor;
-import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.system.PersistentObject;
-import net.rim.device.api.i18n.SimpleDateFormat;
-import net.rim.device.api.ui.Manager;
-import net.rim.device.api.ui.Screen;
-import net.rim.device.api.ui.Ui;
-import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.UiEngine;
-import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.Status;
-import net.rim.device.api.ui.container.MainScreen;
-import net.rim.device.api.util.Persistable;
-
-
-import net.rim.blackberry.api.phone.Phone;
-import net.rim.blackberry.api.phone.PhoneCall;
-import net.rim.blackberry.api.phone.AbstractPhoneListener;
-import net.rim.blackberry.api.sms.OutboundMessageListener;
-
-import net.rim.blackberry.api.mail.Store;
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.SendListener;
-import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.NoSuchServiceException;
  
 /**
  * 
  * Controller is called by the Application Manager after it calls the Application.
  *  
- * the controller registers objects with the system to monitor device actions
+ * The controller registers objects with the system to monitor device actions
  *
  */
 
-class Controller extends Application
-{       
-    
+//class Controller extends Application
+public class Driver extends Application
+{       // Enable logging
+		Debug logWriter = Logger.getInstance();
+		//LegacyDataAccess legLog = new innerLegacyDataAccess();
+		//LocalDataAccess locLog = new innerLocalDataAccess();
+		
+		LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
+		
+		
+    	//new way of creating the database
+    	LocalDataFactory factory = createOsSpecificDBFactory();
+        LocalDataReader actlog = factory.createLocalDataReader();
+		
         /**
          * After calling to enterEventDispatcher() the application enters the event-processing loop.
          * 
          *
          */
         public static void main(String[] args)
-    {
-                //The event thread processes incoming messages and sends them to the listeners.
-        new Controller().enterEventDispatcher();
-    }
+        {
+            //The event thread processes incoming messages and sends them to the listeners.
+        	//new Controller().enterEventDispatcher();
+        	new Driver().enterEventDispatcher();
+        }
      
+        //method to check sdk version and return the correct database object
+        public static LocalDataFactory createOsSpecificDBFactory()
+        {
+	    int OS = Tools.getGenOSVersion();//change to your code to check the sdk verson
+	    if (OS < 5)
+	    {
+	    	return new LegacyFactory();
+	    }
+	    else
+	    {
+	        return new SQliteFactory();
+	    }
+	}
+
 /**
  * Initialises the objects that will register themselves with the appropriate event listeners
  */
-    public Controller()
-    {
+    //public Controller()
+    public Driver()
+        {
+    	logWriter.log("MobileMinder::Driver->Start...");
+    	
+    	// For future "Registration" feature 
         int employerID  = 1;
         int deviceID    = 2;
+        
+        //Create variables
         int oneSec        = 1000;
         int uploadTimer =  1*oneSec;//send update every
         int GPSTimer    = 15*oneSec;//check GPS every
         int AppTimer    =  2*oneSec;//check running app every
         
-        LocalDataAccess actLog = new LocalDataAccess();
-        actLog.addAction(action.TYPE_IDEL,"Starting Controler");
+        // Load sub-components
+        new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
+    	new MyCallListener(actLog);
+	    new MyTextListener(actLog);
+	    new MyMailListener(actLog);
+	    //new MyGPSListener (actLog, GPSTimer);
+	    new MyAppListener (actLog, AppTimer);	     
+	    //new Server(actLog);
+        
         
         /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();
         Screen screen = new Dialog(Dialog.D_OK, "Shirts!!!!!!",
@@ -95,35 +93,9 @@ class Controller extends Application
         ui.pushGlobalScreen(screen, 1, UiEngine.GLOBAL_QUEUE);
     }*/
         //actLog.removeAction(0);
-        new MyCallListener(actLog);
-        new MyTextListener(actLog);
-        new MyMailListener(actLog);
-        new MyGPSListener (actLog, GPSTimer);
-        new MyAppListener (actLog, AppTimer);
-        new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
-    }
-    
+      
+        }	// End of constructor
 }
-
-
-
-/*
-class toast implements Runnable
-{
-        
-        private String Message;
-        
-        toast(String inputMessage)
-        {
-                Message = inputMessage;
-        }
-        
-    public void run() 
-    {
-        Status.show(Message);
-    }
-}
-*/
 
 /*
  * LINKS

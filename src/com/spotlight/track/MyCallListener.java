@@ -1,48 +1,10 @@
 package com.spotlight.track;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.util.Date;
-import java.util.Vector;
-  
-import javax.microedition.io.Connector;
-import javax.microedition.location.Criteria;
-import javax.microedition.location.Location;
-import javax.microedition.location.LocationException;
-import javax.microedition.location.LocationProvider;
-
-import javax.wireless.messaging.Message;
-import javax.wireless.messaging.MessageConnection;
-
-import net.rim.device.api.system.Application;
-import net.rim.device.api.system.ApplicationDescriptor;
-import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.system.PersistentObject;
-import net.rim.device.api.i18n.SimpleDateFormat;
-import net.rim.device.api.ui.Manager;
-import net.rim.device.api.ui.Screen;
-import net.rim.device.api.ui.Ui;
-import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.UiEngine;
-import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.Status;
-import net.rim.device.api.ui.container.MainScreen;
-import net.rim.device.api.util.Persistable;
-
+import com.kids.prototypes.LocalDataWriter;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
-import net.rim.blackberry.api.sms.OutboundMessageListener;
-
-import net.rim.blackberry.api.mail.Store;
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.SendListener;
-import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 
 /**
@@ -53,7 +15,7 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 public class MyCallListener extends AbstractPhoneListener
 {
-	private LocalDataAccess actLog;
+	private LocalDataWriter actLog;
 	private final String    Connected = "Connected";
 	private final String    Finished  = "Finished";
 	private final String	Hold_ON   = "Hold_ON";
@@ -64,28 +26,31 @@ public class MyCallListener extends AbstractPhoneListener
 	private 	  String    Prefix    = "";
 	//private		  Date		callStartTime
 	//return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+	Debug logWriter = Logger.getInstance();
 
-/**
- * The constructor initialises the action store location and registers the callListener for the device.
- * 
- * @param inputAccess log of actions
- */
+	/**
+	 * The constructor initialises the action store location and registers the callListener for the device.
+	 * 
+	 * @param inputAccess log of actions
+	 */
+		
+	public MyCallListener(LocalDataWriter inputAccess)
+	{
+		logWriter.log("Start MyCallListener");
+		actLog = inputAccess;
+		Phone.addPhoneListener(this);//TODO look up addPhonelistener
+	}
 	
-public MyCallListener(LocalDataAccess inputAccess)
-{
-	actLog = inputAccess;
-	Phone.addPhoneListener(this);//TODO look up addPhonelistener
-}
-	
-/**
- * Returns the phone number of the caller	
- * 
- * @param  callId integer representing the phone call id
- * @return A string is returned containing the callers phone number
- */
+	/**
+	 * Returns the phone number of the caller	
+	 * 
+	 * @param  callId integer representing the phone call id
+	 * @return A string is returned containing the callers phone number
+	 */
 	//TODO what is this function used for? Deosn't seem to be used anywhere in the code
 	private String getPhoneNumber(int callId)
 	{
+		logWriter.log("getPhoneNumber");
 		return Phone.getCall(callId).getDisplayPhoneNumber();
 	}
 	/*
@@ -96,30 +61,53 @@ public MyCallListener(LocalDataAccess inputAccess)
 	*/
 	
 	
-/**
- * Stores call information to action log.
- * 
- * <p>
- * Retrieves the call information from the device and stores it in the action log as type Call
- * 
- * @param ehandler String consisting of a prefix and the status of the call i.e. connected
- * 		
- * @param callid The address of the caller
- * 
- *
- */
+	/**
+	 * Stores call information to action log.
+	 * 
+	 * <p>
+	 * Retrieves the call information from the device and stores it in the action log as type Call
+	 * 
+	 * @param ehandler String consisting of a prefix and the status of the call i.e. connected
+	 * 		
+	 * @param callid The address of the caller
+	 * 
+	 *
+	 */
 	private void addToLog(String ehandler, int callId)
 	{
-		
+		logWriter.log("Adding message to log...");
 	    PhoneCall callInfo = Phone.getCall(callId);
-	    
-	    if(null == callInfo)
+	    CallMessage callMessage=new CallMessage();
+	    String contactNumber=callInfo.getPhoneNumber();
+	    String contactName=callInfo.getDisplayPhoneNumber();;
+	    	    
+	    if(null != callInfo)
 	    {
-	    	actLog.addAction(true,action.TYPE_CALL, ehandler);
+		    
+		    callMessage.setMessage( contactNumber,
+		    						callInfo.isOutgoing(),
+		    						Tools.getDate(),
+		    						callInfo.getElapsedTime());
+	    	//actLog.addMessage(true,action.TYPE_CALL, ehandler);
+		    
+		    // Store the contact name
+		    if (contactNumber.equals(contactName))
+		    	contactName="";
+		    
+		    callMessage.setContactName(contactName);		    
+		    
+	    	actLog.addMessage(callMessage);
 	    }
 	    else
 	    {
-	    	actLog.addAction(action.TYPE_CALL, ehandler, callInfo.getDisplayPhoneNumber());//, callInfo.getStatusString());
+	    	// If, for some reason, the call(callId) doesnt exist (when??), then set a basic blank message
+	    	callMessage.setMessage("", false, Tools.getDate(), 0);
+	    	//callMessage.setMessage(callInfo.getPhoneNumber(), callInfo.isOutgoing());
+	    	actLog.addMessage(callMessage);
+	    	
+	    	
+	    	//Original code
+	    	//actLog.addMessage(action.TYPE_CALL, ehandler, callInfo.getDisplayPhoneNumber());//, callInfo.getStatusString());
 	    }
 	}
 
@@ -262,7 +250,7 @@ public MyCallListener(LocalDataAccess inputAccess)
 	public void callFailed(int callId,int reason)
 	{
 		//actLog.addAction(true,action.TYPE_CALL,"callFailed:"+reason);
-		addToLog(Prefix+"Droped", callId);
+		addToLog(Prefix+"Dropped", callId);
 		Prefix = "";
 	    /*			  // determine reason
 	    switch(reason)//( error ) 
@@ -297,3 +285,48 @@ public MyCallListener(LocalDataAccess inputAccess)
 	    }*/
 	}
 }
+
+/**
+ * This is an enumeration of the different ways in which a call can be ended.
+ * Since enums don't exist in the blackberry API, a workaround has been implemented
+ */
+
+class CallEndStatus
+{
+	private CallEndStatus(){}
+	
+	public static final byte OTHER     = 0;
+	public static final byte NO_ANSWER = 1;
+	public static final byte DROPPED   = 2;
+	public static final byte FINISHED  = 3;
+}
+
+
+
+/*
+class CallEndSataus {
+    public static CallEndSataus OTHER = new CallEndSataus(0);
+    public static CallEndSataus NO_ANSWER = new CallEndSataus(1);
+    public static CallEndSataus DROPPED = new CallEndSataus(2);
+    public static CallEndSataus FINISHED = new CallEndSataus(3);
+    
+    private int _value;
+
+    private CallEndSataus(int value) {
+        _value = value;
+    }
+	
+    public int toInt() {
+        return this._value;
+    }
+    public static CallEndSataus fromInt(int value) {
+    	switch(value)
+    	{
+	    	case 0: return OTHER;
+	    	case 1: return NO_ANSWER;
+	    	case 2: return DROPPED;
+	    	case 3: return FINISHED;
+    	}
+		//return DROPPED;
+    }
+}*/

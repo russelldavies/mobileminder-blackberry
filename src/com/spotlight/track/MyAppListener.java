@@ -1,49 +1,13 @@
 package com.spotlight.track;
 
 import java.util.Date;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.util.Vector;
-  
-import javax.microedition.io.Connector;
-import javax.microedition.location.Criteria;
-import javax.microedition.location.Location;
-import javax.microedition.location.LocationException;
-import javax.microedition.location.LocationProvider;
 
-import javax.wireless.messaging.Message;
-import javax.wireless.messaging.MessageConnection;
+import com.kids.net.Server;
+import com.kids.prototypes.LocalDataWriter;
 
-import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.Bitmap;
-import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.system.PersistentObject;
-import net.rim.device.api.i18n.SimpleDateFormat;
-import net.rim.device.api.ui.Manager;
-import net.rim.device.api.ui.Screen;
-import net.rim.device.api.ui.Ui;
-import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.UiEngine;
-import net.rim.device.api.ui.component.Dialog;
-import net.rim.device.api.ui.component.Status;
-import net.rim.device.api.ui.container.MainScreen;
-import net.rim.device.api.util.Persistable;
-
-
-import net.rim.blackberry.api.phone.Phone;
-import net.rim.blackberry.api.phone.PhoneCall;
-import net.rim.blackberry.api.phone.AbstractPhoneListener;
-import net.rim.blackberry.api.sms.OutboundMessageListener;
-
-import net.rim.blackberry.api.mail.Store;
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.SendListener;
-import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.NoSuchServiceException;
-
+import com.kids.prototypes.Message;
 
 /**
  * 
@@ -53,8 +17,10 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 public class MyAppListener extends Thread
 {
-	private LocalDataAccess actLog;
+	private LocalDataWriter actLog;
 	private int AppTimer;
+	Debug log = Logger.getInstance();
+	//AppMessage appMessage;
 	
 /**
  * The AppListener constructor initialise the action store location and the interval value.
@@ -63,7 +29,7 @@ public class MyAppListener extends Thread
  * @param inputAccess log of actions
  * @param inputAppTimer interval value
  */
-	public MyAppListener(LocalDataAccess inputAccess, int inputAppTimer)
+	public MyAppListener(LocalDataWriter inputAccess, int inputAppTimer)
 	{
 		actLog = inputAccess;
 		AppTimer = inputAppTimer;
@@ -85,12 +51,14 @@ public class MyAppListener extends Thread
 	
 	public void run()
 	{
+		log.log("MyAppListener begin...");
 		try
 	    {
 			int lastProcessId = 0;
 			ApplicationManager manager = ApplicationManager.getApplicationManager();
 			Date StartTimer  = new Date();
 			String lastAppName = "BootUp Device";
+			AppMessage appMessage=new AppMessage();
 			
 			while(true)
 			{
@@ -99,25 +67,141 @@ public class MyAppListener extends Thread
 				
 				if(manager.getForegroundProcessId() != lastProcessId)
 				{
-					lastProcessId = manager.getForegroundProcessId();
-					
+					lastProcessId = manager.getForegroundProcessId();					
 					for(int count = 0; visibleApplications.length > count; count++)
 					{ 
 						if(manager.getProcessId(visibleApplications[count]) == lastProcessId)
 						{ 
-							actLog.addAction(action.TYPE_APP,lastAppName+
-									":"+(int)(new Date().getTime()-StartTimer.getTime())/1000);
+							//actLog.addMessage(action.TYPE_APP,lastAppName+
+							//		":"+(int)(new Date().getTime()-StartTimer.getTime())/1000);
+							appMessage.setMessage(lastAppName,visibleApplications[count].getModuleName());							
+							actLog.addMessage(appMessage);
 							StartTimer = new Date();
 							lastAppName = visibleApplications[count].getName();
 							break;
-						}
-					}
-				}
-			}
-	    }
-        catch (InterruptedException e)
-		{actLog.addAction(true,action.TYPE_APP,e.toString());}
+						}  // End if()
+					} // End for()
+				}  // End if()
+			}  // End while()
+	    } // try
+		catch (InterruptedException e)
+        // In Legacy, its (overloaded )addAction(bool,int,String,String)
+        // In Local its addMessage(Message)
+		{
+        	actLog.addMessage(myMessage);//(true,action.TYPE_APP,e.toString());}
+		}
         catch (Exception e)
-		{actLog.addAction(true,action.TYPE_APP,e.toString());}
+		{
+        	actLog.addMessage(true,action.TYPE_APP,e.toString());
+        }
+	}
+}
+
+
+
+/**
+ * This class implements the message interface to hold application information.
+ * 
+ **/
+class AppMessage implements Message
+{
+	private final int 	 type = 5;
+	private int 		 upTime;
+	private String 		 launchTime;
+	private String 		 appName;
+	private String 		 fullPackageName;
+	private StringBuffer stringREST;
+	private Date		 startTime;
+			
+/**
+ * The constructor initialises all the message parameters
+ */
+		public AppMessage()
+		{clearData();}
+		
+/**
+ * This method adds the application information to the application message object
+ * @param _appName application name
+ * @param _packageName application package name
+ */	
+		public void setMessage(String _appName, String _packageName)
+		{
+			appName = _appName;
+			launchTime = Tools.getDate();
+			startTime = new Date();//get the time now
+			fullPackageName = _packageName;
+		}
+		
+/**
+ * This method calculates and records the duration of the application
+ */
+		public void setEndDuration()
+		{upTime = (int)(new Date().getTime()-startTime.getTime())/1000;}
+		
+/**
+ * This method removes the current data in the message and initialises the parameters.
+ * 
+ */
+		public void clearData()//This is used to ensure good practices and save resources on the device.
+		{
+			upTime		= 0;
+			appName		= "";
+			fullPackageName = "";
+			launchTime = "";
+			startTime = null;
+			stringREST = null;
+		}
+			
+/**
+ * This method retrieves the type number for the application message
+ * 
+ * @return the type number corresponding to an application message
+ */
+		//@Override 
+		public int getType() 
+		{return type;}
+			
+/**
+ * This method retrieves the launch time of the application
+ * 
+ * @return the application launch time
+ */
+		//@Override 
+		public String getTime() 
+		{return launchTime;}
+			
+/**
+ * This method retrieves the message formatted in to a single string value.
+ * <p>
+ * App message consists of:
+ * <ul>
+ * <li> Registration Serial number.
+ * <li> Type of App message which is '05' (two digit number).
+ * <li> Application Name.
+ * <li> Launching time of application.
+ * <li> Application Up-Time.
+ * <li> Application Full Peckage Name.
+ * </ul>
+ * @return a single string containing the entire message.
+ */
+	//@Override 
+	public String getREST() 
+	{
+		if(null == stringREST)
+		{	
+			stringREST = new StringBuffer();
+			stringREST.append(Registration.getRegID());
+			stringREST.append(Server.RestElementSeparator);
+			stringREST.append('0');stringREST.append(type);
+			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(appName);
+			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(launchTime);
+			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(upTime);
+			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(fullPackageName);				
+		}
+		return 	stringREST.toString();
 	}
 }
