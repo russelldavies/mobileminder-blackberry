@@ -11,7 +11,7 @@ import net.rim.blackberry.api.pdap.BlackBerryContact;
 
 public class ContactsReader
 {
-	public static String TAG = "CVK::";		// TAG used for console output to identify specific outputs
+	Debug logWriter = Logger.getInstance();
 	public ContactsReader() throws PIMException
 	{
 		// Create list of contact
@@ -29,7 +29,7 @@ public class ContactsReader
 		
 	    //Get an array of all populated contact fields.
 	    int fieldsWithData[] = bbContact.getFields();
-	    System.err.println(TAG+fieldsWithData.length);
+	    logWriter.log(String.valueOf(fieldsWithData.length));
 	}
 	
 	  //Convert the list of contacts from an Enumeration to a Vector

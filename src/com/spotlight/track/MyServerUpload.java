@@ -1,6 +1,7 @@
 package com.spotlight.track;
 
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
 
 /**
  * 
@@ -11,7 +12,8 @@ import com.kids.prototypes.LocalDataReader;
 
 public class MyServerUpload extends Thread
 {
-	private LocalDataReader actLog;
+	LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
+	//private LocalDataReader actLog;
 	private int             sendToServerTime;
 	private int 			deviceID;
 	private int				employerID;
