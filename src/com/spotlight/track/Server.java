@@ -21,6 +21,7 @@ import com.kids.Controller;
 import com.kids.Logger;
 import com.kids.R;
 */
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
@@ -39,16 +40,6 @@ import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
 
-/*
-interface Message
-{
-	String 	getType();//call,text..
-	boolean getError();
-	String 	getTime();
-	String 	getInfo();
-	String 	getREST();//calls this.toString()
-}
-*/
 /**
  * This class monitors for new actions stored in the local storage for recording actions and sends them to the web server at specific intervals.
  */
@@ -93,7 +84,7 @@ public class Server extends Thread
 		//URL = "http://192.168.0.20/mobileminder.net/WebService.php?";
 		//URL 	 = "http://192.168.81.1/kids/webservice.php?";
 //		deviceId = "xxxxx";
-		serverErrorReply =  RestElementSeparator+
+		serverErrorReply = 	RestElementSeparator+
 		 					RestElementSeparator+//reply
 		 				 1 +RestElementSeparator+//error
 							RestElementSeparator;//CallingCODE
@@ -105,11 +96,10 @@ public class Server extends Thread
 		//httpclient = new DefaultHttpClient();
 		live = true;
 		generator = new Random();
-		crc = new CRC32();
+		//crc = new CRC32();
 		startup();
 		
 		logger.log("Started Server");
-
 	}
 	
 	/**
@@ -148,7 +138,8 @@ public class Server extends Thread
 				while(0 < actLog.length())//checks if a message is in the local storage
 				{
 					//sends message to server and receives a reply. 
-					resultREST = contactServer(actLog.getFirst()).getREST().split(RestElementSeparator);
+					// NO String.split() IN J2ME - http://stackoverflow.com/questions/657627/split-string-logic-in-j2me
+					resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
 
 					if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
 					{	actLog.removeFirst();
@@ -275,39 +266,37 @@ public class Server extends Thread
 		 //HttpGet  request  = new HttpGet (URL + inputBody.toUpperCase());
 		 //HttpPost request2 = new HttpPost(URL + inputBody.toUpperCase());
 		 
-		 //Open connection
-		 httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
 		
 		 //ResponseHandler<String> handler = new BasicResponseHandler();  
 		 try
 		 {
+			 // Attach data to send
 			 if(getFlag)
 			 {	// GET
 				 httpclient.setRequestMethod(HttpConnection.GET);
 				 httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
-				 OutputStream os = httpclient.openOutputStream();
-				 os.write(inputBody.getBytes("UTF-8"));
-				 os.flush();
-				 os.close();
-				 //result = httpclient.execute(request, handler);
 			 }
 			 else
 			 {  // POST
 				 httpclient.setRequestMethod(HttpConnection.POST);
+				 // Not sure if this will work
+				 int length = inputBody.length()+crc.length()+pic.length();
+				 httpclient.setRequestProperty("Content-Length", ""+length);
+				 httpclient.setRequestProperty("crc", crc);
+				 httpclient.setRequestProperty("pic", pic);
+				 logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+				 
 				 
 				 ////////// Is this necessary??
 				 // Headers: Possible way to store key value pairs in Blackberry
-				 Headers nameValuePairs;
+				 /*
+				 Headers nameValuePairs = null;
 				 nameValuePairs.setHeader("crc", crc);
 				 logger.log("CRC sent to server:"+crc);
 				 nameValuePairs.setHeader("pic", pic);
+				 */
 				 ///////////////////////////////
-				 
-				 
-				 OutputStream os = httpclient.openOutputStream();
-				 os.write(inputBody.getBytes());
-				 os.flush();
-				 
+				 				 
 				 // Object for encoding URL, replacing special chars and spaces. 
 				 // format: id=zx&name=john&foo=bar
 				 //URLEncodedPostData postData;
@@ -323,16 +312,24 @@ public class Server extends Thread
 			     catch (UnsupportedEncodingException e1) 
 			     {logger.log("Server: UnsupportedEncodingException");}//actLog.addMessage(new ErrorMessage(e1));}
 			     */
-			     logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 			     
 			     //result = httpclient.execute(request2, handler);
 			 }
 			 
-
+			 //Send the data to the server
+			 OutputStream os = httpclient.openOutputStream();
+			 os.write(inputBody.getBytes("UTF-8"));
+			 os.flush();
+			 os.close();
+			 
+			 // Take note of response
 			 result=httpclient.getResponseMessage();
-		     	
+			 //result=httpclient.getResponseCode();
+			 
+			 //Close connection to server
+			 shutdown();
 
-	     	 logger.log("ResultSERVER->:"+result);
+			 logger.log("ResultSERVER->:"+result);
 	     	 //logger.log("**Before decrypt**");		     	 
 	     	 result = decrypt(result);
 	     	 //logger.log("**After decrypt**");
@@ -358,13 +355,14 @@ public class Server extends Thread
 		 catch (Exception e)//Request Timeout! 
 		 { 
 			 //logger.log(e.getMessage()+" "+e.getLocalizedMessage());
-			 result = serverErrorReply+Controller.getString(R.string.Error_ServerTimeOut);
+			 //result = serverErrorReply+Controller.getString(R.string.Error_ServerTimeOut);
+			 result = serverErrorReply+"Server Unreachable";
 			 live = false;
 			 
 			 //No need to log
 			 //actLog.addMessage(new ErrorMessage(e));
 		 }
-		 
+		 // Returns HTTP 200 OK, or an error
 		 return result;
 	}
 	
@@ -415,12 +413,22 @@ public class Server extends Thread
 	 * This method establishes the connection with the server.
 	 */
 	public void startup()
-	{	httpclient = new DefaultHttpClient();	}
+	{	try {
+		httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
+	} catch (IOException e) {
+		logger.log("Error opening HTTP connection to server");
+		e.printStackTrace();
+	}	}
 	/**
 	 * This method terminates the connection with the server.
 	 */
 	public void shutdown()
-	{	httpclient.getConnectionManager().shutdown();	}
+	{	try {
+		httpclient.close();
+	} catch (IOException e) {
+		logger.log("Error closing connection to HTTP server");
+		e.printStackTrace();
+	}	}
 	/**
 	 * This method checks the status of the server.
 	 * @return true if the server is live, otherwise is down.
@@ -448,7 +456,7 @@ public class Server extends Thread
 	public long getCrcValue(String inputText)
 	{
 		//logger.log("In get CRC Values");
-		crc.reset();
+		crc = null;//crc.reset();
 		crc.update(inputText.getBytes());
 		return crc.getValue();
 	}
@@ -465,7 +473,7 @@ public class Server extends Thread
  
 	//	logger.log("DECRYPT: 382");
 		
-		crc.reset();
+		crc=null;//crc.reset();
  
 		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
@@ -544,7 +552,7 @@ public class Server extends Thread
 	 */
 	 public String hexToString(String hex){
 		  
-		 StringBuilder output = new StringBuilder();
+		 StringBuffer output = new StringBuffer();
 		 String str = "";
 		    for (int i = 0; i < hex.length(); i+=2) {
 		        str = hex.substring(i, i+2);

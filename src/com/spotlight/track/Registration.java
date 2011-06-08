@@ -8,6 +8,8 @@ import com.kids.prototypes.LocalDataReader;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.Database;
+import net.rim.device.api.system.Branding;
+import net.rim.device.api.system.DeviceInfo;
 //import net.rim.device.api.io.messaging.Context;
 
 /*
@@ -348,14 +350,13 @@ public class Registration extends Thread
 
         try
         {
-                Class<android.os.Build> buildClass = android.os.Build.class;
+        	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
+        	manufacturer="Blackberry" + DeviceInfo.getDeviceName()+	Branding.getVendorId();
+                /*
+        		Class<android.os.Build> buildClass = android.os.Build.class;
                 Field field = buildClass.getField("MANUFACTURER");
                 manufacturer = (String) field.get(new android.os.Build());
-        }
-        catch (NoSuchFieldException e) 
-        {
-        	actLog.addMessage(new ErrorMessage(e));
-                manufacturer = "(unavailable)";
+                */
         }
         catch (Exception e) 
         {
@@ -446,8 +447,8 @@ class RegistrationMessage implements Message
 				phoneNum				+ Server.RestElementSeparator +
 				deviceID				+ Server.RestElementSeparator +
 				manufacturer			+ Server.RestElementSeparator +
-				Build.MODEL				+ Server.RestElementSeparator +
-				Build.VERSION.SDK		+ Server.RestElementSeparator +
+				//Build.MODEL			+ Server.RestElementSeparator +
+				Tools.getOSVersion()	+ Server.RestElementSeparator +
 				mmVERSION				+ Server.RestElementSeparator +
 				info;
 	}
