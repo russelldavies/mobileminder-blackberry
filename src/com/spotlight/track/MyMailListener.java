@@ -4,6 +4,7 @@ import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.LocalDataWriter;
 
+import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Session;
@@ -40,9 +41,15 @@ public class MyMailListener implements SendListener
 			mailStore.addSendListener(this);
 		}
 		catch(NoSuchServiceException e) 
-		{actLog.addMessage(true,action.TYPE_MAIL,e.toString());}
+		{
+			log.log("MyMailListener::NoSuchServiceException");
+			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+		}
 		catch(Exception e) 
-		{actLog.addMessage(true,action.TYPE_MAIL,e.toString());}
+		{
+			log.log("MyMailListener::Exception");
+			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+		}
 	}
 
 /**
@@ -53,9 +60,11 @@ public class MyMailListener implements SendListener
  */
 	
 	
-	public boolean sendMessage(net.rim.blackberry.api.mail.Message arg0) 
+	//public boolean sendMessage(net.rim.blackberry.api.mail.Message arg0)
+	public boolean addToLog(net.rim.blackberry.api.mail.Message arg0)
 	{
 		StringBuffer DestinationAddress = new StringBuffer();
+		MailMessage mailMessage = new MailMessage();
 		
 		try
 		{
@@ -70,13 +79,31 @@ public class MyMailListener implements SendListener
 			}
 		} 
 		catch (MessagingException e)
-		{actLog.addMessage(true,action.TYPE_MAIL,e.toString());}
+		{
+			actLog.addMessage(mailMessage);	//TODO: Double check this is what we want to do, log instead?
+			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+		}
 		catch (Exception e)
-		{actLog.addMessage(true,action.TYPE_MAIL,e.toString());}
+		{
+			actLog.addMessage(mailMessage);	//TODO: Double check this is what we want to do, log instead?
+			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+		}
 
-		actLog.addMessage(action.TYPE_MAIL, arg0.getSubject(),
-						DestinationAddress.toString());//Integer.toString(arg0.getStatus())
+		//actLog.addMessage(action.TYPE_MAIL, arg0.getSubject(),DestinationAddress.toString());
 	
 		return false;
 	}
+	
+	public boolean sendMessage(Message message) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+}
+
+class MailDirectionStatus
+{
+	private MailDirectionStatus(){}
+	
+	public static final byte INBOUND  = 0;
+	public static final byte OUTBOUND = 1;
 }
