@@ -12,6 +12,7 @@ import javax.microedition.io.file.FileSystemRegistry;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.io.File;
 import net.rim.device.api.io.FileInputStream;
+import net.rim.device.api.io.FileNotFoundException;
 
 import com.kids.net.ErrorMessage;
 import com.kids.prototypes.Controllable;
@@ -417,11 +418,5 @@ public static boolean deleteDir(File dir) {
 		{return true;} 
 		else 
 		{return false;}
-	}
-
-public boolean isTarget(COMMAND_TARGETS targets) {
-	// TODO Auto-generated method stub
-	return false;
-}
-	
+	}	
 }

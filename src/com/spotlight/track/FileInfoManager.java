@@ -4,6 +4,7 @@ import net.rim.device.api.database.Cursor;
 import net.rim.device.api.io.File;
 import net.rim.device.api.io.FileInfo;
 
+import com.kids.net.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 

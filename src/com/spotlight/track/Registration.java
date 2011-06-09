@@ -22,17 +22,7 @@ import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.DeviceInfo;
-//import net.rim.device.api.io.messaging.Context;
 
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.Message;
-import com.spotlight.track.LocalDataAccess;
-import com.kids.Data.Tools;
-import com.kids.net.ErrorMessage;
-import com.kids.net.Reply;
-import com.kids.net.Server;
-*/
 /**
  * This class checks the registration stage that currently the device is in.
  */
@@ -65,9 +55,9 @@ public class Registration extends Thread
     {
     	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
 		//context = _context;
-		actLog = _actLog;
+		actLog 	= _actLog;
 		server 	= new Server(_actLog);
-		regData 	= new RegData(/*_context*/);
+		regData = new RegData(/*_context*/);
 
 		/*
 			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());
@@ -104,8 +94,8 @@ public class Registration extends Thread
     	Reply 	response;
     	int 	nextStage;
     	int 	currentStageValue = regData.getStageValue();
-    	int		time 			= 0;
-    	int 	finePhoneNum 	= 0;
+    	int		time 			  = 0;
+    	int 	finePhoneNum 	  = 0;
 
 		
 		//{//TelephonyManager can not be used outside this!
@@ -504,7 +494,7 @@ class RegistrationMessage implements Message
  *
  */
 class RegData
-{
+{//TODO: Make compatible with legacy and new Blackberry versions, ie add vector + sqlite support
 	private int currentState;
 	private final String DATABASE_NAME    = "CVKe";
     private final String DATABASE_TABLE   = "regDB";
