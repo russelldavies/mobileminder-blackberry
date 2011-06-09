@@ -13,6 +13,8 @@ public class Tools
 {
 	private static String returnVer="0";
 	private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
+	
+	//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 	private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );
 	private static Matcher matcher;
 	
@@ -115,6 +117,7 @@ public class Tools
 	 */
 	public static synchronized boolean isNumber(String _text)
 	{
+		//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 		matcher = pattern.matcher(_text);
 		return matcher.matches();
 	}

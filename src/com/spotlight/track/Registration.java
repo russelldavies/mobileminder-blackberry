@@ -1,13 +1,25 @@
 package com.spotlight.track;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import com.kids.net.ErrorMessage;
 import com.kids.net.Reply;
 import com.kids.net.Server;
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
+import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
+import net.rim.device.api.database.DatabaseException;
+import net.rim.device.api.database.DatabaseFactory;
+import net.rim.device.api.database.Row;
+import net.rim.device.api.database.Statement;
+import net.rim.device.api.io.MalformedURIException;
+import net.rim.device.api.io.URI;
 import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.DeviceInfo;
 //import net.rim.device.api.io.messaging.Context;
@@ -258,24 +270,33 @@ public class Registration extends Thread
     	switch(inputStage) 
     	{
 			case 0: //New install
-				stateText = context.getString(R.string.RequestSN);
+				stateText = "Requesting Serial Number...";
+				//stateText = context.getString(R.string.RequestSN);
     			//ok = false;
     			break;
     		case 1://New & has SN
-    			stateText = context.getString(R.string.yourSN);//+data.getRegSN();
+    			stateText = "Not activated SN:";
+    			//stateText = context.getString(R.string.yourSN);//+data.getRegSN();
     			//ok = false;
     			break;
     		case 2: //Wed Reg
-    			stateText = context.getString(R.string.RegTrial);
+    			stateText = "Trial account";
+    			//stateText = context.getString(R.string.RegTrial);
     			regOK = true;
     			break;
     		case 3: //Device Reg
-    			stateText = context.getString(R.string.RegActive);
+    			stateText = "Fully Active";
+    			//stateText = context.getString(R.string.RegActive);
     			regOK = true;
     			break;
     		//default:break;
     	}
     	
+    	
+    	// This updates the status bar in Android to display:
+    	// ID: isRegistered, etc
+    	// Needed for Blackberry?
+    	/*
     	switch(inputStage) 
     	{
 	    	case 0: //New install
@@ -286,7 +307,7 @@ public class Registration extends Thread
 	    	case 3: //Device Reg
 	    		Controller.UpdateStatus(stateText+" ["+regID+"]");
 				break;
-    	}
+    	}*/
     }
     
     /**
@@ -351,7 +372,12 @@ public class Registration extends Thread
         try
         {
         	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
-        	manufacturer="Blackberry" + DeviceInfo.getDeviceName()+	Branding.getVendorId();
+        	//TODO: Get unique hardware identifier that identifies the exact handset
+        	//java.lang.Integer.toHexString(DeviceInfo.getDeviceId())  <- BB PIN
+        	manufacturer="Blackberry" + DeviceInfo.getDeviceName()+  // Model of bberry
+        							  + DeviceInfo.getDeviceId()  +  // Unique ID/PIN
+        							  + Branding.getVendorId()       // Vendor ID (Vodafone/O2/etc)
+        							  ;
                 /*
         		Class<android.os.Build> buildClass = android.os.Build.class;
                 Field field = buildClass.getField("MANUFACTURER");
@@ -583,9 +609,12 @@ class RegData
 	 */
 	private class DatabaseHelper// extends SQLiteOpenHelper 
 	{
-		
+		public static final String  DATABASE_NAME    = "CVKf";
+	    public static final String  DATABASE_TABLE   = "LocalData";
 		//private SQLiteDatabase sql_db;
 		private Database sql_db;
+		private String DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
+	    public URI dbURI;
 		/**
 		 * This is the default constructor that is needed when implementing the SOLiteOpenHelper.
 		 * 
@@ -606,13 +635,57 @@ class RegData
 		 */
 		public void update(String table, ContentValues values, String whereClause, String[] whereArgs) 
 		{
+			// Update table
+			// The Strings "whereClause" and "whereArgs[]" are null
+			try
+	        {
+				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+				sql_db = DatabaseFactory.open(dbURI);
+	            
+				String sqlUpdate = "UPDATE "+DATABASE_TABLE+" SET "+KEY_STAGE+"=?";// WHERE "+KEY_NUMBER+"=?";
+	            Statement st = sql_db.createStatement(sqlUpdate);
+	            st.prepare();
+	            
+	            
+	            //TODO: Put proper values in here
+	            // How can we extract from the Android ContentValues?
+	            Hashtable ht = new Hashtable(2);
+	            ht.put("Test1", new Integer(10));
+	            ht.put("Test2",  new Integer(7));
+	            //ht.put(KEY_STAGE,KEY_NUMBER);  ??
+	            
+	            Enumeration names = ht.keys();
+	            Enumeration ages  = ht.elements();
+	            
+	            while (names.hasMoreElements())
+	            {
+	                Integer iAge   = (Integer)ages.nextElement();
+	                String strName = (String)names.nextElement();
+	                st.bind(1,iAge.intValue());
+	                st.bind(2,strName);
+	                st.execute();
+	                st.reset();
+	            }
+	            st.close();
+	            sql_db.close();
+	        }
+	        catch ( Exception e )
+	        {
+	            System.out.println( e.getMessage() );
+	            e.printStackTrace();
+	        }
+
+			
+			
+			/*
 			sql_db = this.getWritableDatabase();
 			sql_db.update(table, values, whereClause, whereArgs);
-			sql_db.close();
+			sql_db.close();*/
 		}
 		
 		/**
-		 * This method query the given table, returns the value of the requested column as an int. It opens the database to read/query and then closes it.
+		 * This method query the given table, returns the value of the requested column as an int.
+		 * It opens the database to read/query and then closes it.
 		 * @param table The table name to compile the query against.
 		 * @param columns A list of which columns to return.
 		 * @param selection A filter declaring which rows to return.
@@ -624,17 +697,48 @@ class RegData
 		 */
 		public int queryINTfirst(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) 
 		{
-			sql_db = this.getReadableDatabase();
-			Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
-			cursor).moveToFirst();
-			int column_value = cursor.getInt(0);
-			cursor.close();
-			sql_db.close();
+			//sql_db. //= this.getReadableDatabase();
+			// SELECT colums FROM table WHERE
+			int column_value=0;
+			
+			try
+			{
+				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
+	            sql_db = DatabaseFactory.open(dbURI);
+	            
+	            //TODO: Make proper SQL Statement
+	            Statement st = sql_db.createStatement("SELECT * FROM "+DATABASE_TABLE);
+	
+	            st.prepare();
+	            Cursor cursor = st.getCursor();
+				
+				//Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+				cursor.first();
+				Row row = cursor.getRow();//.getInt(0);
+				column_value = row.getInteger(0);
+				st.close();
+				cursor.close();
+				sql_db.close();
+
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatabaseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DataTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 			return column_value;
 		}
 		
 		/**
-		 * This method query the given table, returns the value of the requested column as a String. It opens the database to read/query and then closes it.
+		 * This method query the given table, returns the value of the requested column as a String. 
+		 * It opens the database to read/query and then closes it.
 		 * @param table The table name to compile the query against.
 		 * @param columns A list of which columns to return.
 		 * @param selection A filter declaring which rows to return.
@@ -646,13 +750,57 @@ class RegData
 		 */
 		public String querySTRINGfirst(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) 
 		{
+			String column_value="";
+			
+			try
+			{
+				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
+	            sql_db = DatabaseFactory.open(dbURI);
+	            
+	            //TODO: Make proper SQL Statement
+	            Statement st = sql_db.createStatement("SELECT * FROM "+DATABASE_TABLE);
+	
+	            st.prepare();
+	            Cursor cursor = st.getCursor();
+				
+				//Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+				cursor.first();
+				Row row = cursor.getRow();//.getInt(0);
+				column_value = row.getString(0);
+				st.close();
+				cursor.close();
+				sql_db.close();
+
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatabaseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DataTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			return column_value;
+			
+			
+			
+			
+			
+			
+			/*
 			sql_db = this.getReadableDatabase();
 			Cursor c = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
-			c.moveToFirst();
-			String s = c.getString(1);
+			c.first();//.moveToFirst();
+			Row row;
+			row = c.getRow();
+			String s = row.getString(1);//c.getString(1);
 			c.close();
 			sql_db.close();
-			return s;
+			return s;*/
 		}
 		
 		/**
@@ -663,9 +811,17 @@ class RegData
 		//@Override
 		public void onCreate(Database _db) 
 		{
-			_db.beginTransaction();
-			_db.createStatement(DATABASE_CREATE);
-			_db.commitTransaction();
+			try 
+			{
+				_db.beginTransaction();
+				_db.createStatement(DATABASE_CREATE);
+				_db.commitTransaction();
+			}
+			catch (DatabaseException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			setupFirstEntry(_db);
 		}
 		
@@ -676,11 +832,38 @@ class RegData
 		 */
 		private void setupFirstEntry(Database _db)
 		{
-			ContentValues initialValues = new ContentValues();
+			int column_value=0;
+			
+			try
+			{
+				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
+	            sql_db = DatabaseFactory.open(dbURI);
+	            
+	            //Initialises the database to zero.
+	            Statement st = sql_db.createStatement("INSET INTO "+DATABASE_TABLE+"("+KEY_STAGE+","+KEY_NUMBER+") VALUES(0,0)");
+	            
+				st.close();
+				sql_db.close();
+
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatabaseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		
+			
+			/*
+		    ContentValues initialValues = new ContentValues();
 	        initialValues.put(KEY_STAGE, 0);
 	        initialValues.put(KEY_NUMBER,0);
 	     // initialValues.put(KEY_TIME,  Tools.getDate());
 	        _db.insert(DATABASE_TABLE, null, initialValues);
+	        */
 		}
 		
 		/**
@@ -693,10 +876,15 @@ class RegData
 		 */
 		//@Override
 		public void onUpgrade(Database _db, int _oldVersion, int _newVersion) 
-		{
-			_db.beginTransaction();
-			_db.createStatement("DROP IF TABLE EXISTS "+DATABASE_TABLE);
-			_db.commitTransaction();
+		{			
+			try {
+				_db.beginTransaction();
+				_db.createStatement("DROP IF TABLE EXISTS "+DATABASE_TABLE);
+				_db.commitTransaction();
+			} catch (DatabaseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			//_db.execSQL("DROP IF TABLE EXISTS "+DATABASE_TABLE);
 			onCreate(_db);
 		}
@@ -704,7 +892,7 @@ class RegData
 		//@Override
 		public void close() 
 		{
-			super.close();
+			//TODO://super.close();
 		}
 	}
 }

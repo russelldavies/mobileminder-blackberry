@@ -7,6 +7,8 @@ import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.LocalDataWriter;
 
 import net.rim.blackberry.api.sms.OutboundMessageListener;
@@ -21,7 +23,8 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
 */
 public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener 
 {
-	private LocalDataWriter actLog;
+	private LocalDataAccess actLog;
+	//private LocalDataReader actLog;
 	Debug log = Logger.getInstance();
 
 /**
@@ -29,7 +32,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
  * 
  * @param inputAccess log of actions
  */
-	public MyTextListener(LocalDataWriter inputAccess)
+	public MyTextListener(LocalDataReader inputAccess)
 	{
 		log.log("Starting MyTextListener...");
 		actLog = inputAccess;

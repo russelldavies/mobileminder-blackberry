@@ -3,6 +3,7 @@ package com.spotlight.track;
 import java.util.Date;
 
 import com.kids.net.Server;
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
 import net.rim.device.api.system.ApplicationDescriptor;

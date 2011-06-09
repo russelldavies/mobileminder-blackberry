@@ -1,5 +1,7 @@
 package com.spotlight.track;
 
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.LocalDataWriter;
 
 import net.rim.blackberry.api.mail.Store;
@@ -17,7 +19,7 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
  */
 public class MyMailListener implements SendListener
 {
-	private LocalDataWriter actLog;
+	private LocalDataReader actLog;
 	Debug log = Logger.getInstance();
 
 /**
@@ -26,7 +28,7 @@ public class MyMailListener implements SendListener
  * 
  * @param inputAccess log of actions
  */
-	public MyMailListener(LocalDataWriter inputAccess)
+	public MyMailListener(LocalDataReader inputAccess)
 	{
 		log.log("MyMailListener begin...");
 		actLog = inputAccess;

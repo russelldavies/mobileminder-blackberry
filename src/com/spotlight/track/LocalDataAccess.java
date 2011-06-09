@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
-import com.kids.net.ErrorMessage;
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
 
@@ -613,7 +613,8 @@ class innerLegacyDataAccess implements LocalDataReader
 
 	public void addMessage(Message inputMessage) {
 		// TODO Auto-generated method stub
-		
+		// Adds data to vector
+		LocalData.addElement(inputMessage.getREST());
 	}
 
 	public String getFirst() {

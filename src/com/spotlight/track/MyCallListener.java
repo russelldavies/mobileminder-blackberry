@@ -1,5 +1,6 @@
 package com.spotlight.track;
 
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
 import net.rim.blackberry.api.phone.Phone;
@@ -95,7 +96,6 @@ public class MyCallListener extends AbstractPhoneListener
 		    	contactName="";
 		    
 		    callMessage.setContactName(contactName);		    
-		    
 	    	actLog.addMessage(callMessage);
 	    }
 	    else
