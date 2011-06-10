@@ -21,6 +21,7 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.Branding;
+import net.rim.device.api.system.CDMAInfo;
 import net.rim.device.api.system.DeviceInfo;
 
 /**
@@ -238,14 +239,13 @@ public class Registration extends Thread
     	// Possible issue: http://stackoverflow.com/questions/680782/getting-device-imei
     	String phoneID  = System.getProperty("imei");//telephonyMgr.getDeviceId();
     	
-		if(null != phoneID && Tools.isNumber(phoneID.trim()))
-		{
-			if(0 == Integer.parseInt(phoneID.trim()))
-			{	phoneID = "0";	}
-		}
-		else
-		{phoneID = "0";}
-		
+    	if (null == phoneID)
+    	{
+    		//phoneID=System.getProperty("meid");
+    		phoneID=CDMAInfo.getDecimalMEID();
+    		if (null == phoneID) phoneID="0";
+    	}
+
 		return phoneID;
     }
     /**
@@ -545,9 +545,9 @@ class RegData
     public void setStageValue(int inputVal)//KEY_STAGE
     {
     	currentState = inputVal;//set for quick local access
-    	ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_STAGE, inputVal);
-        storeDB.update(DATABASE_TABLE, initialValues, null, null);
+    	//ContentValues initialValues = new ContentValues();
+        //initialValues.put(KEY_STAGE, inputVal);
+        storeDB.update(KEY_STAGE,String.valueOf(inputVal));//(DATABASE_TABLE, initialValues, null, null);
         
     }
     /**
@@ -574,9 +574,9 @@ class RegData
      */
     public void setRegSN(String inputVal)//KEY_NUMBER
     {
-    	ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_NUMBER, inputVal);
-        storeDB.update(DATABASE_TABLE, initialValues, null, null);
+    	//ContentValues initialValues = new ContentValues();
+        //initialValues.put(KEY_NUMBER, inputVal);
+        storeDB.update(KEY_NUMBER,inputVal);//(DATABASE_TABLE, initialValues, null, null);
     }
     
     /**
@@ -623,19 +623,22 @@ class RegData
 		 * @param whereClause the optional WHERE clause to apply when updating. Passing null will update all rows.
 		 * @param whereArgs
 		 */
-		public void update(String table, ContentValues values, String whereClause, String[] whereArgs) 
+		public void update(String rowToUpdate, String theValue)//(String table, ContentValues values, String whereClause, String[] whereArgs) 
 		{
 			// Update table
 			// The Strings "whereClause" and "whereArgs[]" are null
 			try
 	        {
 				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-				sql_db = DatabaseFactory.open(dbURI);
+				sql_db = DatabaseFactory.openOrCreate(dbURI);
 	            
-				String sqlUpdate = "UPDATE "+DATABASE_TABLE+" SET "+KEY_STAGE+"=?";// WHERE "+KEY_NUMBER+"=?";
+				String sqlUpdate = "UPDATE "+DATABASE_TABLE+" SET "+rowToUpdate+"="+theValue;// WHERE "+KEY_NUMBER+"=?";
 	            Statement st = sql_db.createStatement(sqlUpdate);
 	            st.prepare();
+                st.execute();
+                st.reset();
 	            
+	            /*
 	            
 	            //TODO: Put proper values in here
 	            // How can we extract from the Android ContentValues?
@@ -643,6 +646,7 @@ class RegData
 	            ht.put("Test1", new Integer(10));
 	            ht.put("Test2",  new Integer(7));
 	            //ht.put(KEY_STAGE,KEY_NUMBER);  ??
+	            
 	            
 	            Enumeration names = ht.keys();
 	            Enumeration ages  = ht.elements();
@@ -655,7 +659,7 @@ class RegData
 	                st.bind(2,strName);
 	                st.execute();
 	                st.reset();
-	            }
+	            }*/
 	            st.close();
 	            sql_db.close();
 	        }
@@ -697,7 +701,7 @@ class RegData
 	            sql_db = DatabaseFactory.open(dbURI);
 	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = sql_db.createStatement("SELECT * FROM "+DATABASE_TABLE);
+	            Statement st = sql_db.createStatement("SELECT "+KEY_STAGE+" FROM "+DATABASE_TABLE);
 	
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
@@ -748,7 +752,7 @@ class RegData
 	            sql_db = DatabaseFactory.open(dbURI);
 	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = sql_db.createStatement("SELECT * FROM "+DATABASE_TABLE);
+	            Statement st = sql_db.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
 	
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
@@ -756,7 +760,7 @@ class RegData
 				//Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 				cursor.first();
 				Row row = cursor.getRow();//.getInt(0);
-				column_value = row.getString(0);
+				column_value = row.getString(1);
 				st.close();
 				cursor.close();
 				sql_db.close();
@@ -830,7 +834,7 @@ class RegData
 	            sql_db = DatabaseFactory.open(dbURI);
 	            
 	            //Initialises the database to zero.
-	            Statement st = sql_db.createStatement("INSET INTO "+DATABASE_TABLE+"("+KEY_STAGE+","+KEY_NUMBER+") VALUES(0,0)");
+	            Statement st = sql_db.createStatement("INSERT INTO "+DATABASE_TABLE+"("+KEY_STAGE+","+KEY_NUMBER+") VALUES(0,0)");
 	            
 				st.close();
 				sql_db.close();

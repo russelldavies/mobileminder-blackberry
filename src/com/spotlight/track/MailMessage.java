@@ -12,7 +12,7 @@ import com.kids.prototypes.Message;
  */
 public class MailMessage implements Message
 {
-	private final String  type;			// System message, or message with attachment, 01, 11
+	private final String  type="3";		// 3 = Email message
 	private String  	  contactEmail;
 	private String  	  contactName;
 	private String  	  deviceTime;
@@ -25,21 +25,8 @@ public class MailMessage implements Message
 	 * The constructor initialises a normal mail message -> "01"
 	 */
 	public MailMessage()
-	{	this(false);	}
+	{	clearData();	}
 	
-	/**
-	 * The constructor initialises a normal call message or a sync call message based on the boolean value passed to it.
-	 * 
-	 * @param sync true if sync message
-	 */
-	public MailMessage(boolean sync)
-	{	
-		if(sync)
-		{	type = "11";	}
-		else
-		{	type = "01";	}
-		clearData();	
-	}
 
 	/**
 	 * This method adds the email event information to the mail message object.

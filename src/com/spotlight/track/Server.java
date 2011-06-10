@@ -1,6 +1,6 @@
 package com.spotlight.track;
 
-/*
+/*ANDROID
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +21,7 @@ import com.kids.Controller;
 import com.kids.Logger;
 import com.kids.R;
 */
+//BLACKBERRY
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,6 +34,7 @@ import javax.microedition.lcdui.List;
 import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.io.messaging.Headers;
 import net.rim.device.api.util.CRC32;
+import java.util.*;
 
 import com.kids.net.Reply;
 import com.kids.net.Security;
@@ -64,7 +66,7 @@ public class Server extends Thread
 	private Random generator;
 	private Security security;
 	private final String charSET = "!$&()*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz~";  
-	private CRC32 crc;
+	private int crc;
 	//create errormessage object
 
 	/**
@@ -139,7 +141,8 @@ public class Server extends Thread
 				{
 					//sends message to server and receives a reply. 
 					// NO String.split() IN J2ME - http://stackoverflow.com/questions/657627/split-string-logic-in-j2me
-					resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
+					//resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
+					resultREST = Tools.split(actLog.getFirst(), RestElementSeparator);
 
 					if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
 					{	actLog.removeFirst();
@@ -228,7 +231,7 @@ public class Server extends Thread
 	 * @param inputBody the rest message to be sent to the server
 	 * @return reply from the server
 	 */
-	private String contactRESTServer(String inputBody, String crc, String pic)
+	private String contactRESTServer(String inputBody, String sCrc, String pic)
 	//public String contactServer(String inputBody)
 	{
 		logger.log("contactRESTServer1");
@@ -236,7 +239,7 @@ public class Server extends Thread
 		
 		logger.log("Before POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 		
-		if(null == crc || crc.equals("") 
+		if(null == sCrc || sCrc.equals("") 
 		//|| 0 == pic.length )
 		|| null == pic || pic.equals(""))
 		{	getFlag = true;	}
@@ -280,11 +283,11 @@ public class Server extends Thread
 			 {  // POST
 				 httpclient.setRequestMethod(HttpConnection.POST);
 				 // Not sure if this will work
-				 int length = inputBody.length()+crc.length()+pic.length();
+				 int length = inputBody.length()+sCrc.length()+pic.length();
 				 httpclient.setRequestProperty("Content-Length", ""+length);
-				 httpclient.setRequestProperty("crc", crc);
+				 httpclient.setRequestProperty("crc", sCrc);
 				 httpclient.setRequestProperty("pic", pic);
-				 logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+				 logger.log("In Send POST: SERVER:CRC="+sCrc+" SERVERHEX="+pic);
 				 
 				 
 				 ////////// Is this necessary??
@@ -456,9 +459,10 @@ public class Server extends Thread
 	public long getCrcValue(String inputText)
 	{
 		//logger.log("In get CRC Values");
-		crc = null;//crc.reset();
-		crc.update(inputText.getBytes());
-		return crc.getValue();
+		crc = 0;//crc.reset();
+		CRC32.update(crc,inputText.getBytes());
+		CRC32.update(crc, inputText.getBytes());
+		return crc;
 	}
 	/**
 	 * This method decrypts the message which was encrypted.
@@ -473,7 +477,7 @@ public class Server extends Thread
  
 	//	logger.log("DECRYPT: 382");
 		
-		crc=null;//crc.reset();
+		crc=0;//crc.reset();
  
 		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
@@ -494,11 +498,11 @@ public class Server extends Thread
 		}
  
 		//logger.log("DECRYPT: 400");
-		crc.update(text.getBytes());
+		CRC32.update(crc,text.getBytes());
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
 		logger.log("Clinet VAL: "+text);
-		logger.log("Clinet CRC: "+crc.getValue());
-		if(Long.parseLong(replyArray[1]) == crc.getValue())//check CRC
+		logger.log("Clinet CRC: "+crc);
+		if(Long.parseLong(replyArray[1]) == crc)//check CRC
 		{	
 			
 		//	logger.log("DECRYPT: 405");

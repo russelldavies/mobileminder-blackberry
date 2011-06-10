@@ -1,13 +1,16 @@
 package com.spotlight.track;
 
 import java.util.Date;
-import m.java.util.regex;
+import java.util.Vector;
 
 import com.kids.net.ErrorMessage;
 
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.ui.text.NumericTextFilter;
+import net.rim.device.api.util.AbstractString;
+import net.rim.device.api.util.AbstractStringWrapper;
 
 public class Tools 
 {
@@ -15,8 +18,8 @@ public class Tools
 	private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 	
 	//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
-	private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );
-	private static Matcher matcher;
+	//private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );
+	//private static Matcher matcher;
 	
 	 public static int getGenOSVersion()
 	 {
@@ -115,11 +118,51 @@ public class Tools
 	 * @param _text a number.
 	 * @return boolean true if number matches with the pattern false otherwise.
 	 */
+	/*
 	public static synchronized boolean isNumber(String _text)
 	{
+		//AbstractString aS;
+		//aS=AbstractString.valueOf(_text);
+		NumericTextFilter sdf;
+		sdf.
+		//Integer.parseInt(_text);
+		return false;//.validate(_text);
+		
+		
 		//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
-		matcher = pattern.matcher(_text);
-		return matcher.matches();
-	}
+		//matcher = pattern.matcher(_text);
+		//return matcher.matches();
+	}*/
+	 
+	/**
+	 * Method to split string by given seperator
+	 * @param original - Original string to be split
+	 * @param separator - character you want string to be split by
+	 * @return result - String [] with String split into elements
+	 */
+	public static String[] split(String original,String separator) {
+	    Vector nodes = new Vector();
+	    // Parse nodes into vector
+	    int index = original.indexOf(separator);
+	    while(index >= 0) 
+		{
+	        nodes.addElement( original.substring(0, index) );
+	        original = original.substring(index+separator.length());
+	        index = original.indexOf(separator);
+	    }
+	    // Get the last node
+	    nodes.addElement( original );
 
+	     // Create split string array
+	    String[] result = new String[ nodes.size() ];
+	    if( nodes.size() > 0 )
+		{
+	        for(int loop = 0; loop < nodes.size(); loop++)
+	        {
+	            result[loop] = (String)nodes.elementAt(loop);
+	            System.out.println(result[loop]);
+	        }
+	    }
+	   return result;
+	}	
 }
