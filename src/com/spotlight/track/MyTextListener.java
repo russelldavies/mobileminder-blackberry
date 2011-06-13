@@ -7,11 +7,15 @@ import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 
-import com.kids.Monitor.SMSMessage;
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+
+//import com.kids.Monitor.SMSMessage;
+/*
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.LocalDataWriter;
-
+*/
 import net.rim.blackberry.api.sms.OutboundMessageListener;
 
 
@@ -27,7 +31,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	private LocalDataReader actLog;
 	//private LocalDataReader actLog;
 	Debug log = Logger.getInstance();
-	private SMSMessage smsMessage;
+	//TODO:private SMSMessage smsMessage;
 
 /**
  * The constructor initialises the action store location and registers a MessageListener for the device.
@@ -46,9 +50,13 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
            //smsMessage.setMessage(_number, _outgoing, _inputBody)
         }
         catch (IOException e) 
-        {actLog.addMessage(smsMessage);}//true,action.TYPE_TEXT, e.toString());}
+        {
+        	//TODO: actLog.addMessage(smsMessage);
+        }//true,action.TYPE_TEXT, e.toString());}
         catch (Exception e) 
-        {actLog.addMessage(smsMessage);}//true,action.TYPE_TEXT, e.toString());}
+        {
+        	//TODO:actLog.addMessage(smsMessage);
+        }//true,action.TYPE_TEXT, e.toString());}
 	}
 	
 	
@@ -63,7 +71,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 							String inputDestinationAddress)
 	  {
 		  log.log("Adding to log:MyTextListener");
-	    	actLog.addMessage(smsMessage);//(action.TYPE_TEXT, inputStatus, inputDestinationAddress);//, inputDescriptor);
+	    	//TODO: actLog.addMessage(smsMessage);//(action.TYPE_TEXT, inputStatus, inputDestinationAddress);//, inputDescriptor);
 	  }
 	  
 /**
@@ -89,10 +97,16 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 			addToLog(action.Incoming+" Message",conn.receive().getAddress());//,conn.receive().toString());
 		} 
 		catch (InterruptedIOException e) 
-		{actLog.addMessage(smsMessage);}//(true,action.TYPE_TEXT,e.toString());} 
+		{
+			//TODO:actLog.addMessage(smsMessage);
+		}//(true,action.TYPE_TEXT,e.toString());} 
 		catch (IOException e) 
-		{actLog.addMessage(smsMessage);}//(true,action.TYPE_TEXT,e.toString());}	
+		{
+			//TODO:actLog.addMessage(smsMessage);
+		}//(true,action.TYPE_TEXT,e.toString());}	
         catch (Exception e) 
-        {actLog.addMessage(smsMessage);}//(true,action.TYPE_TEXT, e.toString());}
+        {
+        	//TODO:actLog.addMessage(smsMessage);
+        }//(true,action.TYPE_TEXT, e.toString());}
 	}
 }

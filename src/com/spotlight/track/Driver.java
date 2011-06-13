@@ -7,9 +7,13 @@
 
 
 package com.spotlight.track;
-
+/*
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+*/
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+
 import net.rim.device.api.system.Application;
  
 /**
@@ -31,8 +35,8 @@ public class Driver extends Application
 		
 		
     	//new way of creating the database
-    	LocalDataFactory factory = createOsSpecificDBFactory();
-        LocalDataReader actlog = factory.createLocalDataReader();
+    	//LocalDataFactory factory = createOsSpecificDBFactory();
+       // LocalDataReader actlog = factory.createLocalDataReader();
 		
         /**
          * After calling to enterEventDispatcher() the application enters the event-processing loop.
@@ -46,20 +50,6 @@ public class Driver extends Application
         	new Driver().enterEventDispatcher();
         }
      
-        //method to check sdk version and return the correct database object
-        public static LocalDataFactory createOsSpecificDBFactory()
-        {
-	    int OS = Tools.getGenOSVersion();//change to your code to check the sdk verson
-	    if (OS < 5)
-	    {
-	    	return new LegacyFactory();
-	    }
-	    else
-	    {
-	        return new SQliteFactory();
-	    }
-	}
-
 /**
  * Initialises the objects that will register themselves with the appropriate event listeners
  */
@@ -80,12 +70,12 @@ public class Driver extends Application
         
         // Load sub-components
         // What type should actLog be?
-        new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
+       // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
     	new MyCallListener(actLog);
-	    new MyTextListener(actLog);
-	    new MyMailListener(actLog);
+	    //new MyTextListener(actLog);
+	    //new MyMailListener(actLog);
 	    //new MyGPSListener (actLog, GPSTimer);
-	    new MyAppListener (actLog, AppTimer);	     
+	    //new MyAppListener (actLog, AppTimer);	     
 	    new Server(actLog);
         
         

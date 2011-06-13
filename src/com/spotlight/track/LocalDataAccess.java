@@ -7,7 +7,11 @@ import java.util.Vector;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
-
+/*
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
+*/
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
@@ -335,6 +339,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	}
 		//ANDROID
 		//return storeDB.query(DATABASE_TABLE, null, null, null, null, null, null);}
+
 }
 	
 //////////////////////////////////////////////////////////////////////

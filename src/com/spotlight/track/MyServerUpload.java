@@ -2,8 +2,12 @@ package com.spotlight.track;
 
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
 
+/*
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
+*/
 /**
  * 
  * MyServerUpload establishes the connection to the server
@@ -54,7 +58,7 @@ public class MyServerUpload extends Thread
  */
 	
 	public void run()
-	{
+	{/*
 		log.log("In MyServerUpload->run()");
 		actLog.addMessage(action.TYPE_SERVER,"Starting: MyServerUpload");
 		
@@ -108,6 +112,6 @@ public class MyServerUpload extends Thread
 			log.log("Exception in MyServerUpload");
 			actLog.addMessage(true,action.TYPE_SERVER,e.toString());
 			}
-    }
+  */  }  // end of Run()
 }
 

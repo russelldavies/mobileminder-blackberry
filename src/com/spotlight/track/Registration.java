@@ -3,13 +3,16 @@ package com.spotlight.track;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import com.kids.net.ErrorMessage;
-import com.kids.net.Reply;
-import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
 
+//import com.kids.net.ErrorMessage;
+/*
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
+*/
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
@@ -117,7 +120,7 @@ public class Registration extends Thread
 			} 
     		catch(InterruptedException e) 
     		{	
-    			actLog.addMessage(new ErrorMessage(e));
+    			//TODO:actLog.addMessage(new ErrorMessage(e));
     			break;	
     		}
     		
@@ -202,7 +205,7 @@ public class Registration extends Thread
 				} 
 	    		catch(InterruptedException e) 
 	    		{	
-	    			actLog.addMessage(new ErrorMessage(e));
+	    			//TODO:actLog.addMessage(new ErrorMessage(e));
 	    			break;	
 	    		}
 	    	}
@@ -362,7 +365,7 @@ public class Registration extends Thread
         try
         {
         	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
-        	//TODO: Get unique hardware identifier that identifies the exact handset
+        	// Get unique hardware identifier that identifies the exact handset
         	//java.lang.Integer.toHexString(DeviceInfo.getDeviceId())  <- BB PIN
         	manufacturer="Blackberry" + DeviceInfo.getDeviceName()+  // Model of bberry
         							  + DeviceInfo.getDeviceId()  +  // Unique ID/PIN
@@ -376,7 +379,7 @@ public class Registration extends Thread
         }
         catch (Exception e) 
         {
-        	actLog.addMessage(new ErrorMessage(e));
+        	//TODO:actLog.addMessage(new ErrorMessage(e));
                 manufacturer = "error";
         }
         return manufacturer;
@@ -411,9 +414,9 @@ class RegistrationMessage implements Message
 								String inputDeviceID, 
 								String inputManufacturer)
 	{
-		error 		= false;
-		deviceTime 	= Tools.getDate();
-		stage 		= inputStage;
+		error 		 = false;
+		deviceTime 	 = Tools.getDate();
+		stage 		 = inputStage;
 		manufacturer = inputManufacturer;
 		/*
 		logger.log("inputPhoneNum"+inputPhoneNum);
@@ -428,7 +431,7 @@ class RegistrationMessage implements Message
 		else
 		{*/	deviceID = inputDeviceID;//}
 		
-		info 		= "Android";
+		info 		= "RIM";
 	}
 	
 	/**
@@ -826,7 +829,7 @@ class RegData
 		 */
 		private void setupFirstEntry(Database _db)
 		{
-			int column_value=0;
+			//int column_value=0;
 			
 			try
 			{

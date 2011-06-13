@@ -2,14 +2,11 @@ package com.spotlight.track;
 
 import java.util.Vector;
 
-import com.kids.net.ErrorMessage;
-import com.kids.net.Reply;
-import com.kids.net.Server;
-import com.kids.prototypes.Controllable;
+//import com.kids.prototypes.Controllable;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
-import com.kids.Data.Tools;
 import com.kids.prototypes.Message;
+import com.spotlight.track.Reply;
 
 /**
  * Responsible for contacting server and getting response from server. It is also responsible for processing response. 
@@ -118,7 +115,9 @@ public class Commander extends Thread
 			try 
 			{	Thread.sleep(time);} 
 			catch (InterruptedException e)
-			{	actLog.addMessage(new ErrorMessage(e));	}		
+			{
+				//TODO:actLog.addMessage(new ErrorMessage(e));
+			}		
 		}	
 	}
 	
@@ -256,4 +255,3 @@ public class Commander extends Thread
 	}
 	
 }
-

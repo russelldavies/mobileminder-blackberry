@@ -2,13 +2,16 @@ package com.spotlight.track;
 
 import java.util.Date;
 
-import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
-
+import com.kids.prototypes.Message;
+/*
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataWriter;
+*/
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import com.kids.prototypes.Message;
+//import com.kids.prototypes.Message;
 
 /**
  * 
@@ -51,7 +54,7 @@ public class MyAppListener extends Thread
 */
 	
 	public void run()
-	{
+	{/*
 		log.log("MyAppListener begin...");
 		try
 	    {
@@ -95,9 +98,8 @@ public class MyAppListener extends Thread
 		{
         	actLog.addMessage(true,action.TYPE_APP,e.toString());
         }
-	}
+	*/}
 }
-
 
 
 /**

@@ -83,7 +83,7 @@ public MyGPSListener(LocalDataAccess inputAccess, int inputGPSTimer)
 	
 	
 	public void run()
-	{
+	{/*
 		try
 	    {
 			while(true)
@@ -118,7 +118,7 @@ public MyGPSListener(LocalDataAccess inputAccess, int inputGPSTimer)
 		{actLog.addAction(true,action.TYPE_GPS,e.toString());}
         catch (Exception e)
 		{actLog.addAction(true,action.TYPE_GPS,e.toString());}
-
-	}
+*/
+	}	// end run()
 }
 
