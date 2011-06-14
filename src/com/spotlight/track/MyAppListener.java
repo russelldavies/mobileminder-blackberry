@@ -2,6 +2,10 @@ package com.spotlight.track;
 
 import java.util.Date;
 
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataWriter;
+import com.kids.prototypes.Message;
+
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 

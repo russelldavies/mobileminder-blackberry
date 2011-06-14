@@ -7,6 +7,10 @@ import java.util.Vector;
 
 import javax.microedition.io.file.FileSystemRegistry;
 
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
+
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
@@ -84,13 +88,17 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
      */
 	public innerLocalDataAccess(/*Context _context*/)
 	{	
+		
+		//String mc 		= System.getProperty("fileconn.dir.memorycard");
+		//String mcname 	= System.getProperty("fileconn.dir.memorycard.name");
+		
 		// Determine if an SDCard is present 
         boolean sdCardPresent = false;
         String root = null;
-        Enumeration enum = FileSystemRegistry.listRoots();
-        while (enum.hasMoreElements())
+        Enumeration theEnum = FileSystemRegistry.listRoots();
+        while (theEnum.hasMoreElements())
         {
-            root = (String)enum.nextElement();
+            root = (String)theEnum.nextElement();
             logWriter.log("root="+root);
             if(root.equalsIgnoreCase("SDCard/"))//("store/"))//("sdcard/"))
             {

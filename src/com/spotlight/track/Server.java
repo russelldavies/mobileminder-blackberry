@@ -31,6 +31,11 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.lcdui.List;
 
+import com.kids.net.Security;
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.Message;
+
 import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.io.messaging.Headers;
 import net.rim.device.api.util.CRC32;

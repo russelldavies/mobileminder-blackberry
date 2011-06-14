@@ -3,6 +3,8 @@ package com.spotlight.track;
 import java.util.Date;
 import java.util.Vector;
 
+import com.kids.prototypes.LocalDataReader;
+
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;

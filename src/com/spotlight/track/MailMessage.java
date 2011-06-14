@@ -1,6 +1,8 @@
 package com.spotlight.track;
 
 import java.util.Date;
+
+import com.kids.prototypes.Message;
 /**
  * 
  * This class implements the message interface to hold mail event messages.

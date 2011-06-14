@@ -7,6 +7,9 @@
 
 package com.spotlight.track;
 
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.SystemListener;
@@ -37,6 +40,8 @@ public class Driver extends Application implements SystemListener
          */
         public static void main(String[] args)
         {
+        	//How to create proper startup apps:
+        	//http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
         	Driver appInstance = new Driver();
         	
             // If system startup is still in progress when this

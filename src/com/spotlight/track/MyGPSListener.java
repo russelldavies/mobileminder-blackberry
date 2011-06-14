@@ -15,6 +15,8 @@ import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 
+import com.kids.prototypes.LocalDataWriter;
+
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
