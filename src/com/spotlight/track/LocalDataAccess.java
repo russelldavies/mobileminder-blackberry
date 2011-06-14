@@ -2,16 +2,11 @@ package com.spotlight.track;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
 
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-*/
+import javax.microedition.io.file.FileSystemRegistry;
+
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
@@ -19,9 +14,11 @@ import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.database.DatabaseFactory;
 import net.rim.device.api.database.DatabaseIOException;
 import net.rim.device.api.database.DatabasePathException;
+import net.rim.device.api.database.DatabaseSecurityOptions;
 import net.rim.device.api.database.Row;
 import net.rim.device.api.database.Statement;
 import net.rim.device.api.i18n.SimpleDateFormat;
+import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.PersistentObject;
@@ -86,29 +83,65 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
      * @param _context Interface to global environment that the current application is running in.
      */
 	public innerLocalDataAccess(/*Context _context*/)
-	{
-		//ANDROID
-		//storeDB  = new DatabaseHelper(_context).getWritableDatabase();
-		
-		//Blackberry
-		// Create database
-		// I think DatabaseFactory.create() will check by itself if it exists first.
-		// although theres always DatabaseFactory.exists() to check
-		try
-	       {	// URI needed only if you want to specify a path to the DB
-	           dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME); 
+	{	
+		// Determine if an SDCard is present 
+        boolean sdCardPresent = false;
+        String root = null;
+        Enumeration enum = FileSystemRegistry.listRoots();
+        while (enum.hasMoreElements())
+        {
+            root = (String)enum.nextElement();
+            logWriter.log("root="+root);
+            if(root.equalsIgnoreCase("SDCard/"))//("store/"))//("sdcard/"))
+            {
+            	logWriter.log("sdCardPresent=true");
+                sdCardPresent = true;
+            }     
+        }
+        
+        //sdCardPresent = true; // TODO: This is for DEBUG ONLY
+        if (sdCardPresent)
+        {
+			// Create database
+	        try {
+				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+			} catch (IllegalArgumentException e) {
+				logWriter.log("LocalDataAccess::IllegalArgumentException:LINE111:"+e.getMessage());
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				logWriter.log("LocalDataAccess::MalformedURIException:LINE114:"+e.getMessage());
+				e.printStackTrace();
+			} 
 	           //Creates a SQLite® database on the SD card of the BlackBerry® device.
 	           // If you do not specify the full path to the database to create,
 	           // it will be created in a folder named after your application.
-	           storeDB = DatabaseFactory.openOrCreate(dbURI);
-	           //storeDB = DatabaseFactory.create(dbURI);
-	           storeDB.close();
-	       }
-	       catch ( Exception e ) 
-	       {         
-	    	   logWriter.log("LocalDataAccess::Exception:"+e.getMessage());
-	           e.printStackTrace();
-	       }
+	           try {
+				storeDB = DatabaseFactory.openOrCreate(dbURI);
+				
+	            Statement st = storeDB.createStatement( DATABASE_CREATE );	            
+	            st.prepare();
+	            st.execute();
+	            st.close();
+	            //storeDB.close();
+			} catch (ControlledAccessException e) {
+				logWriter.log("LocalDataAccess::ControlledAccessException:LINE123:"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabaseIOException e) {
+				logWriter.log("LocalDataAccess::DatabaseIOException:LINE126:"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabasePathException e) {
+				logWriter.log("LocalDataAccess::DatabasePathException:LINE129:"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabaseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}   // end try/catch
+			
+        } // End if
+        else
+        {
+        	logWriter.log("No SD Card present");
+        }
 	}
 	
 	/**
@@ -170,7 +203,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 		Date theDate = Calendar.getInstance().getTime();
 		String dateTime = String.valueOf(theDate.getTime());
 		
-        Statement st;
+		net.rim.device.api.database.Statement st;
 		try {
 			st = storeDB.createStatement("INSERT INTO "+DATABASE_TABLE+
 													"("+KEY_TIME+","+KEY_VALUE+") "+
@@ -179,7 +212,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	        st.prepare();
 	        st.execute();
 	        st.close();
-	        storeDB.close();
+	        //storeDB.close();
 		} catch (DatabaseException e) {
 			logWriter.log("LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
 			e.printStackTrace();
@@ -264,12 +297,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	{
 		try {
 			storeDB = DatabaseFactory.open(dbURI);
-	        Statement st = storeDB.createStatement("DELETE FROM "+DATABASE_TABLE+
+			Statement st = storeDB.createStatement("DELETE FROM "+DATABASE_TABLE+
 					" WHERE "+KEY_INDEX+"="+String.valueOf(_index));
 			st.prepare();
 			st.execute();
 			st.close();
-			storeDB.close();
+			//storeDB.close();
 		} catch (ControlledAccessException e) {
 			logWriter.log("LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
 			e.printStackTrace();
@@ -302,7 +335,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 		try {
 			//result.last returns FALSE is its empty
 			// Otherwise, it moves to the last position
-			if(result.last())
+			if(result.last()) // TODO: Causing NullPointerException
 			{	// Assuming its not empty, getPosition will return an INT
 				size = result.getPosition();
 			}
@@ -326,9 +359,13 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 		Statement st;
 		Cursor c=null;
 		try {
+			storeDB=DatabaseFactory.open(dbURI);
 			st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
 			st.prepare();
+			st.execute();
 			c = st.getCursor();
+			//st.close();
+			//storeDB.close();
 		} catch (DatabaseException e) {
 			logWriter.log("LocalDataAccess::getStoreDBoutput::"+e.getMessage());
 			e.printStackTrace();
@@ -375,7 +412,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
 		 try
 	        { 
 	            innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-	            Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
+	            net.rim.device.api.database.Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
 	            
 	            st.prepare();
 	            st.execute();
@@ -401,7 +438,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
 		 try
 	        { 
 			 	innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-	            Statement st = innerLocalDataAccess.storeDB.createStatement("DROP IF TABLE EXISTS "
+			 	net.rim.device.api.database.Statement st = innerLocalDataAccess.storeDB.createStatement("DROP IF TABLE EXISTS "
 	            										+innerLocalDataAccess.DATABASE_TABLE);
 	            
 	            st.prepare();

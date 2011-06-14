@@ -7,15 +7,6 @@ import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-
-//import com.kids.Monitor.SMSMessage;
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.LocalDataWriter;
-*/
 import net.rim.blackberry.api.sms.OutboundMessageListener;
 
 

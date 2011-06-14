@@ -5,16 +5,11 @@
  * 
  */
 
-
 package com.spotlight.track;
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-*/
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
 
 import net.rim.device.api.system.Application;
+import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.SystemListener;
  
 /**
  * 
@@ -25,14 +20,11 @@ import net.rim.device.api.system.Application;
  */
 
 //class Controller extends Application
-public class Driver extends Application
+public class Driver extends Application implements SystemListener
 {       // Enable logging
-		Debug logWriter = Logger.getInstance();
-		//LegacyDataAccess legLog = new innerLegacyDataAccess();
-		//LocalDataAccess locLog = new innerLocalDataAccess();
+		static Debug logWriter = Logger.getInstance();
 		
-		LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
-		
+		LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
 		
     	//new way of creating the database
     	//LocalDataFactory factory = createOsSpecificDBFactory();
@@ -45,19 +37,50 @@ public class Driver extends Application
          */
         public static void main(String[] args)
         {
+        	Driver appInstance = new Driver();
+        	
+            // If system startup is still in progress when this
+            // application is run.
+            if (ApplicationManager.getApplicationManager().inStartup())
+    		{
+            	logWriter.log("Still starting up");
+                appInstance.addSystemListener(appInstance);
+            }
+            else
+    		{
+            	logWriter.log("Fully booted up");
+                appInstance.doStartupWorkLater();
+            }
             //The event thread processes incoming messages and sends them to the listeners.
         	//new Controller().enterEventDispatcher();
-        	new Driver().enterEventDispatcher();
+            appInstance.enterEventDispatcher();
         }
-     
+       
 /**
  * Initialises the objects that will register themselves with the appropriate event listeners
  */
     //public Controller()
-    public Driver()
-        {
-    	logWriter.log("MobileMinder::Driver->Start...");
-    	
+    Driver()
+        { }
+
+    
+    private void doStartupWorkLater()
+	{
+		invokeLater(new Runnable()
+		{
+        public void run()
+			{
+        	logWriter.log("Doing startup work now...");
+            doStartupWork();
+			}
+		});
+	}
+    
+    private void doStartupWork()
+    {
+    	actLog = LocalDataAccess.getLocalDataAccessRef();
+     	logWriter.log("MobileMinder::Driver->Start...");
+       	
     	// For future "Registration" feature 
         int employerID  = 1;
         int deviceID    = 2;
@@ -72,10 +95,10 @@ public class Driver extends Application
         // What type should actLog be?
        // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
     	new MyCallListener(actLog);
-	    //new MyTextListener(actLog);
-	    //new MyMailListener(actLog);
-	    //new MyGPSListener (actLog, GPSTimer);
-	    //new MyAppListener (actLog, AppTimer);	     
+	    new MyTextListener(actLog);
+	    new MyMailListener(actLog);
+	    new MyGPSListener (actLog, GPSTimer);
+	    new MyAppListener (actLog, AppTimer);	     
 	    new Server(actLog);
         
         
@@ -83,10 +106,43 @@ public class Driver extends Application
         Screen screen = new Dialog(Dialog.D_OK, "Shirts!!!!!!",
             Dialog.OK,           Bitmap.getPredefinedBitmap(Bitmap.EXCLAMATION),         Manager.VERTICAL_SCROLL);
         ui.pushGlobalScreen(screen, 1, UiEngine.GLOBAL_QUEUE);
-    }*/
+    }*/	
         //actLog.removeAction(0);
-      
-        }	// End of constructor
+    }
+    
+
+	public void powerUp()
+	{
+    	logWriter.log("Power up...");
+
+        removeSystemListener(this);
+        doStartupWork();		
+	}
+    
+	public void batteryGood() 
+	{
+		// TODO Auto-generated method stub
+    	logWriter.log("Battery Good...");
+	}
+	
+	public void batteryLow() 
+	{
+		// TODO Auto-generated method stub
+    	logWriter.log("Battery Low...");
+	}
+	
+	public void batteryStatusChange(int arg0)
+	{
+		// TODO Auto-generated method stub
+    	logWriter.log("BatteryStatusChange...");
+	}
+	
+	public void powerOff()
+	{
+		// TODO Auto-generated method stub
+    	logWriter.log("Power off...");
+	}
+	
 }
 
 /*

@@ -3,9 +3,6 @@ package com.spotlight.track;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 */
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataWriter;
-
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
@@ -80,9 +77,10 @@ public class MyCallListener extends AbstractPhoneListener
 	private void addToLog(String ehandler, int callId)
 	{
 		logWriter.log("Adding message to log...");
+		logWriter.log("callID="+callId);
 	    PhoneCall callInfo = Phone.getCall(callId);
 	    CallMessage callMessage=new CallMessage();
-	    String contactNumber=callInfo.getPhoneNumber();
+	    String contactNumber=callInfo.getPhoneNumber(); // TODO: Causing NullPointerException
 	    String contactName=callInfo.getDisplayPhoneNumber();;
 	    	    
 	    if(null != callInfo)
@@ -95,12 +93,12 @@ public class MyCallListener extends AbstractPhoneListener
 	    	//actLog.addMessage(true,action.TYPE_CALL, ehandler);
 		    
 		    // Store the contact name
-		    if (contactNumber.equals(contactName))
+		    if (contactNumber.equals(contactName))	//TODO: NullPointerException on call fail
 		    	contactName="";
 		    
 		    callMessage.setContactName(contactName);		    
 	    	actLog.addMessage(callMessage);
-	    }
+	    }/*
 	    else
 	    {
 	    	// If, for some reason, the call(callId) doesnt exist (when??), then set a basic blank message
@@ -111,7 +109,7 @@ public class MyCallListener extends AbstractPhoneListener
 	    	
 	    	//Original code
 	    	//actLog.addMessage(action.TYPE_CALL, ehandler, callInfo.getDisplayPhoneNumber());//, callInfo.getStatusString());
-	    }
+	    }*/
 	}
 
 	// A call has been added to a conference call

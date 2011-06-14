@@ -7,10 +7,6 @@ import javax.microedition.pim.ContactList;
 import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
 
-import com.kids.prototypes.Debug;
-
-//import com.kids.prototypes.Debug;
-
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 
 public class ContactsReader

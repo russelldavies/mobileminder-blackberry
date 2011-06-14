@@ -3,10 +3,6 @@ package com.spotlight.track;
 import java.util.Date;
 import java.util.Vector;
 
-import com.kids.prototypes.LocalDataReader;
-
-//import com.kids.net.ErrorMessage;
-
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
@@ -82,10 +78,8 @@ public class Tools
 	 * @param _date milliseconds since the epoch.
 	 * @return
 	 */
-	public static String getDate(long _date)
-	{
-		return new SimpleDateFormat("yyMMddHHmmssZ").format(new Date(_date)).substring(0, 15);//the GTM return time zone in xxxx hours we only need xx
-	}
+	public static String getDate(long _date)//the GTM return time zone in xxxx hours we only need xx
+	{return new SimpleDateFormat("yyMMddHHmmssZ").format(new Date(_date)).substring(0, 12);}
 	
 	/**
 	 * Gets the String format of date.

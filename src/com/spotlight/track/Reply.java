@@ -2,8 +2,6 @@ package com.spotlight.track;
 
 import java.util.Vector;
 
-import com.kids.prototypes.Debug;
-
 /**
  * This class transforms the data into easier accessible form.
  */

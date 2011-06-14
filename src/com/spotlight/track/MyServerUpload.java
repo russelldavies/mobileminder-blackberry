@@ -1,13 +1,5 @@
 package com.spotlight.track;
 
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-*/
 /**
  * 
  * MyServerUpload establishes the connection to the server

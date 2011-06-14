@@ -3,16 +3,6 @@ package com.spotlight.track;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-
-//import com.kids.net.ErrorMessage;
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-*/
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;

@@ -1,9 +1,5 @@
 package com.spotlight.track;
 
-import com.kids.prototypes.Debug;
-
-//import com.kids.prototypes.Debug;
-
 public class Logger implements Debug {
 
 	private static Logger logger;

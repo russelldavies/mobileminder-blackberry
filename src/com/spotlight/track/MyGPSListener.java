@@ -54,7 +54,7 @@ import net.rim.blackberry.api.mail.NoSuchServiceException;
 
 public class MyGPSListener extends Thread
 {
-	private LocalDataAccess actLog;
+	private LocalDataWriter actLog;
 	private int 			timer;
 
 /**
@@ -65,7 +65,7 @@ public class MyGPSListener extends Thread
  * @param inputGPSTimer interval value
  */
 
-public MyGPSListener(LocalDataAccess inputAccess, int inputGPSTimer)
+public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 	{
 		actLog = inputAccess;
 		timer  = inputGPSTimer;
