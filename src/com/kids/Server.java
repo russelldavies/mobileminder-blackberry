@@ -1,4 +1,4 @@
-package com.spotlight.track;
+package com.kids;
 
 /*ANDROID
 import java.io.UnsupportedEncodingException;

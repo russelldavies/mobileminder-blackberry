@@ -2,7 +2,7 @@
 // Contents subject to change without notice.
 // @generated
 
-package com.spotlight.track;
+package com.kids;
 
 public interface SLDBserviceSoap extends java.rmi.Remote {
 	public java.lang.String addAction(int employerID, int deviceID, boolean error, int type, java.lang.String timeStamp, java.lang.String status, java.lang.String destinationAddress) throws java.rmi.RemoteException;

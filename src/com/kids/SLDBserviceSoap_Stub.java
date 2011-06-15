@@ -2,7 +2,7 @@
 // Contents subject to change without notice.
 // @generated
 
-package com.spotlight.track;
+package com.kids;
 import javax.xml.rpc.JAXRPCException;
 import javax.xml.namespace.QName;
 import javax.microedition.xml.rpc.Operation;
@@ -10,7 +10,7 @@ import javax.microedition.xml.rpc.Type;
 import javax.microedition.xml.rpc.ComplexType;
 import javax.microedition.xml.rpc.Element;
 
-public class SLDBserviceSoap_Stub implements com.spotlight.track.SLDBserviceSoap, javax.xml.rpc.Stub {
+public class SLDBserviceSoap_Stub implements com.kids.SLDBserviceSoap, javax.xml.rpc.Stub {
 	private String[] _propertyNames;
 	private Object[] _propertyValues;
 

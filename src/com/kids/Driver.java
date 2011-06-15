@@ -5,7 +5,7 @@
  * 
  */
 
-package com.spotlight.track;
+package com.kids;
 
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;

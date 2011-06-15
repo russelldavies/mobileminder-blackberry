@@ -1,11 +1,11 @@
-package com.spotlight.track;
+package com.kids;
 
 import java.util.Vector;
 
+import com.kids.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
-import com.spotlight.track.Reply;
 
 /**
  * Responsible for contacting server and getting response from server. It is also responsible for processing response. 

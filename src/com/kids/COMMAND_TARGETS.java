@@ -1,4 +1,4 @@
-package com.spotlight.track;
+package com.kids;
 
 public class COMMAND_TARGETS {
 	private COMMAND_TARGETS(){}
