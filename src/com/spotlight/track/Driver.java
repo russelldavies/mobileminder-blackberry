@@ -25,14 +25,14 @@ import net.rim.device.api.system.SystemListener;
 //class Controller extends Application
 public class Driver extends Application implements SystemListener
 {       // Enable logging
-		static Debug logWriter = Logger.getInstance();
-		
-		LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
-		
-    	//new way of creating the database
-    	//LocalDataFactory factory = createOsSpecificDBFactory();
+                static Debug logWriter = Logger.getInstance();
+                
+                LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
+                
+        //new way of creating the database
+        //LocalDataFactory factory = createOsSpecificDBFactory();
        // LocalDataReader actlog = factory.createLocalDataReader();
-		
+                
         /**
          * After calling to enterEventDispatcher() the application enters the event-processing loop.
          * 
@@ -40,24 +40,25 @@ public class Driver extends Application implements SystemListener
          */
         public static void main(String[] args)
         {
-        	//How to create proper startup apps:
-        	//http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
-        	Driver appInstance = new Driver();
-        	
+                //How to create proper startup apps:
+                //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
+                Driver appInstance = new Driver();
+                
+                
             // If system startup is still in progress when this
             // application is run.
             if (ApplicationManager.getApplicationManager().inStartup())
-    		{
-            	logWriter.log("Still starting up");
+                {
+                logWriter.log("Still starting up");
                 appInstance.addSystemListener(appInstance);
             }
             else
-    		{
-            	logWriter.log("Fully booted up");
+                {
+                logWriter.log("Fully booted up");
                 appInstance.doStartupWorkLater();
             }
             //The event thread processes incoming messages and sends them to the listeners.
-        	//new Controller().enterEventDispatcher();
+                //new Controller().enterEventDispatcher();
             appInstance.enterEventDispatcher();
         }
        
@@ -70,23 +71,23 @@ public class Driver extends Application implements SystemListener
 
     
     private void doStartupWorkLater()
-	{
-		invokeLater(new Runnable()
-		{
+        {
+                invokeLater(new Runnable()
+                {
         public void run()
-			{
-        	logWriter.log("Doing startup work now...");
+                        {
+                logWriter.log("Doing startup work now...");
             doStartupWork();
-			}
-		});
-	}
+                        }
+                });
+        }
     
     private void doStartupWork()
     {
-    	actLog = LocalDataAccess.getLocalDataAccessRef();
-     	logWriter.log("MobileMinder::Driver->Start...");
-       	
-    	// For future "Registration" feature 
+        actLog = LocalDataAccess.getLocalDataAccessRef();
+        logWriter.log("MobileMinder::Driver->Start...");
+        
+        // For future "Registration" feature 
         int employerID  = 1;
         int deviceID    = 2;
         
@@ -99,55 +100,55 @@ public class Driver extends Application implements SystemListener
         // Load sub-components
         // What type should actLog be?
        // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
-    	new MyCallListener(actLog);
-	    new MyTextListener(actLog);
-	    new MyMailListener(actLog);
-	    new MyGPSListener (actLog, GPSTimer);
-	    new MyAppListener (actLog, AppTimer);	     
-	    new Server(actLog);
+        new MyCallListener(actLog);
+            new MyTextListener(actLog);
+            new MyMailListener(actLog);
+            new MyGPSListener (actLog, GPSTimer);
+            new MyAppListener (actLog, AppTimer);            
+            new Server(actLog);
         
         
         /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();
         Screen screen = new Dialog(Dialog.D_OK, "Shirts!!!!!!",
             Dialog.OK,           Bitmap.getPredefinedBitmap(Bitmap.EXCLAMATION),         Manager.VERTICAL_SCROLL);
         ui.pushGlobalScreen(screen, 1, UiEngine.GLOBAL_QUEUE);
-    }*/	
+    }*/ 
         //actLog.removeAction(0);
     }
     
 
-	public void powerUp()
-	{
-    	logWriter.log("Power up...");
+        public void powerUp()
+        {
+        logWriter.log("Power up...");
 
         removeSystemListener(this);
-        doStartupWork();		
-	}
+        doStartupWork();                
+        }
     
-	public void batteryGood() 
-	{
-		// TODO Auto-generated method stub
-    	logWriter.log("Battery Good...");
-	}
-	
-	public void batteryLow() 
-	{
-		// TODO Auto-generated method stub
-    	logWriter.log("Battery Low...");
-	}
-	
-	public void batteryStatusChange(int arg0)
-	{
-		// TODO Auto-generated method stub
-    	logWriter.log("BatteryStatusChange...");
-	}
-	
-	public void powerOff()
-	{
-		// TODO Auto-generated method stub
-    	logWriter.log("Power off...");
-	}
-	
+        public void batteryGood() 
+        {
+                // TODO Auto-generated method stub
+        logWriter.log("Battery Good...");
+        }
+        
+        public void batteryLow() 
+        {
+                // TODO Auto-generated method stub
+        logWriter.log("Battery Low...");
+        }
+        
+        public void batteryStatusChange(int arg0)
+        {
+                // TODO Auto-generated method stub
+        logWriter.log("BatteryStatusChange...");
+        }
+        
+        public void powerOff()
+        {
+                // TODO Auto-generated method stub
+        logWriter.log("Power off...");
+        }
+        
 }
 
 /*
