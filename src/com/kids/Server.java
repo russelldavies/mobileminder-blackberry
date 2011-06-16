@@ -31,6 +31,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.lcdui.List;
 
+import com.kids.net.Reply;
 import com.kids.net.Security;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;

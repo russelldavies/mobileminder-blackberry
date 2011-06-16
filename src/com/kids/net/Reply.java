@@ -1,7 +1,11 @@
-package com.kids;
+package com.kids.net;
 
 import java.util.Vector;
 
+import com.kids.COMMAND_TARGETS;
+import com.kids.Logger;
+import com.kids.Server;
+import com.kids.Tools;
 import com.kids.prototypes.Debug;
 
 /**

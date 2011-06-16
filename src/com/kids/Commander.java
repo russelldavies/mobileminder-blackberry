@@ -2,7 +2,7 @@ package com.kids;
 
 import java.util.Vector;
 
-import com.kids.Reply;
+import com.kids.net.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;

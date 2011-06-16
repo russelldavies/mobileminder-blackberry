@@ -79,20 +79,25 @@ public class MyCallListener extends AbstractPhoneListener
          */
         private void addToLog(String ehandler, int callId)
         {
-                logWriter.log("Adding message to log...");
-                logWriter.log("callID="+callId);
+            logWriter.log("Adding message to log...");
+            logWriter.log("callID="+callId);
             PhoneCall callInfo = Phone.getCall(callId);
+            logWriter.log("call id info is: "+Phone.getCall(callId));
+            logWriter.log("callinfo call id is: "+callInfo.getCallId());
             CallMessage callMessage=new CallMessage();
-            String contactNumber=callInfo.getPhoneNumber().toString(); // TODO: Causing NullPointerException
+            //RadioGetCallStatus(callId).getPhoneNumber;
+            logWriter.log("Getting phone number from call "+callId);
+            String contactNumber=callInfo.getPhoneNumber(); // TODO: Causing NullPointerException
             String contactName=callInfo.getDisplayPhoneNumber();
                     
             if(null != callInfo)
             {
                     
                     callMessage.setMessage( contactNumber,
-                                                                callInfo.isOutgoing(),
-                                                                Tools.getDate(),
-                                                                callInfo.getElapsedTime());
+                                            callInfo.isOutgoing(),
+                                            Tools.getDate(),
+                                            callInfo.getElapsedTime()
+                                            );
                 //actLog.addMessage(true,action.TYPE_CALL, ehandler);
                     
                     // Store the contact name

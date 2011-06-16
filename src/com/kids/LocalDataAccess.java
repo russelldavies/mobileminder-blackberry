@@ -54,16 +54,16 @@ public class LocalDataAccess
  */
 class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 {
-        public static Debug logWriter = Logger.getInstance();
-        
-        //ANDROID
-        //private static ArrayList<Message> otherMessages = new ArrayList<Message>(); 
-        //private                        Context thisContext;
-        
-        //Blackberry
-        //public static Vector otherMessages = new Vector();
-        
-        public static final String  DATABASE_NAME    = "CVKf";
+    public static Debug logWriter = Logger.getInstance();
+    
+    //ANDROID
+    //private static ArrayList<Message> otherMessages = new ArrayList<Message>(); 
+    //private                        Context thisContext;
+    
+    //Blackberry
+    //public static Vector otherMessages = new Vector();
+    
+    public static final String  DATABASE_NAME    = "CVKf";
     public static final String  DATABASE_TABLE   = "LocalData";
    // private static final int     DATABASE_VERSION = 2;
     //The primary key MUST be named '_id' Android convention
@@ -93,64 +93,69 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 //String mcname         = System.getProperty("fileconn.dir.memorycard.name");
                 
                 // Determine if an SDCard is present 
-        boolean sdCardPresent = false;
-        String root = null;
-        Enumeration theEnum = FileSystemRegistry.listRoots();
-        while (theEnum.hasMoreElements())
-        {
-            root = (String)theEnum.nextElement();
-            logWriter.log("root="+root);
-            if(root.equalsIgnoreCase("SDCard/"))//("store/"))//("sdcard/"))
-            {
-                logWriter.log("sdCardPresent=true");
-                sdCardPresent = true;
-            }     
-        }
-        
-        //sdCardPresent = true; // TODO: This is for DEBUG ONLY
-        if (sdCardPresent)
-        {
-                        // Create database
-                try {
-                                dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-                        } catch (IllegalArgumentException e) {
-                                logWriter.log("LocalDataAccess::IllegalArgumentException:LINE111:"+e.getMessage());
-                                e.printStackTrace();
-                        } catch (MalformedURIException e) {
-                                logWriter.log("LocalDataAccess::MalformedURIException:LINE114:"+e.getMessage());
-                                e.printStackTrace();
-                        } 
-                   //Creates a SQLite® database on the SD card of the BlackBerry® device.
-                   // If you do not specify the full path to the database to create,
-                   // it will be created in a folder named after your application.
-                   try {
-                                storeDB = DatabaseFactory.create(dbURI);
-                                
-                    Statement st = storeDB.createStatement( DATABASE_CREATE );              
-                    st.prepare();
-                    st.execute();
-                    st.close();
-                    //storeDB.close();
-                        } catch (ControlledAccessException e) {
-                                logWriter.log("LocalDataAccess::ControlledAccessException:LINE123:"+e.getMessage());
-                                e.printStackTrace();
-                        } catch (DatabaseIOException e) {
-                                logWriter.log("LocalDataAccess::DatabaseIOException:LINE126:"+e.getMessage());
-                                e.printStackTrace();
-                        } catch (DatabasePathException e) {
-                                logWriter.log("LocalDataAccess::DatabasePathException:LINE129:"+e.getMessage());
-                                e.printStackTrace();
-                        } catch (DatabaseException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                        }   // end try/catch
-                        
-        } // End if
-        else
-        {
-                logWriter.log("No SD Card present");
-        }
-        }
+	        boolean sdCardPresent = false;
+	        String root = null;
+	        Enumeration theEnum = FileSystemRegistry.listRoots();
+	        while (theEnum.hasMoreElements())
+	        {
+	            root = (String)theEnum.nextElement();
+	            logWriter.log("root="+root);
+	            if(root.equalsIgnoreCase("SDCard/"))//("store/"))//("sdcard/"))
+	            {
+	                logWriter.log("sdCardPresent=true");
+	                sdCardPresent = true;
+	            }     
+	        }
+	        
+	        //sdCardPresent = true; // TODO: This is for DEBUG ONLY
+	        if (sdCardPresent)
+	        {
+	        	// Create database
+	            try {
+	                            dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+	                    } catch (IllegalArgumentException e) {
+	                            logWriter.log("LocalDataAccess::IllegalArgumentException:LINE111:"+e.getMessage());
+	                            e.printStackTrace();
+	                    } catch (MalformedURIException e) {
+	                            logWriter.log("LocalDataAccess::MalformedURIException:LINE114:"+e.getMessage());
+	                            e.printStackTrace();
+	                    } 
+	               //Creates a SQLite® database on the SD card of the BlackBerry® device.
+	               // If you do not specify the full path to the database to create,
+	               // it will be created in a folder named after your application.
+	               try
+	               {
+	            	   if (!DatabaseFactory.exists(dbURI))
+	            	   {
+	            		   logWriter.log("DB does not exist. Creating...");
+	            		   storeDB = DatabaseFactory.create(dbURI);
+	            		   logWriter.log("DB Created");
+	            		   Statement st = storeDB.createStatement( DATABASE_CREATE );              
+		                   st.prepare();
+		                   st.execute();
+		                   st.close();
+		                   //storeDB.close();
+	            	   }
+	                } catch (ControlledAccessException e) {
+	                       logWriter.log("LocalDataAccess::ControlledAccessException:LINE123:"+e.getMessage());
+	                       e.printStackTrace();
+	                } catch (DatabaseIOException e) {
+	                       logWriter.log("LocalDataAccess::DatabaseIOException:LINE126:"+e.getMessage());
+	                       e.printStackTrace();
+	                } catch (DatabasePathException e) {
+	                       logWriter.log("LocalDataAccess::DatabasePathException:LINE129:"+e.getMessage());
+	                       e.printStackTrace();
+	                } catch (DatabaseException e) {
+	                       // TODO Auto-generated catch block
+	                       e.printStackTrace();
+	                }   // end try/catch
+	                    
+	        } // End if
+	        else
+	        {
+	        	logWriter.log("No SD Card present");
+	        }
+        }  // end constructor
         
         /**
          * This method adds the phone actions messages into the table used to store phone actions.
@@ -213,14 +218,25 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 
                 net.rim.device.api.database.Statement st;
                 try {
-                        st = storeDB.createStatement("INSERT INTO "+DATABASE_TABLE+
-                                                                                                        "("+KEY_TIME+","+KEY_VALUE+") "+
-                                                                                                        //"VALUES ("+Tools.getDate()+","+_value+")");
-                                                                                                        "VALUES ("+dateTime+","+_value+")");
-                st.prepare();
-                st.execute();
-                st.close();
-                //storeDB.close();
+                	StringBuffer sBuffer = new StringBuffer();
+                	sBuffer.append("INSERT INTO ");
+                	sBuffer.append(DATABASE_TABLE);
+                	sBuffer.append("(");
+                	sBuffer.append(KEY_TIME);
+                	sBuffer.append(",");
+                	sBuffer.append(KEY_VALUE);
+                	sBuffer.append(") VALUES (");
+                	sBuffer.append("\"");
+                	sBuffer.append(dateTime);
+                	sBuffer.append("\",\"");
+                	sBuffer.append(_value);
+                	sBuffer.append("\")");
+
+                    st = storeDB.createStatement(sBuffer.toString());
+                    st.prepare();
+                    st.execute();
+                    st.close();
+                    //storeDB.close();
                 } catch (DatabaseException e) {
                         logWriter.log("LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                         e.printStackTrace();
@@ -343,6 +359,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 try {
                         //result.last returns FALSE is its empty
                         // Otherwise, it moves to the last position
+                		logWriter.log("if result.last");
                         if(result.last()) // TODO: Causing NullPointerException
                         {       // Assuming its not empty, getPosition will return an INT
                                 size = result.getPosition();
