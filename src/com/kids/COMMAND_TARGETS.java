@@ -11,7 +11,7 @@ public class COMMAND_TARGETS {
 	public static final String CONTACTS = "Conts";
 	public static final String FILES    = "files";
 	
-	private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
+	//private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
 	
 	private String columnName			= "";
 	

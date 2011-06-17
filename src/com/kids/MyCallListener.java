@@ -1,11 +1,13 @@
 package com.kids;
-/*
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataWriter;
-*/
+
+import java.util.Date;
+
+import javax.microedition.pim.Contact;
+
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
+import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
@@ -20,14 +22,19 @@ import net.rim.blackberry.api.phone.AbstractPhoneListener;
 public class MyCallListener extends AbstractPhoneListener
 {
         private LocalDataWriter actLog;
-        private final String    Connected = "Connected";
-        private final String    Finished  = "Finished";
-        private final String    Hold_ON   = "Hold_ON";
-        private final String    Hold_OFF  = "Hold_OFF";
-        private final String    Dial_OUT  = "Dial_OUT";
-        private final String    Dial_IN   = "Dial_IN";
-        private final String    Droped    = "Droped";
-        private           String    Prefix    = "";
+        private final String    Connected 		= "Connected";
+        private final String    Finished  		= "Finished";
+        private final String    Hold_ON   		= "Hold_ON";
+        private final String    Hold_OFF  		= "Hold_OFF";
+        private final String    Dial_OUT  		= "Dial_OUT";
+        private final String    Dial_IN   		= "Dial_IN";
+        private final String    Dropped   		= "Dropped";
+        private       String    Prefix          = "";
+        private 	  String	contactName 	= "";
+        private		  String	contactNumber	= "";
+        private 	  boolean	isOutgoing		= false;
+        private		  int 		callStartTime	= 0;
+        private		  int 		callEndTime		= 0;
         //private                 Date          callStartTime
         //return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         Debug logWriter = Logger.getInstance();
@@ -43,27 +50,7 @@ public class MyCallListener extends AbstractPhoneListener
                 logWriter.log("Start MyCallListener");
                 actLog = inputAccess;
                 Phone.addPhoneListener(this);//TODO look up addPhonelistener
-        }
-        
-        /**
-         * Returns the phone number of the caller       
-         * 
-         * @param  callId integer representing the phone call id
-         * @return A string is returned containing the callers phone number
-         */
-        //TODO what is this function used for? Deosn't seem to be used anywhere in the code
-        private String getPhoneNumber(int callId)
-        {
-                logWriter.log("getPhoneNumber");
-                return Phone.getCall(callId).getDisplayPhoneNumber();
-        }
-        /*
-        private void addTimedEntryToLog(String ehandler, int callId, startTime, endTime)
-        {
-                
-        }
-        */
-        
+        }     
         
         /**
          * Stores call information to action log.
@@ -79,60 +66,22 @@ public class MyCallListener extends AbstractPhoneListener
          */
         private void addToLog(String ehandler, int callId)
         {
-            logWriter.log("Adding message to log...");
-            logWriter.log("callID="+callId);
-            PhoneCall callInfo = Phone.getCall(callId);
-            logWriter.log("call id info is: "+Phone.getCall(callId));
-            logWriter.log("callinfo call id is: "+callInfo.getCallId());
+            logWriter.log("In MyCallListener.addToLog");
             CallMessage callMessage=new CallMessage();
-            //RadioGetCallStatus(callId).getPhoneNumber;
-            logWriter.log("Getting phone number from call "+callId);
-            String contactNumber=callInfo.getPhoneNumber(); // TODO: Causing NullPointerException
-            String contactName=callInfo.getDisplayPhoneNumber();
-                    
-            if(null != callInfo)
-            {
-                    
-                    callMessage.setMessage( contactNumber,
-                                            callInfo.isOutgoing(),
-                                            Tools.getDate(),
-                                            callInfo.getElapsedTime()
-                                            );
-                //actLog.addMessage(true,action.TYPE_CALL, ehandler);
-                    
-                    // Store the contact name
-                    if (contactNumber.equals(contactName))      //TODO: NullPointerException on call fail
-                        contactName="";
-                    
-                    callMessage.setContactName(contactName);                
-                actLog.addMessage(callMessage);
-            }/*
-            else
-            {
-                // If, for some reason, the call(callId) doesnt exist (when??), then set a basic blank message
-                callMessage.setMessage("", false, Tools.getDate(), 0);
-                //callMessage.setMessage(callInfo.getPhoneNumber(), callInfo.isOutgoing());
-                actLog.addMessage(callMessage);
-                
-                
-                //Original code
-                //actLog.addMessage(action.TYPE_CALL, ehandler, callInfo.getDisplayPhoneNumber());//, callInfo.getStatusString());
-            }*/
+                        
+            logWriter.log("Setting CallMessage...");
+            callMessage.setMessage( contactNumber,
+                                    isOutgoing,
+                                    Tools.getDate(),
+                                    (callEndTime-callStartTime)/1000
+                                    );
+            
+            callMessage.setContactName(contactName);
+            
+            logWriter.log("Adding message to log...");
+            actLog.addMessage(callMessage);
+            logWriter.log("Message added to log..."); 
         }
-
-        // A call has been added to a conference call
-        //public void callAdded(int callId)
-        //{ addToLog("callAdded", callId); }
-        
-        // User answered a call
-        //public void callAnswered(int callId)//call is incoming but user is still to pickup
-        //{ addToLog(Prefix+Connected+1, callId); }
-        
-        // Conference call established
-        //public void callConferenceCallEstablished(int callId)
-        //{ addToLog("callConferenceCallEstablished", callId); }
-        
-        // Network indicates a connected event
         
 /**
  * Adds action to log when the call has been connected
@@ -140,7 +89,24 @@ public class MyCallListener extends AbstractPhoneListener
  * @param callId call address
  */
         public void callConnected(int callId)
-        { addToLog(Prefix+Connected, callId); }//{ addToLog("callConnected", callId); }
+        { 
+        	logWriter.log("MyCallListener::callConnected");
+        	callStartTime = (int) new Date().getTime();
+            PhoneCall callInfo = Phone.getCall(callId);
+            BlackBerryContact contact = callInfo.getContact();
+            contactNumber=callInfo.getPhoneNumber();
+            //contactName=callInfo.getDisplayPhoneNumber();
+            contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
+            
+            // We don't want the number to be the same as the contact name so
+            logWriter.log("contactName="+contactName);
+            if (contactNumber.equals(contactName))      //TODO: NullPointerException on call fail
+            {
+            	logWriter.log("Contact name=contact number");
+                contactName="";
+            }
+        	//addToLog(Prefix+Connected, callId);
+        }
 
         /**
          * Adds action to log when the call has been directly connected
@@ -150,7 +116,10 @@ public class MyCallListener extends AbstractPhoneListener
 
         // Direct-connect call connected
         public void callDirectConnectConnected(int callId)
-        { addToLog(Prefix+Connected, callId); }//{ addToLog("callDirectConnectConnected", callId); }
+        { 
+        	logWriter.log("MyCallListener::callDirectConnectConnected");
+        	//addToLog(Prefix+Connected, callId);
+        }
 
         /**
          * Adds action to log when the call has been directly disconnected
@@ -161,13 +130,13 @@ public class MyCallListener extends AbstractPhoneListener
         // Direct-connect call disconnected
         public void callDirectConnectDisconnected(int callId)
         { 
+        	logWriter.log("MyCallListener::callDirectConnectDisconnected");
                 if(false == Prefix.equals(""))
                 {
-                        addToLog(Prefix+Finished, callId); 
+                        //addToLog(Prefix+Finished, callId); 
                         Prefix = "";
                 }
-        }//{ addToLog("callDirectConnectDisconnected", callId); }
-
+        }
         
         /**
          * Adds action to log when the call has been disconnected
@@ -177,16 +146,14 @@ public class MyCallListener extends AbstractPhoneListener
         // Call disconnected
         public void callDisconnected(int callId)
         { 
+        	callEndTime=(int) new Date().getTime();
+        	logWriter.log("MyCallListener::callDisconnected");
                 if(false == Prefix.equals(""))
                 {
                         addToLog(Prefix+Finished, callId); 
                         Prefix = "";
                 }
-        }//{ addToLog("callDisconnected", callId); }
-        
-        // User ended call.. this will be called as well as "callDisconnected(int)"
-        //public void callEndedByUser(int callId)
-        //{ addToLog("Finished", callId); }//{ addToLog("callEndedByUser", callId); }
+        }
         
         /**
          * Adds action to log when the call has been put on hold
@@ -195,7 +162,10 @@ public class MyCallListener extends AbstractPhoneListener
          */
         // Call has been placed on "hold"
         public void callHeld(int callId)
-        { addToLog(Prefix+Hold_ON, callId); }//{ addToLog("callHeld", callId); }
+        { 
+        	logWriter.log("MyCallListener::callHeld");
+        	//addToLog(Prefix+Hold_ON, callId); 
+        }//{ addToLog("callHeld", callId); }
 
         
         /**
@@ -206,8 +176,10 @@ public class MyCallListener extends AbstractPhoneListener
         // New call has arrived
         public void callIncoming(int callId)
         {
-                Prefix = action.Incoming + " ";
-                //addToLog(Dial_IN, callId); 
+        	logWriter.log("MyCallListener::callIncoming");
+        	isOutgoing=false;
+            Prefix = action.Incoming + " ";
+            //addToLog(Dial_IN, callId); 
         }//{ addToLog("callIncoming", callId); }
 
         
@@ -220,15 +192,11 @@ public class MyCallListener extends AbstractPhoneListener
         // Outbound call initiated by the handheld
         public void callInitiated(int callId)
         { 
+        	logWriter.log("MyCallListener::callInitiated");
+        	isOutgoing = true;
                 Prefix = action.Outgoing + " ";
                 //addToLog(Dial_OUT, callId); 
-        }//{ addToLog("callInitiated", callId); }
-        
-        // Call removed from a conference call
-        //public void callRemoved(int callId)
-        //{ addToLog("callRemoved", callId); }
-
-        
+        }
         
         /**
          * Adds action to log when the call has been taken off hold
@@ -237,18 +205,10 @@ public class MyCallListener extends AbstractPhoneListener
          */
         // Call taken off of "hold"
         public void callResumed(int callId)
-        { addToLog(Prefix+Hold_OFF, callId); }//{ addToLog("callResumed", callId); }
-        
-        // Call is waiting
-        //public void callWaiting(int callid)
-        //{ addToLog("callWaiting", callid); }
-        
-        // Conference call has been terminated
-        // (all members disconnected)
-        //public void conferenceCallDisconnected(int callId)
-        //{ addToLog("conferenceCallDisconnected", callId); }
-
-        
+        { 
+        	logWriter.log("MyCallListener::callResumed");
+        	//addToLog(Prefix+Hold_OFF, callId); 
+        }
         
         /**
          * Adds action to log when the call has failed
@@ -258,8 +218,8 @@ public class MyCallListener extends AbstractPhoneListener
          */
         public void callFailed(int callId,int reason)
         {
-                //actLog.addAction(true,action.TYPE_CALL,"callFailed:"+reason);
-                addToLog(Prefix+"Dropped", callId);
+        	logWriter.log("MyCallListener::callFailed");
+        	//addToLog(Prefix+"Dropped", callId);
                 Prefix = "";
             /*                    // determine reason
             switch(reason)//( error ) 
@@ -303,39 +263,9 @@ public class MyCallListener extends AbstractPhoneListener
 class CallEndStatus
 {
         private CallEndStatus(){}
-        
+        //TODO: Implement these properly. ATM, we only set FINISH
         public static final byte OTHER     = 0;
         public static final byte NO_ANSWER = 1;
         public static final byte DROPPED   = 2;
         public static final byte FINISHED  = 3;
 }
-
-
-
-/*
-class CallEndSataus {
-    public static CallEndSataus OTHER = new CallEndSataus(0);
-    public static CallEndSataus NO_ANSWER = new CallEndSataus(1);
-    public static CallEndSataus DROPPED = new CallEndSataus(2);
-    public static CallEndSataus FINISHED = new CallEndSataus(3);
-    
-    private int _value;
-
-    private CallEndSataus(int value) {
-        _value = value;
-    }
-        
-    public int toInt() {
-        return this._value;
-    }
-    public static CallEndSataus fromInt(int value) {
-        switch(value)
-        {
-                case 0: return OTHER;
-                case 1: return NO_ANSWER;
-                case 2: return DROPPED;
-                case 3: return FINISHED;
-        }
-                //return DROPPED;
-    }
-}*/

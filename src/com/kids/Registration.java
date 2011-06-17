@@ -1,8 +1,5 @@
 package com.kids;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import com.kids.net.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
@@ -39,7 +36,7 @@ public class Registration extends Thread
     //private			String 	phoneID;
     //private			String 	phoneNum;
     private final 	int 	finePhoneNum_timeOut = 10;
-    private Phone telephonyMgr;
+    //private Phone telephonyMgr;
     private Debug logger = Logger.getInstance();
  
   /**
@@ -215,10 +212,10 @@ public class Registration extends Thread
      */
     private String phoneNumber()
     {    	
-    	if (null == telephonyMgr.getDevicePhoneNumber(false))
+    	if (null == Phone.getDevicePhoneNumber(false))
     	{ return "0"; }
     	else
-    	{ return telephonyMgr.getDevicePhoneNumber(false); }
+    	{ return Phone.getDevicePhoneNumber(false); }
     	
     	/*ANDROID
     	if(null == telephonyMgr.getLine1Number())

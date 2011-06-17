@@ -68,7 +68,7 @@ public class CallMessage implements Message
 		startStatus = _outgoing;
 		deviceTime 	= _deviceTime;
 		duration 	= _duration;
-		endStatus	= (byte)CallEndStatus.OTHER;//.ordinal();
+		//endStatus	= (byte)CallEndStatus.OTHER;//.ordinal();
 		setEndStatus();
 	}
 	

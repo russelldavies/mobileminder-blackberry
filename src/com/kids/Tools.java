@@ -3,20 +3,15 @@ package com.kids;
 import java.util.Date;
 import java.util.Vector;
 
-import com.kids.prototypes.LocalDataReader;
-
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.ui.text.NumericTextFilter;
-import net.rim.device.api.util.AbstractString;
-import net.rim.device.api.util.AbstractStringWrapper;
 
 public class Tools 
 {
 	private static String returnVer="0";
 	//private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
-	private static LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
+	//private static LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 	
 	//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 	//private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );

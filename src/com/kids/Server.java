@@ -23,24 +23,18 @@ import com.kids.R;
 */
 //BLACKBERRY
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
-import javax.microedition.lcdui.List;
-
 import com.kids.net.Reply;
 import com.kids.net.Security;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.Message;
 
-import net.rim.blackberry.api.browser.URLEncodedPostData;
-import net.rim.device.api.io.messaging.Headers;
 import net.rim.device.api.util.CRC32;
-import java.util.*;
 
 //import com.kids.net.Reply;
 /*

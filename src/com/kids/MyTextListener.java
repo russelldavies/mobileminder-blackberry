@@ -23,8 +23,8 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
 public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener 
 {
 	private LocalDataReader actLog;
+	public static Debug logWriter = Logger.getInstance();
 	//private LocalDataReader actLog;
-	Debug log = Logger.getInstance();
 	//TODO:private SMSMessage smsMessage;
 
 /**
@@ -34,7 +34,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
  */
 	public MyTextListener(LocalDataReader inputAccess)
 	{
-		log.log("Starting MyTextListener...");
+		logWriter.log("Starting MyTextListener...");
 		actLog = inputAccess;
 		
 		try 
@@ -45,10 +45,12 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
         }
         catch (IOException e) 
         {
-        	//TODO: actLog.addMessage(smsMessage);
+        	logWriter.log("MyTextListener::IOException:: "+e);
+        	//TODO: actLog.addMessage(smsMessage); 
         }//true,action.TYPE_TEXT, e.toString());}
         catch (Exception e) 
         {
+        	logWriter.log("MyTextListener::Exception:: "+e);
         	//TODO:actLog.addMessage(smsMessage);
         }//true,action.TYPE_TEXT, e.toString());}
 	}
@@ -64,7 +66,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	  private void addToLog(String inputStatus,
 							String inputDestinationAddress)
 	  {
-		  log.log("Adding to log:MyTextListener");
+		  logWriter.log("Adding to log:MyTextListener");
 	    	//TODO: actLog.addMessage(smsMessage);//(action.TYPE_TEXT, inputStatus, inputDestinationAddress);//, inputDescriptor);
 	  }
 	  
@@ -86,21 +88,20 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 */
 	public void notifyIncomingMessage(MessageConnection conn) 
 	{
-		try 
+		try
 		{
-			addToLog(action.Incoming+" Message",conn.receive().getAddress());//,conn.receive().toString());
-		} 
-		catch (InterruptedIOException e) 
+			addToLog(action.Incoming+" Message",conn.receive().getAddress());
+		}
+		catch (InterruptedIOException e)
 		{
-			//TODO:actLog.addMessage(smsMessage);
-		}//(true,action.TYPE_TEXT,e.toString());} 
-		catch (IOException e) 
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e)
 		{
-			//TODO:actLog.addMessage(smsMessage);
-		}//(true,action.TYPE_TEXT,e.toString());}	
-        catch (Exception e) 
-        {
-        	//TODO:actLog.addMessage(smsMessage);
-        }//(true,action.TYPE_TEXT, e.toString());}
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//,conn.receive().toString());
+
 	}
 }
