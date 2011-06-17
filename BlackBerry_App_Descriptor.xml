@@ -4,9 +4,7 @@
   <General Title="MobileMinder" Version="1.0.0" Vendor="eoinzy" Description="MobileMinder App"/>
   <Application Type="BlackBerry Application" MainMIDletName="" MainArgs="" HomeScreenPosition="0" StartupTier="7" IsSystemModule="true" IsAutostartup="true"/>
   <Resources hasTitleResource="false" TitleResourceBundleName="" TitleResourceBundleRelativePath="" TitleResourceBundleClassName="" TitleResourceBundleKey="" DescriptionId="">
-    <Icons>
-      <Icon CanonicalFileName="res\img\icon.png" IsFocus="false"/>
-    </Icons>
+    <Icons/>
   </Resources>
   <Compile OutputCompilerMessages="false" ConvertImages="true" CreateWarningForNoExportedRoutine="true" CompressResources="false" AliasList="">
     <PreprocessorDefines/>
