@@ -95,9 +95,9 @@ public class MyCallListener extends AbstractPhoneListener
             PhoneCall callInfo = Phone.getCall(callId);
             
             contactNumber=callInfo.getPhoneNumber();
-            contactName=callInfo.getDisplayPhoneNumber();
-            //BlackBerryContact contact = callInfo.getContact();
-            //contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
+            //contactName=callInfo.getDisplayPhoneNumber();
+            BlackBerryContact contact = callInfo.getContact();
+            contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
             
             // We don't want the number to be the same as the contact name so
             logWriter.log("contactName="+contactName);

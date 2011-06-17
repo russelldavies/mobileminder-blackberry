@@ -86,7 +86,7 @@ public class Driver extends Application implements SystemListener
     private void doStartupWork()
     {
         actLog = LocalDataAccess.getLocalDataAccessRef();
-        logWriter.log("MobileMinder::Driver->Start...");
+        logWriter.log("MobileMinder::Driver->Start123...");
         
         // For future "Registration" feature 
         //int employerID  = 1;
@@ -94,20 +94,23 @@ public class Driver extends Application implements SystemListener
         
         //Create variables
         int oneSec        = 1000;
-        int uploadTimer =  1*oneSec;//send update every
+        //int uploadTimer =  1*oneSec;//send update every
         int GPSTimer    = 15*oneSec;//check GPS every
         int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
         // What type should actLog be?
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
-        new MyCallListener(actLog);
+        logWriter.log("MobileMinder::Before loading components...");
+
         new MyTextListener(actLog);
+        new MyCallListener(actLog);
         new MyMailListener(actLog);
         new MyGPSListener (actLog, GPSTimer);
         new MyAppListener (actLog, AppTimer);            
         new Server(actLog);
-        
+        logWriter.log("MobileMinder::After loading components...");
+
         
         /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();
         Screen screen = new Dialog(Dialog.D_OK, "Shirts!!!!!!",
