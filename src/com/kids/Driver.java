@@ -94,7 +94,7 @@ public class Driver extends Application implements SystemListener
         
         //Create variables
         int oneSec        = 1000;
-        //int uploadTimer =  1*oneSec;//send update every
+        int uploadTimer =  1*oneSec;//send update every
         int GPSTimer    = 15*oneSec;//check GPS every
         int AppTimer    =  2*oneSec;//check running app every
         

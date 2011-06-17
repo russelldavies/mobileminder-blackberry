@@ -93,10 +93,11 @@ public class MyCallListener extends AbstractPhoneListener
         	logWriter.log("MyCallListener::callConnected");
         	callStartTime = (int) new Date().getTime();
             PhoneCall callInfo = Phone.getCall(callId);
-            BlackBerryContact contact = callInfo.getContact();
+            
             contactNumber=callInfo.getPhoneNumber();
-            //contactName=callInfo.getDisplayPhoneNumber();
-            contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
+            contactName=callInfo.getDisplayPhoneNumber();
+            //BlackBerryContact contact = callInfo.getContact();
+            //contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
             
             // We don't want the number to be the same as the contact name so
             logWriter.log("contactName="+contactName);

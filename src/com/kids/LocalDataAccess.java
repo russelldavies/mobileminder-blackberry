@@ -77,7 +77,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                                                    					+"`"+KEY_TIME   +"` TEXT    NOT NULL,"     
                                                    					+"`"+KEY_VALUE  +"` TEXT);";
     
-    public static Database storeDB;
+    public static Database storeDB=null;
     public static String DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
     public static URI dbURI;
     
@@ -423,6 +423,8 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             getDatabase();
 
             try {
+            	if (null == storeDB)
+            		storeDB = DatabaseFactory.open(dbURI);
                 st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
                 st.prepare();
                 st.execute();
