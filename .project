@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>BBOSX</name>
+	<name>MobileMinder1</name>
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
+			<name>net.rim.ejde.internal.builder.BlackBerryPreprocessBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>eclipseme.core.preverifier</name>
+			<name>net.rim.ejde.internal.builder.BlackBerryResourcesBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>net.rim.ejde.BlackBerryPreProcessNature</nature>
+		<nature>net.rim.ejde.BlackBerryProjectCoreNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>eclipseme.core.nature</nature>
 	</natures>
 </projectDescription>
