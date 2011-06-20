@@ -450,17 +450,17 @@ class RegistrationMessage implements Message
 	public String getREST()
 	{	//RegSN,	reg, 	error, deviceTime, stage,	PhoneNum, 	DeviceID, info
 		// TODO: Change to String builder
-		return 	Registration.getRegID() + Server.RestElementSeparator +
-				'0'+type				+ Server.RestElementSeparator +
-				(error?1:0)				+ Server.RestElementSeparator +
-				deviceTime				+ Server.RestElementSeparator +
-				stage					+ Server.RestElementSeparator +
-				phoneNum				+ Server.RestElementSeparator +
-				deviceID				+ Server.RestElementSeparator +
-				manufacturer			+ Server.RestElementSeparator +
-				//Build.MODEL			+ Server.RestElementSeparator +
-				Tools.getOSVersion()	+ Server.RestElementSeparator +
-				mmVERSION				+ Server.RestElementSeparator +
+		return 	Registration.getRegID() + Tools.RestElementSeparator +
+				'0'+type				+ Tools.RestElementSeparator +
+				(error?1:0)				+ Tools.RestElementSeparator +
+				deviceTime				+ Tools.RestElementSeparator +
+				stage					+ Tools.RestElementSeparator +
+				phoneNum				+ Tools.RestElementSeparator +
+				deviceID				+ Tools.RestElementSeparator +
+				manufacturer			+ Tools.RestElementSeparator +
+				//Build.MODEL			+ Tools.RestElementSeparator +
+				Tools.getOSVersion()	+ Tools.RestElementSeparator +
+				mmVERSION				+ Tools.RestElementSeparator +
 				info;
 	}
 	

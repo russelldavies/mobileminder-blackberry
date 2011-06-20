@@ -33,7 +33,7 @@ public class Reply
 	{
 		
 		restString = restMessage;
-		String[]replyArray = Tools.split(restString, Server.RestElementSeparator);
+		String[]replyArray = Tools.split(restString, Tools.RestElementSeparator);
 		logger.log("rest messsage: "+restMessage);
 		if(null != restMessage)
 		{

@@ -48,7 +48,7 @@ import com.kids.prototypes.Message;
  */
 public class Server extends Thread
 {
-	public static final String RestElementSeparator = ",";
+	//public static final String RestElementSeparator = ",";
 	private Debug logger = Logger.getInstance();
 	/*
 	private final String ServerFeedBack_good = "ok";
@@ -87,10 +87,10 @@ public class Server extends Thread
 		//URL = "http://192.168.0.20/mobileminder.net/WebService.php?";
 		//URL 	 = "http://192.168.81.1/kids/webservice.php?";
 //		deviceId = "xxxxx";
-		serverErrorReply = 	RestElementSeparator+
-		 					RestElementSeparator+//reply
-		 				 1 +RestElementSeparator+//error
-							RestElementSeparator;//CallingCODE
+		serverErrorReply = 	Tools.RestElementSeparator+
+							Tools.RestElementSeparator+//reply
+		 				 1 +Tools.RestElementSeparator+//error
+							Tools.RestElementSeparator;//CallingCODE
 		//	Controller.getString(R.string.Error_ServerTimeOut);
 		
 		
@@ -143,7 +143,7 @@ public class Server extends Thread
 					//sends message to server and receives a reply. 
 					// NO String.split() IN J2ME - http://stackoverflow.com/questions/657627/split-string-logic-in-j2me
 					//resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
-					resultREST = Tools.split(actLog.getFirst(), RestElementSeparator);
+					resultREST = Tools.split(actLog.getFirst(), Tools.RestElementSeparator);
 
 					if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
 					{	actLog.removeFirst();
@@ -448,9 +448,9 @@ public class Server extends Thread
 	{
 		
 		inputText = getRandomString(generator.nextInt(10))//add random
-					+RestElementSeparator
+					+Tools.RestElementSeparator
 					+getCrcValue(inputText)//add CRC
-					+RestElementSeparator
+					+Tools.RestElementSeparator
 					+inputText;
 		
 
@@ -495,7 +495,7 @@ public class Server extends Thread
 			//logger.log("DECRYPT: 394");
 			text += replyArray[count];
 			if((replyArray.length-1) > count)
-			{	text += Server.RestElementSeparator; }
+			{	text += Tools.RestElementSeparator; }
 		}
  
 		//logger.log("DECRYPT: 400");

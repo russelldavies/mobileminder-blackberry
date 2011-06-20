@@ -9,6 +9,8 @@ import net.rim.device.api.system.ApplicationManager;
 
 public class Tools 
 {
+	public static final String RestElementSeparator = ",";
+
 	private static String returnVer="0";
 	//private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 	//private static LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();

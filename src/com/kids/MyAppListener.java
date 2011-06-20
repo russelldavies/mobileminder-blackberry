@@ -187,15 +187,15 @@ class AppMessage implements Message
 		{	
 			stringREST = new StringBuffer();
 			stringREST.append(Registration.getRegID());
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append('0');stringREST.append(type);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(appName);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(launchTime);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(upTime);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(fullPackageName);				
 		}
 		return 	stringREST.toString();

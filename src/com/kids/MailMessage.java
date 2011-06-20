@@ -93,21 +93,21 @@ public class MailMessage implements Message
 		{	
 			stringREST = new StringBuffer();
 			stringREST.append(Registration.getRegID());
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(type);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(deviceTime);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactEmail);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactName);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(sentTime);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(sentStatus);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(hasAttachment);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			/*								
 		   stringREST = Registration.getRegID() + Server.RestElementSeparator +
 						type 					+ Server.RestElementSeparator +

@@ -24,8 +24,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 {
 	private LocalDataReader actLog;
 	public static Debug logWriter = Logger.getInstance();
-	//private LocalDataReader actLog;
-	//TODO:private SMSMessage smsMessage;
+	private SMSMessage smsMessage;
 
 /**
  * The constructor initialises the action store location and registers a MessageListener for the device.

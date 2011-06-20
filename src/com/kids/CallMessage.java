@@ -113,20 +113,20 @@ public class CallMessage implements Message
 		{	
 			stringREST = new StringBuffer();
 			stringREST.append(Registration.getRegID());
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(type);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(deviceTime);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(number);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactName);
 			//stringREST.append(Controller.getContactNameFromNumber(number));
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(duration);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(startStatus);
-			stringREST.append(Server.RestElementSeparator);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(endStatus);
 			/*								
 		   stringREST = Registration.getRegID() + Server.RestElementSeparator +

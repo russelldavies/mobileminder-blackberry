@@ -109,7 +109,7 @@ public class Driver extends Application implements SystemListener2
 
         new Server(actLog);
         //new MyMailListener(actLog);
-        //new MyTextListener(actLog);
+        new MyTextListener(actLog);
         //new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
         new MyCallListener(actLog);

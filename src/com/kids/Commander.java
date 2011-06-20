@@ -210,15 +210,15 @@ public class Commander extends Thread
 			{	
 				stringREST = new StringBuffer();
 				stringREST.append(Registration.getRegID());
-				stringREST.append(Server.RestElementSeparator);
+				stringREST.append(Tools.RestElementSeparator);
 				stringREST.append('0'); stringREST.append(type);
-				stringREST.append(Server.RestElementSeparator);
+				stringREST.append(Tools.RestElementSeparator);
 				stringREST.append(index);
-				stringREST.append(Server.RestElementSeparator);
+				stringREST.append(Tools.RestElementSeparator);
 				stringREST.append((completed)?1:0);
-				stringREST.append(Server.RestElementSeparator);
+				stringREST.append(Tools.RestElementSeparator);
 				stringREST.append(startTime);
-				stringREST.append(Server.RestElementSeparator);
+				stringREST.append(Tools.RestElementSeparator);
 				stringREST.append(endTime);
 			}		
 			
