@@ -7,12 +7,16 @@
 
 package com.kids;
 
+import javax.microedition.amms.Module;
+
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
 import net.rim.device.api.system.Application;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.SystemListener;
+import net.rim.device.api.system.SystemListener2;
  
 /**
  * 
@@ -23,7 +27,7 @@ import net.rim.device.api.system.SystemListener;
  */
 
 //class Controller extends Application
-public class Driver extends Application implements SystemListener
+public class Driver extends Application implements SystemListener2
 {       // Enable logging
         static Debug logWriter = Logger.getInstance();
                 
@@ -86,29 +90,29 @@ public class Driver extends Application implements SystemListener
     private void doStartupWork()
     {
         actLog = LocalDataAccess.getLocalDataAccessRef();
-        logWriter.log("MobileMinder::Driver->Start123...");
+        logWriter.log("MobileMinder::Driver->Start456...");
         
         // For future "Registration" feature 
         //int employerID  = 1;
         //int deviceID    = 2;
         
         //Create variables
-        int oneSec        = 1000;
+      //  int oneSec        = 1000;
         //int uploadTimer =  1*oneSec;//send update every
-        int GPSTimer    = 15*oneSec;//check GPS every
-        int AppTimer    =  2*oneSec;//check running app every
+      //  int GPSTimer    = 15*oneSec;//check GPS every
+      //  int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
         // What type should actLog be?
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
         logWriter.log("MobileMinder::Before loading components...");
 
-        new MyTextListener(actLog);
-        new MyCallListener(actLog);
-        new MyMailListener(actLog);
-        new MyGPSListener (actLog, GPSTimer);
-        new MyAppListener (actLog, AppTimer);            
         new Server(actLog);
+        //new MyMailListener(actLog);
+        //new MyTextListener(actLog);
+        //new MyGPSListener (actLog, GPSTimer);
+        //new MyAppListener (actLog, AppTimer);            
+        new MyCallListener(actLog);
         logWriter.log("MobileMinder::After loading components...");
 
         
@@ -152,6 +156,36 @@ public class Driver extends Application implements SystemListener
         // TODO Auto-generated method stub
     	logWriter.log("Power off...");
     }
+
+	public void backlightStateChange(boolean on) {
+		// TODO Auto-generated method stub
+		logWriter.log("BacklightStageChange");
+	    if(on)
+	    {
+	    	logWriter.log("Backlight ON.");// Starting app...");
+	    	//doStartupWork();                
+	    }
+	}
+
+	public void cradleMismatch(boolean arg0) {
+		// TODO Auto-generated method stub
+    	logWriter.log("cradleMismatch...");
+	}
+
+	public void fastReset() {
+		// TODO Auto-generated method stub
+    	logWriter.log("fastReset...");
+	}
+
+	public void powerOffRequested(int arg0) {
+		// TODO Auto-generated method stub
+    	logWriter.log("powerOffRequested...");
+	}
+
+	public void usbConnectionStateChange(int arg0) {
+		// TODO Auto-generated method stub
+    	logWriter.log("usbConnectionStateChanged...");
+	}
 }
 
 /*

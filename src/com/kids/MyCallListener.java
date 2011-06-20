@@ -2,8 +2,6 @@ package com.kids;
 
 import java.util.Date;
 
-import javax.microedition.pim.Contact;
-
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
@@ -11,7 +9,6 @@ import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
-
 
 /**
  * 
@@ -95,9 +92,9 @@ public class MyCallListener extends AbstractPhoneListener
             PhoneCall callInfo = Phone.getCall(callId);
             
             contactNumber=callInfo.getPhoneNumber();
-            //contactName=callInfo.getDisplayPhoneNumber();
-            BlackBerryContact contact = callInfo.getContact();
-            contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
+            contactName=callInfo.getDisplayPhoneNumber();
+            //BlackBerryContact contact = callInfo.getContact();
+            //contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
             
             // We don't want the number to be the same as the contact name so
             logWriter.log("contactName="+contactName);
