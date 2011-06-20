@@ -1,5 +1,7 @@
 package com.kids;
 
+import java.util.Date;
+
 import com.kids.Registration;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
@@ -42,10 +44,11 @@ public class SMSMessage implements Message
  * 
  * @param _number the phone number of the incoming or outgoing message
  * @param _outgoing states whether the SMS was outgoing or incoming
+ * @param _date 
  * @param _inputBody The body of the SMS message
  */
-	public void setMessage(String _number, boolean _outgoing, String _inputBody)
-	{setMessage(_number, _outgoing,Tools.getDate() ,_inputBody);}
+	public void setMessage(String _number, boolean _outgoing, Date _date, String _inputBody)
+	{setMessage(_number, _outgoing,_date ,_inputBody);}
 	
 /**
  * Adds the SMS event information to the SMS message object
