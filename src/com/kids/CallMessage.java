@@ -11,14 +11,14 @@ import com.kids.prototypes.Message;
 public class CallMessage implements Message
 {
 	private final String  type;	
-	private String 		  deviceTime;	
 	private Date		  startTime;
+	private String 		  deviceTime;	
+	private String		  contactName;
 	private String 		  number;
-	private int 		  duration;// in Sec
 	private boolean 	  startStatus;//0:Incoming/1:Outgoing
 	private byte 		  endStatus;
+	private int 		  duration;// in Sec
 	private StringBuffer  stringREST;
-	private String		  contactName;
 
 /**
  * The constructor initialises a normal call message
@@ -50,9 +50,7 @@ public class CallMessage implements Message
 	{		
 		number 		= _number;
 		startStatus = _outgoing;
-		//startTime = new Date();
 		deviceTime 	= Tools.getDate();
-	//	Controller.log("xxxxxx number:"+number);
 	}
 
 /**
@@ -68,7 +66,6 @@ public class CallMessage implements Message
 		startStatus = _outgoing;
 		deviceTime 	= _deviceTime;
 		duration 	= _duration;
-		//endStatus	= (byte)CallEndStatus.OTHER;//.ordinal();
 		setEndStatus();
 	}
 	
@@ -121,26 +118,14 @@ public class CallMessage implements Message
 			stringREST.append(number);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactName);
-			//stringREST.append(Controller.getContactNameFromNumber(number));
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(duration);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(startStatus);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(endStatus);
-			/*								
-		   stringREST = Registration.getRegID() + Server.RestElementSeparator +
-						type 					+ Server.RestElementSeparator +
-						deviceTime				+ Server.RestElementSeparator +
-						number					+ Server.RestElementSeparator +
-						duration				+ Server.RestElementSeparator +
-						startStatus				+ Server.RestElementSeparator +
-						endSataus				+ Server.RestElementSeparator +
-						info;*/
 		}		
-		// RegSN,	call, deviceTime, number,	duration, startStatus,	endSataus, info
 		return 	stringREST.toString();			
-		//return null;
 	}
 
 /**
@@ -179,8 +164,6 @@ public class CallMessage implements Message
  */
 	public void setEndDuration()
 	{duration = (int)(new Date().getTime()-startTime.getTime())/1000;}
-	
-	//TODO: Change spelling on all "sataus" to status below.
 	
 /**
  * This method is used to record "finished" as the way in which the call was ended. 

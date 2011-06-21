@@ -63,25 +63,25 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
  * @param txtBody 
  */
 	
-	  private void addToLog(String inputStatus, String inputDestinationAddress, Date _date, String _txtBody)
+	  private void addToLog(String inputStatus, String phNumber, String _date, String _txtBody)
 	  {
 		  logWriter.log("Adding to log:MyTextListener");
-		  logWriter.log("inputStatus is: "+inputStatus);
-		  logWriter.log("inputDestinationAddress is: "+inputDestinationAddress);
 		  SMSMessage smsMessage=new SMSMessage();
 		  boolean isOutgoing = false;
 		  isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true : false;
 		  
-		  logWriter.log("SMS Address: "+inputDestinationAddress);
+		  logWriter.log("inputStatus is: "+inputStatus);
+		  logWriter.log("SMS Address: "+phNumber);
 		  logWriter.log("Direction is: "+(isOutgoing ? "Outgoing":"Incoming"));
 		  logWriter.log("Date: "+_date);
 		  logWriter.log("SMS Body: "+_txtBody);
 		  
-		  smsMessage.setMessage(inputDestinationAddress, isOutgoing, _date, _txtBody);
+		  smsMessage.setMessage(phNumber, isOutgoing, _date, _txtBody);
 
-		  // TODO: Implement addMessage for SMS
-		  actLog.addMessage(smsMessage);//(action.TYPE_TEXT, inputStatus, inputDestinationAddress);//, inputDescriptor);
-	  }
+          logWriter.log("Adding message to log...");
+          actLog.addMessage(smsMessage);
+          logWriter.log("Message added to log...");
+		  }
 
 /**
  * Adds an outgoing message to the action log
@@ -92,17 +92,17 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	public void notifyOutgoingMessage(Message message)
 	{
 		logWriter.log("SMS message outgoing");
-		TextMessage txtMessage=null;
-		try {
-			txtMessage = (TextMessage) _mc.receive();
-		} catch (InterruptedIOException e) {
-			logWriter.log("MyTextListener::notifyOutgoingMessage::InterruptedIOException::"+e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			logWriter.log("MyTextListener::notifyOutgoingMessage::IOException::"+e.getMessage());
-			e.printStackTrace();
+
+		// Get the body contents of the SMS Text
+		String txtBody = "";
+		// If "message" is an object of type "TextMessage"
+		if ( message instanceof TextMessage )
+		{
+		    txtBody = ((TextMessage) message).getPayloadText();
 		}
-		addToLog(action.Outgoing +" Message",message.getAddress(), message.getTimestamp(),txtMessage.getPayloadText());
+		
+		// Add to log
+		addToLog(action.Outgoing +" Message",message.getAddress(), Tools.getDate(), txtBody);
 	}
 
 
@@ -129,9 +129,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 				logWriter.log("MyTextListener::notifyIncomingMessage::IOException::"+e1.getMessage());
 				e1.printStackTrace();
 			}
-			addToLog(action.Outgoing +" Message",message.getAddress(), message.getTimestamp(),message.getPayloadText());
-	
-			
+			addToLog(action.Incoming +" Message",message.getAddress(), Tools.getDate(),message.getPayloadText());
 			
 			
 			//http://myhowto.org/java/j2me/22-sending-and-receiving-gsm-sms-on-blackberry-using-rim-apis/
@@ -172,22 +170,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 		         logWriter.log("Received SMS text from  " + address + " : " + msg); 
 		     }
 			*/
-			/*
-			try
-			{
-				addToLog(action.Incoming+" Message",conn.receive().getAddress(),msg.getTimestamp());
-			}
-			catch (InterruptedIOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}//,conn.receive().toString());
-			*/
+
 
 		}	
 

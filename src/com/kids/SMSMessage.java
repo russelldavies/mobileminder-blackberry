@@ -3,7 +3,6 @@ package com.kids;
 import java.util.Date;
 
 import com.kids.Registration;
-import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 /**
@@ -17,8 +16,8 @@ public class SMSMessage implements Message
 	private 		boolean endSataus;	//0:bounced /1:delivered
 	private 		String 	number;
 	private			String	contactName;
+	private			String	messageBody;
 	private 		String 	deviceTime;
-	private 		String 	info;
 	//private MMTools tools = Tools.getInstance();
 	
 /**
@@ -63,7 +62,7 @@ public class SMSMessage implements Message
 		startStatus = _outgoing;//0:Incoming/1:Outgoing
 		number 		= _number;
 		deviceTime	= _deviceTime;
-		info 		= inputBody;
+		messageBody	= inputBody;
 	}
 	
 /**
@@ -74,15 +73,15 @@ public class SMSMessage implements Message
 		startStatus = false;//Incoming
 		endSataus 	= true; //delivered
 		stringREST 	= null;
-		info 		= "";
+		messageBody	= "";
 	}
 
 /**
  * This method retrieves the information in the body of the message
  * @return the message body
  */
-	public String getInfo() 
-	{	return info;	}
+	public String getMessageBody() 
+	{	return messageBody;	}
 	
 /**
  * This method retrieves the message formatted in to a single string value.
@@ -120,18 +119,8 @@ public class SMSMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(endSataus);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(info);
-			/*
-			stringREST = Registration.getRegID() + Tools.RestElementSeparator +
-					type 					 + Tools.RestElementSeparator +
-					(error?1:0)				 + Tools.RestElementSeparator +
-					deviceTime				 + Tools.RestElementSeparator +
-					number					 + Tools.RestElementSeparator +
-					startStatus				 + Tools.RestElementSeparator +
-					endSataus				 + Tools.RestElementSeparator +
-					info;*/
+			stringREST.append(messageBody);
 		}
-		// TODO Auto-generated method stub
 		return stringREST.toString();
 	}
 	

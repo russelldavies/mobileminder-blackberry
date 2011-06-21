@@ -219,59 +219,52 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         private synchronized void addValue(String _value)
         {
-                //ANDROID
-                //Controller.log(_value);
-                //Controller.log("Size:"+length());
-                //ContentValues initialValues = new ContentValues();
-        //initialValues.put(KEY_TIME,  Tools.getDate()); //1
-        //initialValues.put(KEY_VALUE, _value);//2
-        //storeDB.insert(DATABASE_TABLE, null, initialValues);
-                
-                //blackberry
-                logWriter.log(""+_value+"\nSize:"+length());
-                /*
-                try {
-                        storeDB = DatabaseFactory.open(dbURI);
-                } catch (ControlledAccessException e1) {
-                        logWriter.log("LocalDataAccess::addValue::ControlledAccessException:"+e1.getMessage());
-                        e1.printStackTrace();
-                } catch (DatabaseIOException e1) {
-                        logWriter.log("LocalDataAccess::addValue::DatabaseIOException:"+e1.getMessage());
-                        e1.printStackTrace();
-                } catch (DatabasePathException e1) {
-                        logWriter.log("LocalDataAccess::addValue::DatabasePathException:"+e1.getMessage());
-                        e1.printStackTrace();
-                }*/
-                        
-                Date theDate = Calendar.getInstance().getTime();
-                String dateTime = String.valueOf(theDate.getTime());
-                
-                Statement st;
-                try {
-                	logWriter.log("addValue::Try INSERT");
-                	StringBuffer sBuffer = new StringBuffer();
-                	sBuffer.append("INSERT INTO ");
-                	sBuffer.append(DATABASE_TABLE);
-                	sBuffer.append("(");
-                	sBuffer.append(KEY_TIME);
-                	sBuffer.append(",");
-                	sBuffer.append(KEY_VALUE);
-                	sBuffer.append(") VALUES (");
-                	sBuffer.append("\"");
-                	sBuffer.append(dateTime);
-                	sBuffer.append("\",\"");
-                	sBuffer.append(_value);
-                	sBuffer.append("\")");
+        	//blackberry
+            logWriter.log("Value: "+_value);
+            logWriter.log("Size: "+length());
+            /*
+            try {
+                    storeDB = DatabaseFactory.open(dbURI);
+            } catch (ControlledAccessException e1) {
+                    logWriter.log("LocalDataAccess::addValue::ControlledAccessException:"+e1.getMessage());
+                    e1.printStackTrace();
+            } catch (DatabaseIOException e1) {
+                    logWriter.log("LocalDataAccess::addValue::DatabaseIOException:"+e1.getMessage());
+                    e1.printStackTrace();
+            } catch (DatabasePathException e1) {
+                    logWriter.log("LocalDataAccess::addValue::DatabasePathException:"+e1.getMessage());
+                    e1.printStackTrace();
+            }*/
+                    
+            Date theDate = Calendar.getInstance().getTime();
+            String dateTime = String.valueOf(theDate.getTime());
+            
+            Statement st;
+            try {
+            	logWriter.log("addValue::Try INSERT");
+            	StringBuffer sBuffer = new StringBuffer();
+            	sBuffer.append("INSERT INTO ");
+            	sBuffer.append(DATABASE_TABLE);
+            	sBuffer.append("(");
+            	sBuffer.append(KEY_TIME);
+            	sBuffer.append(",");
+            	sBuffer.append(KEY_VALUE);
+            	sBuffer.append(") VALUES (");
+            	sBuffer.append("\"");
+            	sBuffer.append(dateTime);
+            	sBuffer.append("\",\"");
+            	sBuffer.append(_value);
+            	sBuffer.append("\")");
 
-                    st = storeDB.createStatement(sBuffer.toString());
-                    st.prepare();
-                    st.execute();
-                    st.close();
-                    //storeDB.close();
-                } catch (DatabaseException e) {
-                	logWriter.log("LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
-                    e.printStackTrace();
-                }
+                st = storeDB.createStatement(sBuffer.toString());
+                st.prepare();
+                st.execute();
+                st.close();
+                //storeDB.close();
+            } catch (DatabaseException e) {
+            	logWriter.log("LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
+                e.printStackTrace();
+            }
 
         }
         /**
