@@ -106,7 +106,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         /**
          * Method that sets the URI of the database, so it can be used with DatabaseFactory
          */
-		private void getdbURI()
+		private static void getdbURI()
 		{
 			logWriter.log("In getdbURI method");
 			try {
@@ -121,7 +121,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			}	
 		}
         
-        private void createDatabase()
+        private static void createDatabase()
         {
         	logWriter.log("In createDatabase method");
 			try {
@@ -165,7 +165,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          * Method to open the database.
          * 
          */
-        public void openDatabase()
+        public static void openDatabase()
         {
         	logWriter.log("In openDatabase method");
 			try {
@@ -243,11 +243,8 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	sqlInsert.append("\",\"");
             	sqlInsert.append(_value);
             	sqlInsert.append("\")");
-            	
-        		if (null == dbURI) getdbURI();
-            	logWriter.log("addValue::dbURI is: "+dbURI.toString());  
+            	 
             	if (null == storeDB) openDatabase();
-				storeDB = DatabaseFactory.open(dbURI);		   // if DB is open, it wont be null
         		logWriter.log("selectAllFromDB::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
             	
                 st = storeDB.createStatement(sqlInsert.toString());
@@ -468,27 +465,28 @@ class DatabaseHelper //extends SQLiteOpenHelper
          */
         public void onCreate(/*Database _db*/) 
         {
-                 try
-                 {
-                	//innerLocalDataAccess.dbURI = URI.create(innerLocalDataAccess.DATABASE_LOCATION+innerLocalDataAccess.DATABASE_NAME);
-                	innerLocalDataAccess.logWriter.log("DataBaseHelper create...");
-                	innerLocalDataAccess.logWriter.log("DatabaseHelper::dbURI is: "+innerLocalDataAccess.dbURI.toString());
-                    innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-                    Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
-                    
-                    st.prepare();
-                    st.execute();
-                    st.close();
-                    //innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
-                }
-                catch ( Exception e ) 
-                {         
-                        innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onCreate::"+e.getMessage());
-                    e.printStackTrace();
-                }
+             try
+             {
+            	//innerLocalDataAccess.dbURI = URI.create(innerLocalDataAccess.DATABASE_LOCATION+innerLocalDataAccess.DATABASE_NAME);
+            	innerLocalDataAccess.logWriter.log("DataBaseHelper create...");
+            	innerLocalDataAccess.logWriter.log("DatabaseHelper::dbURI is: "+innerLocalDataAccess.dbURI.toString());
+                //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
+                if (null == innerLocalDataAccess.storeDB) innerLocalDataAccess.openDatabase();
+            	Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
                 
-                //ANDROID
-                //_db.execSQL(LocalDataAccess.DATABASE_CREATE);
+                st.prepare();
+                st.execute();
+                st.close();
+                //innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
+            }
+            catch ( Exception e ) 
+            {         
+                    innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onCreate::"+e.getMessage());
+                e.printStackTrace();
+            }
+            
+            //ANDROID
+            //_db.execSQL(LocalDataAccess.DATABASE_CREATE);
         }
         
         /**
@@ -497,24 +495,24 @@ class DatabaseHelper //extends SQLiteOpenHelper
          */
         public void onUpgrade(/*Database _db, int oldVersion, int _newVersion*/) 
         {
-                 try
-                { 
-                	 innerLocalDataAccess.logWriter.log("DBHelper::onUpgrade");
-                	 //This should be opened at the beginning and kept open
-                    //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-                    Statement st = innerLocalDataAccess.storeDB.createStatement("DROP IF TABLE EXISTS "
-                                                                                 +innerLocalDataAccess.DATABASE_TABLE);
-        
-                    st.prepare();
-                    st.execute();
-                    st.close();
-                    //innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
-                }
-                catch ( Exception e ) 
-                {
-                	innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onUpgrade::"+e.getMessage());
-                    e.printStackTrace();
-                }
+             try
+            { 
+            	 innerLocalDataAccess.logWriter.log("DBHelper::onUpgrade");
+            	 //This should be opened at the beginning and kept open
+                //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
+                Statement st = innerLocalDataAccess.storeDB.createStatement("DROP IF TABLE EXISTS "
+                                                                             +innerLocalDataAccess.DATABASE_TABLE);
+    
+                st.prepare();
+                st.execute();
+                st.close();
+                //innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
+            }
+            catch ( Exception e ) 
+            {
+            	innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onUpgrade::"+e.getMessage());
+                e.printStackTrace();
+            }
                         
         }
         
