@@ -7,15 +7,11 @@
 
 package com.kids;
 
-import javax.microedition.amms.Module;
-
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
 import net.rim.device.api.system.Application;
-import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.SystemListener;
 import net.rim.device.api.system.SystemListener2;
  
 /**
@@ -89,8 +85,9 @@ public class Driver extends Application implements SystemListener2
     
     private void doStartupWork()
     {
+    	// Get database/vector storage
         actLog = LocalDataAccess.getLocalDataAccessRef();
-        logWriter.log("MobileMinder::Driver->Start456...");
+        logWriter.log("MobileMinder::Driver->Start...");
         
         // For future "Registration" feature 
         //int employerID  = 1;
@@ -103,34 +100,24 @@ public class Driver extends Application implements SystemListener2
       //  int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
-        // What type should actLog be?
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
-        logWriter.log("MobileMinder::Before loading components...");
 
-        new Server(actLog);
         //new MyMailListener(actLog);
         new MyTextListener(actLog);
         //new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
         new MyCallListener(actLog);
-        logWriter.log("MobileMinder::After loading components...");
 
-        
-        /*synchronized(Application.getEventLock()){    UiEngine ui = Ui.getUiEngine();
-        Screen screen = new Dialog(Dialog.D_OK, "Shirts!!!!!!",
-            Dialog.OK,           Bitmap.getPredefinedBitmap(Bitmap.EXCLAMATION),         Manager.VERTICAL_SCROLL);
-        ui.pushGlobalScreen(screen, 1, UiEngine.GLOBAL_QUEUE);
-    }*/ 
-        //actLog.removeAction(0);
+    	//new Server(actLog).start();
     }
     
 
     public void powerUp()
     {
-    logWriter.log("Power up...");
-
-    removeSystemListener(this);
-    doStartupWork();                
+	    logWriter.log("Power up...");
+	
+	    removeSystemListener(this);
+	    doStartupWork();                
     }
 
     public void batteryGood() 

@@ -2,8 +2,6 @@ package com.kids;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.Date;
-
 import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
@@ -12,6 +10,7 @@ import javax.wireless.messaging.TextMessage;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
+import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.blackberry.api.sms.OutboundMessageListener;
 
 /**
@@ -39,7 +38,6 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
         {															
            _mc = (MessageConnection)Connector.open("sms://:1212");   // is port 1212 valid??
            _mc.setMessageListener(this);
-           //smsMessage.setMessage(_number, _outgoing, _inputBody)
         }
         catch (IOException e) 
         {
@@ -63,20 +61,21 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
  * @param txtBody 
  */
 	
-	  private void addToLog(String inputStatus, String phNumber, String _date, String _txtBody)
+	  private void addToLog(String inputStatus, String contactNumber, String _date, String _txtBody)
 	  {
 		  logWriter.log("Adding to log:MyTextListener");
 		  SMSMessage smsMessage=new SMSMessage();
-		  boolean isOutgoing = false;
-		  isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true : false;
+		  boolean isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true : false;
 		  
 		  logWriter.log("inputStatus is: "+inputStatus);
-		  logWriter.log("SMS Address: "+phNumber);
+		  logWriter.log("SMS Address: "+contactNumber);
 		  logWriter.log("Direction is: "+(isOutgoing ? "Outgoing":"Incoming"));
 		  logWriter.log("Date: "+_date);
 		  logWriter.log("SMS Body: "+_txtBody);
 		  
-		  smsMessage.setMessage(phNumber, isOutgoing, _date, _txtBody);
+		  smsMessage.setMessage(contactNumber, isOutgoing, _date, _txtBody);
+		  // set contact name seperately
+		  smsMessage.setContactName( new PhoneCallLogID(contactNumber).getName() );
 
           logWriter.log("Adding message to log...");
           actLog.addMessage(smsMessage);

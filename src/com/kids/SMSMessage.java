@@ -10,14 +10,15 @@ import com.kids.prototypes.Message;
  */
 public class SMSMessage implements Message
 {
-	private final 	String 	type;
-	private 		StringBuffer stringREST;
-	private 		boolean startStatus;//0:Incoming/1:Outgoing
-	private 		boolean endSataus;	//0:bounced /1:delivered
-	private 		String 	number;
-	private			String	contactName;
-	private			String	messageBody;
-	private 		String 	deviceTime;
+	private final 	String 			type;
+	private 		String 			number;
+	private			String			contactName;
+	private			String			messageBody;
+	private 		String 			deviceTime;
+	private 		boolean 		startStatus;//0:Incoming/1:Outgoing
+	private 		boolean 		endStatus;	//0:bounced /1:delivered
+	private 		StringBuffer 	stringREST;
+	
 	//private MMTools tools = Tools.getInstance();
 	
 /**
@@ -71,9 +72,10 @@ public class SMSMessage implements Message
 	public void clearData()
 	{
 		startStatus = false;//Incoming
-		endSataus 	= true; //delivered
+		endStatus 	= true; //delivered
 		stringREST 	= null;
 		messageBody	= "";
+		contactName = "";
 	}
 
 /**
@@ -117,7 +119,7 @@ public class SMSMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(startStatus);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(endSataus);
+			stringREST.append(endStatus);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(messageBody);
 		}

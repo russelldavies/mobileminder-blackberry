@@ -1,8 +1,5 @@
 package com.kids;
 
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-
 /**
  * 
  * MyServerUpload establishes the connection to the server
@@ -12,12 +9,12 @@ import com.kids.prototypes.LocalDataReader;
 
 public class MyServerUpload extends Thread
 {
-	LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
-	//private LocalDataReader actLog;
+	/*LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
+	private LocalDataReader actLog;
 	private int             sendToServerTime;
 	private int 			deviceID;
 	private int				employerID;
-	Debug log = Logger.getInstance();
+	Debug log = Logger.getInstance();*/
 /**
  * Initialises the ServerUpload thread with the appropriate parameters.
  * Calls the start() method on the thread which invokes the run() method of the thread.
@@ -27,17 +24,18 @@ public class MyServerUpload extends Thread
  * @param inputDeviceID device identifier
  * @param inputUploadTimer interval value
  */
-	public MyServerUpload(LocalDataReader inputAccess,
+	public MyServerUpload(/*LocalDataReader inputAccess,
 						  int			  inputEmployerID,
 						  int 			  inputDeviceID,
-						  int			  inputUploadTimer)
+						  int			  inputUploadTimer*/
+						  )
 	{
-		actLog           = inputAccess;
+		/*actLog           = inputAccess;
 		employerID 		 = inputEmployerID;
 		deviceID 		 = inputDeviceID;
 		sendToServerTime = inputUploadTimer;
 		log.log("MyServerUpload begin...");
-		this.start();
+		this.start();*/
 	}
 	
 /** 

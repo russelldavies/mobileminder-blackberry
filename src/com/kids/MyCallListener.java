@@ -5,10 +5,10 @@ import java.util.Date;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
-import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
 import net.rim.blackberry.api.phone.AbstractPhoneListener;
+import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 
 /**
  * 
@@ -19,22 +19,20 @@ import net.rim.blackberry.api.phone.AbstractPhoneListener;
 public class MyCallListener extends AbstractPhoneListener
 {
         private LocalDataWriter actLog;
-        private final String    Connected 		= "Connected";
+        //private final String    Connected 		= "Connected";
+        //private final String    Hold_ON   		= "Hold_ON";
+        //private final String    Hold_OFF  		= "Hold_OFF";
+        //private final String    Dial_OUT  		= "Dial_OUT";
+        //private final String    Dial_IN   		= "Dial_IN";
+        //private final String    Dropped   		= "Dropped";
         private final String    Finished  		= "Finished";
-        private final String    Hold_ON   		= "Hold_ON";
-        private final String    Hold_OFF  		= "Hold_OFF";
-        private final String    Dial_OUT  		= "Dial_OUT";
-        private final String    Dial_IN   		= "Dial_IN";
-        private final String    Dropped   		= "Dropped";
         private       String    Prefix          = "";
         private 	  String	contactName 	= "";
         private		  String	contactNumber	= "";
-        private 	  boolean	isOutgoing		= false;
         private		  int 		callStartTime	= 0;
         private		  int 		callEndTime		= 0;
-        //private                 Date          callStartTime
-        //return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        Debug logWriter = Logger.getInstance();
+        private 	  boolean	isOutgoing		= false;
+        			  Debug     logWriter		= Logger.getInstance();
 
         /**
          * The constructor initialises the action store location and registers the callListener for the device.
@@ -71,7 +69,7 @@ public class MyCallListener extends AbstractPhoneListener
                                     isOutgoing,
                                     Tools.getDate(),
                                     (callEndTime-callStartTime)/1000
-                                    );
+                                  );
             
             callMessage.setContactName(contactName);
             
@@ -89,21 +87,18 @@ public class MyCallListener extends AbstractPhoneListener
         { 
         	logWriter.log("MyCallListener::callConnected");
         	callStartTime = (int) new Date().getTime();
-            PhoneCall callInfo = Phone.getCall(callId);
-            
+        	
+            PhoneCall callInfo = Phone.getCall(callId);            
             contactNumber=callInfo.getPhoneNumber();
-            contactName=callInfo.getDisplayPhoneNumber();
-            //BlackBerryContact contact = callInfo.getContact();
-            //contactName = (contact == null ? null : contact.getString(BlackBerryContact.NAME, 0));//(Contact.NAME, 0);
             
-            // We don't want the number to be the same as the contact name so
+            //contactName = PhoneCallLogID(Integer.parseInt(contactNumber)).getName();
+            contactName = new PhoneCallLogID(contactNumber).getName();
+            
+            //contactName=callInfo.getDisplayPhoneNumber();
+            
             logWriter.log("contactName="+contactName);
-            if (contactNumber.equals(contactName))      //TODO: NullPointerException on call fail
-            {
-            	logWriter.log("Contact name=contact number");
-                contactName="";
-            }
-        	//addToLog(Prefix+Connected, callId);
+            
+            if (null == contactName) contactName="";
         }
 
         /**

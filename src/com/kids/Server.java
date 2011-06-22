@@ -1,26 +1,5 @@
 package com.kids;
 
-/*ANDROID
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.zip.CRC32;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import com.kids.Controller;
-import com.kids.Logger;
-import com.kids.R;
-*/
 //BLACKBERRY
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,21 +11,15 @@ import com.kids.net.Reply;
 import com.kids.net.Security;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.MMServer;
 import com.kids.prototypes.Message;
 
 import net.rim.device.api.util.CRC32;
 
-//import com.kids.net.Reply;
-/*
-import com.kids.net.Security;
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.Message;
-*/
 /**
  * This class monitors for new actions stored in the local storage for recording actions and sends them to the web server at specific intervals.
  */
-public class Server extends Thread
+public class Server extends Thread implements MMServer
 {
 	//public static final String RestElementSeparator = ",";
 	private Debug logger = Logger.getInstance();
@@ -61,7 +34,7 @@ public class Server extends Thread
 	private final String 	URL;
 	private HttpConnection	httpclient;
 //	private String 	 		deviceId;
-	private int 		 	freq = 1000 * 15; //freq = 1000 * 60 * 5; //5 min
+	private int 		 	freq = 1000 * 30; //freq = 1000 * 60 * 5; //5 min
 	private boolean			live;
 	private String serverErrorReply;
 	private Random generator;
@@ -79,8 +52,6 @@ public class Server extends Thread
 	{		
 		logger.log("Starting.. Server");
 		security = new Security();
-		//URL = Controller.getString(R.string.URL_webservice);
-		//logger.log(URL);
 		//URL		= "http://www.associatemobile.com/mobileminder/WebService.php?";
 		//Development Server
 		URL 	 = "http://217.115.115.148:8000/dev1/mobileminder.net/WebService.php?";
@@ -91,9 +62,6 @@ public class Server extends Thread
 							Tools.RestElementSeparator+//reply
 		 				 1 +Tools.RestElementSeparator+//error
 							Tools.RestElementSeparator;//CallingCODE
-		//	Controller.getString(R.string.Error_ServerTimeOut);
-		
-		
 
 		actLog 	 = inputActLog;
 		//httpclient = new DefaultHttpClient();
@@ -145,7 +113,8 @@ public class Server extends Thread
 					//resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
 					resultREST = Tools.split(actLog.getFirst(), Tools.RestElementSeparator);
 
-					if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
+					//if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
+					if(resultREST.length > 2 && "0" == resultREST[2])// No error
 					{	actLog.removeFirst();
 						counter = -1;
 						
@@ -176,29 +145,10 @@ public class Server extends Thread
 			} 
 			catch (InterruptedException e) 
 			{	
-				logger.log("Server: InterruptedException");//actLog.addMessage(new ErrorMessage(e));
+				logger.log("x::Server: InterruptedException");//actLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}
-	/*
-	public String contactServer(String[] inputElements)
-	{
-		String separator 	= ",";
-		StringBuffer result = new StringBuffer();
-		
-	    if (inputElements.length > 0) 
-	    {
-	        result.append(inputElements[0]);
-	        for (int count=1; count<inputElements.length; count++) 
-	        {
-	            result.append(separator);
-	            result.append(inputElements[count]);
-	        }
-	    }
-
-		return contactServer(result.toString());
-	}
-	*/
 	
 	/**
 	 * This method will sends a rest message to the server.
@@ -420,7 +370,7 @@ public class Server extends Thread
 	{	try {
 		httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
 	} catch (IOException e) {
-		logger.log("Error opening HTTP connection to server");
+		logger.log("x::Error opening HTTP connection to server");
 		e.printStackTrace();
 	}	}
 	/**
@@ -430,7 +380,7 @@ public class Server extends Thread
 	{	try {
 		httpclient.close();
 	} catch (IOException e) {
-		logger.log("Error closing connection to HTTP server");
+		logger.log("x::Error closing connection to HTTP server");
 		e.printStackTrace();
 	}	}
 	/**

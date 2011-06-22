@@ -1,7 +1,10 @@
 package com.kids;
 
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
+
+import javax.microedition.io.file.FileSystemRegistry;
 
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
@@ -14,7 +17,7 @@ public class Tools
 	private static String returnVer="0";
 	//private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 	//private static LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
-	
+
 	//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 	//private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );
 	//private static Matcher matcher;
@@ -161,4 +164,29 @@ public class Tools
 	    }
 	   return result;
 	}	
+	
+    /**
+     * Method checks to see if the device has an SD card present.
+     * This is done by listing the FileSystem root directories and
+     * checking if there is a match for "SDCard/"
+     * @return bool sdCardPresent
+     */
+    public static boolean hasSDCard()
+    {
+    	boolean sdCardPresent = false;
+    	String root = null;   // root will hold the alias of the storage root, ie store/, sdcard/
+        Enumeration theEnum = FileSystemRegistry.listRoots();
+        while (theEnum.hasMoreElements())
+        {
+            root = (String)theEnum.nextElement();
+            System.err.println("CVK::root="+root);
+            if(root.equalsIgnoreCase("SDCard/"))//("store/"))//("sdcard/"))
+            {
+                System.err.println("CVK::sdCardPresent=true");
+                sdCardPresent = true;
+            }     
+        }
+	
+	return sdCardPresent;
+    }
 }
