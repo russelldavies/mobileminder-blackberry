@@ -54,7 +54,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     
     //ANDROID
     //private static ArrayList<Message> otherMessages = new ArrayList<Message>(); 
-    //private                        Context thisContext;
     
     //Blackberry
     //public static Vector otherMessages = new Vector();
@@ -63,9 +62,9 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     public static final String  DATABASE_TABLE   = "LocalData";
    // private static final int     DATABASE_VERSION = 2;
     //The primary key MUST be named '_id' Android convention
-    private static final String  KEY_INDEX                = "_id";//MAY OVER FLOW!!
-    private static final String  KEY_TIME                 = "time";
-    private static final String  KEY_VALUE                = "value";
+    private static final String  KEY_INDEX       = "_id";//MAY OVER FLOW!!
+    private static final String  KEY_TIME        = "time";
+    private static final String  KEY_VALUE       = "value";
     
     //ANDROID
     // Should be same for Blackberry
@@ -74,13 +73,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                                                    					+"`"+KEY_TIME   +"` TEXT    NOT NULL,"     
                                                    					+"`"+KEY_VALUE  +"` TEXT);";
     
-    public static Database storeDB=null;
-    public static String DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
-    public static URI dbURI;
+    public static String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
+    public static Database storeDB			 = null;
+    public static URI      dbURI;
     
     public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
     public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
-    public static boolean dbOpen		= false;	// Bool to keep track of when DB gets opened
     
     /**
      * This is the constructor of LocalDataAccess. It creates the environment for the table in the local database used to store phone actions..
@@ -88,150 +86,109 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
      */
         public innerLocalDataAccess(/*Context _context*/)
         {
+        	logWriter.log("innerLocalDataAccess::constructor");
         	//String mc             = System.getProperty("fileconn.dir.memorycard");
             //String mcname         = System.getProperty("fileconn.dir.memorycard.name");
-                   
-	        // Set up URI to database in constructor so everywhere can use it
-    		try {
-				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-			} catch (IllegalArgumentException e) {
-				logWriter.log("x::innerLocalDataAccess::dbURI_create::IllegalArgumentException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				logWriter.log("x::innerLocalDataAccess::dbURI_create::MalformedURIException::"+e.getMessage());
-				e.printStackTrace();
-			}
-			
+	
+        	// This never gets called in the simulator. Real phones might mount the SD card quicker,
+        	// so this check is valid here, purely for those current/future faster devices.
 	        if (Tools.hasSDCard())
 	        {
 	        	sdCardPresent=true;
-	        	getDatabase();
+	        	openDatabase();
 	        }
 	        else
 	        {
-	        	logWriter.log("No SD Card present");
+	        	logWriter.log("No SD Card mounted...yet!");
 	        }
         }  // end constructor
 
+        /**
+         * Method that sets the URI of the database, so it can be used with DatabaseFactory
+         */
+		private void getdbURI()
+		{
+			logWriter.log("In getdbURI method");
+			try {
+				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+				logWriter.log("getdbURI::URI"+(null==dbURI ? " is not " : " is ")+"usable");
+			} catch (IllegalArgumentException e) {
+				logWriter.log("x::getdbURI::IllegalArgumentException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				logWriter.log("x::getdbURI::MalformedURIException::"+e.getMessage());
+				e.printStackTrace();
+			}	
+		}
         
         private void createDatabase()
         {
-        	try {
-				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-				dbExist = DatabaseFactory.exists(dbURI);	// Returns true or false
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DatabasePathException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DatabaseIOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
+        	logWriter.log("In createDatabase method");
+			try {
+				if (null == dbURI) getdbURI();	// Ensure dbURI is usable
+				
+				// Check to see if the database already exists.
+				// dbExist is initialised to false, so this will catch an error
+				// when the device gets rebooted, and dbExist is reset to false,
+				// even though the database was previously created.
+				// Plus, the below code creates the tables. We don't want to do that twice!
+				dbExist=DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
 
-        private void openDatabase()
-        {
-        	
-        }
-        
-		/**
-         * Method to get a usable database at STARTUP.
-         * Opens the database handle on boot and re-uses that handle throughout.
-         * Checks to see if DB does not exist, and creates it, then opens it.
-         * If it alreadyt exists, it will just open it.
-         * @return void
-         */
-        private void getDatabase()
-        {
-        	if (!dbExist) // if dbExist is false, check again
-        	{
-	        	try {
-	        		// This is just to check if the database has been created since last check
-	        		// This is helpful in case I've missed setting dbExist to true somewhere...
-	        		dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-					dbExist = DatabaseFactory.exists(dbURI);	// Returns true or false
-				} catch (DatabasePathException e) {
-					logWriter.log("x::innerLocalDataAccess::getDatabase::DatabasePathException::dbExists::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabaseIOException e) {
-					logWriter.log("x::innerLocalDataAccess::getDatabase::DatabaseIOException::dbExists::"+e.getMessage());
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					logWriter.log("x::innerLocalDataAccess::getDatabase::IllegalArgumentException::dbExists::"+e.getMessage());
-					e.printStackTrace();
-				} catch (MalformedURIException e) {
-					logWriter.log("x::innerLocalDataAccess::getDatabase::MalformedURIException::dbExists::"+e.getMessage());
-					e.printStackTrace();
-				}
-        	}	// end if
-			
-        	if (!dbExist)	// If dbExist is still false after previous code, then create a new one
-        	{        		
-        	    logWriter.log("DB does not exist. Creating...");
-        	    try {
+				if (!dbExist)
+				{
 					storeDB = DatabaseFactory.create(dbURI);  //Create file
+					dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
+					
+					// Now create the tables
 					Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
-					// if "st" is unsuccessful, one of the "catch" blocks will trigger before
-					//assigning "true" to "dbExist". Same for dbOpen
+					// if "st" is unsuccessful, one of the "catch" blocks will
+					//trigger before openDatabase is called.
 					st.prepare();
 					st.execute();  // Execute SQL
 					st.close();
-					dbExist=true;	// Store the fact that we've created a new DB
-					storeDB = DatabaseFactory.open(dbURI);    //Open DB
-					if (null != storeDB)	// if storeDB is opened successfully, it wont be null
-						dbOpen=true;	// Store the fact that we've opened the DB
-					
-				} catch (DatabaseIOException e) {
-					logWriter.log("x::localDataAccess:getDatabase::DatabaseIOException::DatabaseFactory.create()::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabasePathException e) {
-					logWriter.log("x::localDataAccess:getDatabase::DatabasePathException::DatabaseFactory.create()::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabaseException e) {
-					logWriter.log("x::localDataAccess:getDatabase::DatabaseException::storeDB.createStatement(),st.prepare, st.execute and st.close::"+e.getMessage());
-					e.printStackTrace();
-				} catch (ControlledAccessException e) {
-					logWriter.log("x::localDataAccess:getDatabase::ControlledAccessException::storeDB.open::"+e.getMessage());
-					e.printStackTrace();
+					// Now open the database for use, since we just created it
 				}
-        	}   // end if(!dbExist)
-        	else
-        	{
-        		try {
-        			if ( null == storeDB)	// storeDB will be null if it is not opened
-        			{
-        				logWriter.log("LocalDataAccess:getDatabase::Opening storeDB...");
-        				storeDB=DatabaseFactory.open(dbURI);
-        				if (null != storeDB)	// storeDB won't be null if its opened successfully
-        				{
-	        				logWriter.log("LocalDataAccess:getDatabase:: storeDB open!");
-	        				dbOpen=true;	// Save state of DB, ie open
-        				}
-        				else
-        				{
-        					logWriter.log("x::storeDB still not opened!");
-        					dbOpen=false;
-        				}
-        			}
-				} catch (ControlledAccessException e) {
-					logWriter.log("x::localDataAccess:getDatabase::ControlledAccessException::DatabaseFactory.open::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabaseIOException e) {
-					logWriter.log("x::localDataAccess:getDatabase::DatabaseIOException::DatabaseFactory.open::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabasePathException e) {
-					logWriter.log("x::localDataAccess:getDatabase::DatabasePathException::DatabaseFactory.open::"+e.getMessage());
-					e.printStackTrace();
-				}
-        	}   // end if/else
-        	
-        }  // End getDatabase()
 
+			} catch (DatabaseIOException e) {
+				logWriter.log("x::LocalDataAccess:createDatabase::DatabaseIOException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabasePathException e) {
+				logWriter.log("x::LocalDataAccess:createDatabase::DatabasePathException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabaseException e) {
+				logWriter.log("x::LocalDataAccess:createDatabase::DatabaseException::"+e.getMessage());
+				e.printStackTrace();
+			}		
+        }
+
+        /**
+         * Method to open the database.
+         * 
+         */
+        public void openDatabase()
+        {
+        	logWriter.log("In openDatabase method");
+			try {
+				// Ensure URI is valid
+				if (null == dbURI) getdbURI();
+
+				// and make sure the DB exists. SHOULD always exist here, but just to be safe...
+				if (!dbExist) createDatabase();
+				
+				storeDB = DatabaseFactory.open(dbURI);
+				// From now on, we can check if the DB is open by comparing it to null				
+			} catch (ControlledAccessException e) {
+				logWriter.log("x::LocalDataAccess:openDatabase::ControlledAccessException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabaseIOException e) {
+				logWriter.log("x::LocalDataAccess:openDatabase::DatabaseIOException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabasePathException e) {
+				logWriter.log("x::LocalDataAccess:openDatabase::DatabasePathException::"+e.getMessage());
+				e.printStackTrace();
+			}
+        }
+        
 		/**
          * This method adds the phone actions messages into the table used to store phone actions.
          * @param _message The phone actions from the monitor classes.
@@ -248,8 +205,8 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         private synchronized void addValue(String _value)
         {
-            logWriter.log("Value: "+_value);
-            logWriter.log("Size: "+length());
+	    	logWriter.log("innerLocalDataAccess::addValue");	    	
+            logWriter.log("REST String: "+_value);
                     
             Date theDate = Calendar.getInstance().getTime();
             String dateTime = String.valueOf(theDate.getTime());
@@ -258,19 +215,19 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             try {
             	logWriter.log("addValue::Try INSERT");
 
-            	// Check if database is open. storeDB null should mean it hasnt been opened yet
-            	if (null == storeDB || !dbOpen)
+            	// Check if database is open. storeDB=null should mean it hasnt been opened yet
+            	if (null == storeDB )
             	{
-            		logWriter.log("localDataAccess::addValue::Checking database...");
-            		getDatabase();
-            		logWriter.log("localDataAccess::addValue::storeDB should be open now.");
+            		logWriter.log("localDataAccess::addValue::1:Calling getDatabase()...");
+            		openDatabase();
+            		logWriter.log("localDataAccess::addValue::2:storeDB should be open now.");
+            		//TODO: DEBUG: remove when done
+            		logWriter.log("localDataAccess::addValue::3:storeDB is "
+            													+(null==storeDB ? "null" : "open") );
             	}
             	
-            	//TODO: DEBUG: Check for open DB again
-            	if (null == storeDB)
-            		logWriter.log("localDataAccess::addValue::storeDB is still null!");
             	            	
-            	// storeDB should hopefully never be NULL at this point, as it should be opened
+            	// storeDB should, hopefully, never be NULL at this point, as it should be opened
             	
             	//Build SQL statement
             	StringBuffer sqlInsert = new StringBuffer();
@@ -287,24 +244,22 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	sqlInsert.append(_value);
             	sqlInsert.append("\")");
             	
-            	
-            	dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+        		if (null == dbURI) getdbURI();
+            	logWriter.log("addValue::dbURI is: "+dbURI.toString());  
+            	if (null == storeDB) openDatabase();
 				storeDB = DatabaseFactory.open(dbURI);		   // if DB is open, it wont be null
-        		logWriter.log("getStoreDBoutput::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
+        		logWriter.log("selectAllFromDB::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
             	
                 st = storeDB.createStatement(sqlInsert.toString());
                 st.prepare();
                 st.execute();
                 st.close();  
-                storeDB.close(); dbOpen=false;
+                //storeDB.close();
             } catch (DatabaseException e) {
             	logWriter.log("x::LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                 e.printStackTrace();
             } catch (IllegalArgumentException e) {
             	logWriter.log("x::LocalDataAccess::addValue::IllegalArgumentException:URI:"+e.getMessage());
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-            	logWriter.log("x::LocalDataAccess::addValue::MalformedURIException:URI:"+e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -330,7 +285,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             Row row;
             String value = "";
             // Get cursor pointing to first item in DB
-            Cursor result = getStoreDBoutput();
+            Cursor result = selectAllFromDB();
             
             try 
             {//TODO: cleanup
@@ -365,7 +320,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 Row row;
                 Cursor result = null;;
                 try {
-                        result = getStoreDBoutput();
+                        result = selectAllFromDB();
                         result.position(0);
                         //move to First
                         row=result.getRow();
@@ -397,11 +352,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         	sqlCreate.append(String.valueOf(_index));
         	
         	try {
+        		if (null == storeDB) openDatabase();
                 Statement st = storeDB.createStatement(sqlCreate.toString());
                 st.prepare();
                 st.execute();
                 st.close();
-                storeDB.close(); dbOpen=false;
+                //storeDB.close(); dbOpen=false;
             } catch (ControlledAccessException e) {
                 logWriter.log("x::LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
                 e.printStackTrace();
@@ -423,7 +379,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         public int length()
         {       
-            Cursor result = getStoreDBoutput();
+            Cursor result = selectAllFromDB();
             int size=0;
             try {
                     //result.last returns FALSE is its empty (result=null if cant be opened)
@@ -456,56 +412,27 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          * This method retrieves the information in the local database.
          * @return a cursor object which contains all the information of the table used to store phone actions.
          */
-        private Cursor getStoreDBoutput()
+        private Cursor selectAllFromDB()
         {
+			logWriter.log("innerLocalDataAccess::getStoreDBouput");
         	Statement st;
             Cursor c=null;
             
             //Ensure a connection to the database exists
-            // This method (getDatabase) checks if a DB exists, and opens it,
-            //otherwise creates a new one and opens that.
-            if(!dbExist || !dbOpen)	// If the DB doesnt exist, or is not open...
-            {
-            	getDatabase();   	
-            }
+            if (null == storeDB) openDatabase();            
             
-            
-    		try {
-    			if (null == storeDB) // storeDB will be null if it hasnt been opened yet
-    			{
-            		logWriter.log("getStoreDBoutput::storeDB is null. Opening...");
-    				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-					storeDB = DatabaseFactory.open(dbURI);		   // if DB is open, it wont be null
-	        		logWriter.log("getStoreDBoutput::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
-    			}
-    			else
-    			{
-    				logWriter.log("getStoreDBoutput::storeDB already open!");
-    			}
-                st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
-                st.prepare();
-                st.execute();
-                c = st.getCursor();
-                //st.close();
-			} catch (ControlledAccessException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::ControlledAccessException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (DatabaseIOException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::DatabaseIOException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (DatabasePathException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::DatabasePathException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (DatabaseException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::DatabaseException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::IllegalArgumentException::URI_Create"+e.getMessage());
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				logWriter.log("x::LocalDataAccess::getStoreDBoutput::MalformedURIException::URI_Create"+e.getMessage());
-				e.printStackTrace();
-			}
+                try {
+					st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
+	                st.prepare();
+	                st.execute();
+	                c = st.getCursor();
+	                //st.close();
+				} catch (DatabaseException e) {
+					logWriter.log("x::innerLocalDataAccess::getStoreDBouput::DatabaseException::"+e.getMessage());
+					e.printStackTrace();
+				}
+
+
 			// Return CURSOR or NULL
             return c;
         }
@@ -543,15 +470,16 @@ class DatabaseHelper //extends SQLiteOpenHelper
         {
                  try
                  {
-                	innerLocalDataAccess.dbURI = URI.create(innerLocalDataAccess.DATABASE_LOCATION+innerLocalDataAccess.DATABASE_NAME);
+                	//innerLocalDataAccess.dbURI = URI.create(innerLocalDataAccess.DATABASE_LOCATION+innerLocalDataAccess.DATABASE_NAME);
                 	innerLocalDataAccess.logWriter.log("DataBaseHelper create...");
+                	innerLocalDataAccess.logWriter.log("DatabaseHelper::dbURI is: "+innerLocalDataAccess.dbURI.toString());
                     innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
                     Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
                     
                     st.prepare();
                     st.execute();
                     st.close();
-                    innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
+                    //innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
                 }
                 catch ( Exception e ) 
                 {         
@@ -580,7 +508,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
                     st.prepare();
                     st.execute();
                     st.close();
-                    innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
+                    //innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
                 }
                 catch ( Exception e ) 
                 {
@@ -588,11 +516,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
                     e.printStackTrace();
                 }
                         
-                        
-                //ANDROID
-                //_db.execSQL("DROP IF TABLE EXISTS "+LocalDataAccess.DATABASE_TABLE);
-                //onCreate(_db);
-                }
+        }
         
         public static void addOtherMessage(Message otherMessages)
         {
@@ -865,7 +789,7 @@ class action implements Persistable
          */
         public action()
         {
-                this(false,action.TYPE_UNKNOWN,"","","");
+        	this(false,action.TYPE_UNKNOWN,"","","");
         }
 
         /**
@@ -909,7 +833,7 @@ class action implements Persistable
                 type                       = inputType;
                 timeStamp                  = inputTimeStamp;
                 status                     = inputStatus;
-                destinationAddress = inputDestinationAddress;
+                destinationAddress 		   = inputDestinationAddress;
         }
                 
         /**
@@ -919,7 +843,7 @@ class action implements Persistable
          */
         public boolean getIsError()
         {
-                return error;
+        	return error;
         }
 
         /**
@@ -929,7 +853,7 @@ class action implements Persistable
          */
         public int getType()
         {
-                return type;
+        	return type;
         }
                 
         /**
@@ -939,7 +863,7 @@ class action implements Persistable
          */
         public String getDestinationAddress()
         {
-                return new String(destinationAddress);
+        	return new String(destinationAddress);
         }
 
         /**
@@ -949,7 +873,7 @@ class action implements Persistable
          */
         public String getTimeStamp()
         {
-                return new String(timeStamp);
+        	return new String(timeStamp);
         }
 
         /**
@@ -959,7 +883,7 @@ class action implements Persistable
          */
         public String getStatus()
         {
-                return new String(status);
+        	return new String(status);
         }
 
         /**
@@ -973,18 +897,18 @@ class action implements Persistable
                 String textVal = new String();
                 switch(inputType) 
                 {
-                        //case -3: textVal = "System Error"; break;
-                        //case -2: textVal = "Logic Error"; break;
-                        
-                        case 0: textVal = "Unknown"; break;
-                        case 1: textVal = "Idel";    break;
-                        case 2: textVal = "Call";    break;
-                        case 3: textVal = "Text";    break;
-                        case 4: textVal = "Mail";    break;
-                        case 5: textVal = "Web";     break;
-                        case 6: textVal = "App";     break;
-                        case 7: textVal = "GPS";     break;
-                        case 8: textVal = "Server";  break;
+                    //case -3: textVal = "System Error"; break;
+                    //case -2: textVal = "Logic Error"; break;
+                    
+                    case 0: textVal = "Unknown"; break;
+                    case 1: textVal = "Idel";    break;
+                    case 2: textVal = "Call";    break;
+                    case 3: textVal = "Text";    break;
+                    case 4: textVal = "Mail";    break;
+                    case 5: textVal = "Web";     break;
+                    case 6: textVal = "App";     break;
+                    case 7: textVal = "GPS";     break;
+                    case 8: textVal = "Server";  break;
                 }
                 
                 return textVal;
@@ -998,33 +922,15 @@ class action implements Persistable
          */
         public String toString()
         {
-                String textVal = findType(type);
-                /*
-                switch(type) 
-                {
-                        //case -3: textVal = "System Error"; break;
-                        //case -2: textVal = "Logic Error"; break;
-                        
-                        case 0: textVal = "Unknown"; break;
-                        case 1: textVal = "Idel";    break;
-                        case 2: textVal = "Call";    break;
-                        case 3: textVal = "Text";    break;
-                        case 4: textVal = "Mail";    break;
-                case 5: textVal = "Web";     break;
-                case 6: textVal = "App";     break;
-                case 7: textVal = "GPS";     break;
-                case 8: textVal = "Server";  break;
-                }*/
-                
-                
-                
-                if(error)
-                {
-                        return "!> "+timeStamp + " - " + textVal;
-                }
-                else
-                {
-                        return timeStamp + " - " + textVal;
-                }
+            String textVal = findType(type);
+            
+            if(error)
+            {
+            	return "!> "+timeStamp + " - " + textVal;
+            }
+            else
+            {
+            	return timeStamp + " - " + textVal;
+            }
         }
 }    // end class Action
