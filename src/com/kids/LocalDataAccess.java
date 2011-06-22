@@ -78,9 +78,9 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     public static String DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
     public static URI dbURI;
     
-    boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
-    boolean dbExist			= false;	// For checking to see if the DB already exists before each DB call
-    boolean dbOpen			= false;	// Bool to keep track of when DB gets opened
+    public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
+    public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
+    public static boolean dbOpen		= false;	// Bool to keep track of when DB gets opened
     
     /**
      * This is the constructor of LocalDataAccess. It creates the environment for the table in the local database used to store phone actions..
@@ -113,7 +113,32 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	        }
         }  // end constructor
 
+        
+        private void createDatabase()
+        {
+        	try {
+				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+				dbExist = DatabaseFactory.exists(dbURI);	// Returns true or false
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatabasePathException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatabaseIOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
 
+        private void openDatabase()
+        {
+        	
+        }
+        
 		/**
          * Method to get a usable database at STARTUP.
          * Opens the database handle on boot and re-uses that handle throughout.
@@ -189,7 +214,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         				}
         				else
         				{
-        					logWriter.log("storeDB still not opened!");
+        					logWriter.log("x::storeDB still not opened!");
         					dbOpen=false;
         				}
         			}
@@ -262,15 +287,26 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	sqlInsert.append(_value);
             	sqlInsert.append("\")");
             	
+            	
+            	dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+				storeDB = DatabaseFactory.open(dbURI);		   // if DB is open, it wont be null
+        		logWriter.log("getStoreDBoutput::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
+            	
                 st = storeDB.createStatement(sqlInsert.toString());
                 st.prepare();
                 st.execute();
                 st.close();  
-                //storeDB.close();
+                storeDB.close(); dbOpen=false;
             } catch (DatabaseException e) {
             	logWriter.log("x::LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                 e.printStackTrace();
-            }
+            } catch (IllegalArgumentException e) {
+            	logWriter.log("x::LocalDataAccess::addValue::IllegalArgumentException:URI:"+e.getMessage());
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+            	logWriter.log("x::LocalDataAccess::addValue::MalformedURIException:URI:"+e.getMessage());
+				e.printStackTrace();
+			}
 
         }
         /**
@@ -365,7 +401,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 st.prepare();
                 st.execute();
                 st.close();
-                //storeDB.close();
+                storeDB.close(); dbOpen=false;
             } catch (ControlledAccessException e) {
                 logWriter.log("x::LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
                 e.printStackTrace();
@@ -438,6 +474,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     			if (null == storeDB) // storeDB will be null if it hasnt been opened yet
     			{
             		logWriter.log("getStoreDBoutput::storeDB is null. Opening...");
+    				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
 					storeDB = DatabaseFactory.open(dbURI);		   // if DB is open, it wont be null
 	        		logWriter.log("getStoreDBoutput::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
     			}
@@ -461,6 +498,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				e.printStackTrace();
 			} catch (DatabaseException e) {
 				logWriter.log("x::LocalDataAccess::getStoreDBoutput::DatabaseException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				logWriter.log("x::LocalDataAccess::getStoreDBoutput::IllegalArgumentException::URI_Create"+e.getMessage());
+				e.printStackTrace();
+			} catch (MalformedURIException e) {
+				logWriter.log("x::LocalDataAccess::getStoreDBoutput::MalformedURIException::URI_Create"+e.getMessage());
 				e.printStackTrace();
 			}
 			// Return CURSOR or NULL
@@ -508,7 +551,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
                     st.prepare();
                     st.execute();
                     st.close();
-                    //innerLocalDataAccess.storeDB.close();
+                    innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
                 }
                 catch ( Exception e ) 
                 {         
@@ -537,7 +580,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
                     st.prepare();
                     st.execute();
                     st.close();
-                    //innerLocalDataAccess.storeDB.close();
+                    innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
                 }
                 catch ( Exception e ) 
                 {
