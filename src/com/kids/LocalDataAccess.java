@@ -121,11 +121,16 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			}	
 		}
         
+		/**
+		 * Method for creating a database, if one does not exist.
+		 * Should not be called directly. Call openDatabase instead, which in turn calls this.
+		 */
         private static void createDatabase()
         {
         	logWriter.log("In createDatabase method");
 			try {
-				if (null == dbURI) getdbURI();	// Ensure dbURI is usable
+				// This is called in openDatabase() anyway so shouldnt need to be called here
+				//if (null == dbURI) getdbURI();	// Ensure dbURI is usable
 				
 				// Check to see if the database already exists.
 				// dbExist is initialised to false, so this will catch an error
@@ -146,7 +151,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 					st.prepare();
 					st.execute();  // Execute SQL
 					st.close();
-					// Now open the database for use, since we just created it
 				}
 
 			} catch (DatabaseIOException e) {
@@ -162,21 +166,26 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         }
 
         /**
-         * Method to open the database.
+         * Method to open the database. It also calls createDatabase if no DB exists
          * 
          */
-        public static void openDatabase()
+        public static boolean openDatabase()
         {
         	logWriter.log("In openDatabase method");
 			try {
 				// Ensure URI is valid
-				if (null == dbURI) getdbURI();
+				if (null == dbURI)
+					getdbURI();
 
 				// and make sure the DB exists. SHOULD always exist here, but just to be safe...
-				if (!dbExist) createDatabase();
+				if (!dbExist)
+					createDatabase();
 				
-				storeDB = DatabaseFactory.open(dbURI);
-				// From now on, we can check if the DB is open by comparing it to null				
+				if (null == storeDB)	// Checked here, but also checked before call. Overkill??
+					storeDB = DatabaseFactory.open(dbURI);
+				
+				// From now on, we can check if the DB is open by comparing it to null	
+				//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));
 			} catch (ControlledAccessException e) {
 				logWriter.log("x::LocalDataAccess:openDatabase::ControlledAccessException::"+e.getMessage());
 				e.printStackTrace();
@@ -187,6 +196,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				logWriter.log("x::LocalDataAccess:openDatabase::DatabasePathException::"+e.getMessage());
 				e.printStackTrace();
 			}
+			return (null==storeDB?false:true);
         }
         
 		/**
@@ -211,6 +221,22 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             Date theDate = Calendar.getInstance().getTime();
             String dateTime = String.valueOf(theDate.getTime());
             
+        	//Build SQL statement
+        	StringBuffer sqlInsert = new StringBuffer();
+        	sqlInsert.append("INSERT INTO ");
+        	sqlInsert.append(DATABASE_TABLE);
+        	sqlInsert.append("(");
+        	sqlInsert.append(KEY_TIME);
+        	sqlInsert.append(",");
+        	sqlInsert.append(KEY_VALUE);
+        	sqlInsert.append(") VALUES (");
+        	sqlInsert.append("\"");
+        	sqlInsert.append(dateTime);
+        	sqlInsert.append("\",\"");
+        	sqlInsert.append(_value);
+        	sqlInsert.append("\")");
+        	 
+            
             Statement st;
             try {
             	logWriter.log("addValue::Try INSERT");
@@ -218,40 +244,17 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	// Check if database is open. storeDB=null should mean it hasnt been opened yet
             	if (null == storeDB )
             	{
-            		logWriter.log("localDataAccess::addValue::1:Calling getDatabase()...");
-            		openDatabase();
-            		logWriter.log("localDataAccess::addValue::2:storeDB should be open now.");
-            		//TODO: DEBUG: remove when done
-            		logWriter.log("localDataAccess::addValue::3:storeDB is "
-            													+(null==storeDB ? "null" : "open") );
-            	}
-            	
-            	            	
+            		logWriter.log("localDataAccess::addValue::Calling openDatabase()...");
+            		// NOTE: openDatabase method call is embedded in output
+            		logWriter.log("localDataAccess::addValue::storeDB is"+(openDatabase()?" ":" NOT ")+"open");
+            	}           	            	
             	// storeDB should, hopefully, never be NULL at this point, as it should be opened
-            	
-            	//Build SQL statement
-            	StringBuffer sqlInsert = new StringBuffer();
-            	sqlInsert.append("INSERT INTO ");
-            	sqlInsert.append(DATABASE_TABLE);
-            	sqlInsert.append("(");
-            	sqlInsert.append(KEY_TIME);
-            	sqlInsert.append(",");
-            	sqlInsert.append(KEY_VALUE);
-            	sqlInsert.append(") VALUES (");
-            	sqlInsert.append("\"");
-            	sqlInsert.append(dateTime);
-            	sqlInsert.append("\",\"");
-            	sqlInsert.append(_value);
-            	sqlInsert.append("\")");
-            	 
-            	if (null == storeDB) openDatabase();
-        		logWriter.log("selectAllFromDB::storeDB is"+ (null==storeDB? " not ":" ") +"open!");
             	
                 st = storeDB.createStatement(sqlInsert.toString());
                 st.prepare();
                 st.execute();
                 st.close();  
-                //storeDB.close();
+                storeDB.close(); storeDB=null;
             } catch (DatabaseException e) {
             	logWriter.log("x::LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                 e.printStackTrace();
@@ -349,12 +352,13 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         	sqlCreate.append(String.valueOf(_index));
         	
         	try {
-        		if (null == storeDB) openDatabase();
+        		if (null == storeDB)
+        			openDatabase();
                 Statement st = storeDB.createStatement(sqlCreate.toString());
                 st.prepare();
                 st.execute();
                 st.close();
-                //storeDB.close(); dbOpen=false;
+                storeDB.close(); storeDB=null;
             } catch (ControlledAccessException e) {
                 logWriter.log("x::LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
                 e.printStackTrace();
@@ -390,6 +394,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                         size = result.getPosition();
                         logWriter.log("Closing result");
                         result.close();
+                        storeDB.close(); storeDB=null;
                     }
                     else
                     {
@@ -416,19 +421,19 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             Cursor c=null;
             
             //Ensure a connection to the database exists
-            if (null == storeDB) openDatabase();            
+            if (null == storeDB)
+            	openDatabase();            
             
                 try {
 					st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
 	                st.prepare();
 	                st.execute();
 	                c = st.getCursor();
-	                //st.close();
+	                //st.close(); //TODO: We're returning a cursor to the DB. Do we need to close the statement?
 				} catch (DatabaseException e) {
 					logWriter.log("x::innerLocalDataAccess::getStoreDBouput::DatabaseException::"+e.getMessage());
 					e.printStackTrace();
 				}
-
 
 			// Return CURSOR or NULL
             return c;
@@ -471,13 +476,14 @@ class DatabaseHelper //extends SQLiteOpenHelper
             	innerLocalDataAccess.logWriter.log("DataBaseHelper create...");
             	innerLocalDataAccess.logWriter.log("DatabaseHelper::dbURI is: "+innerLocalDataAccess.dbURI.toString());
                 //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-                if (null == innerLocalDataAccess.storeDB) innerLocalDataAccess.openDatabase();
+                if (null == innerLocalDataAccess.storeDB)
+                	innerLocalDataAccess.openDatabase();
             	Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
                 
                 st.prepare();
                 st.execute();
                 st.close();
-                //innerLocalDataAccess.storeDB.close();  innerLocalDataAccess.dbOpen=false;
+                innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.storeDB = null;
             }
             catch ( Exception e ) 
             {         
@@ -506,7 +512,7 @@ class DatabaseHelper //extends SQLiteOpenHelper
                 st.prepare();
                 st.execute();
                 st.close();
-                //innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.dbOpen=false;
+                innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.storeDB = null;
             }
             catch ( Exception e ) 
             {

@@ -354,26 +354,14 @@ public class Registration extends Thread
         if (manufacturer != null) 
         {  return manufacturer;   }
 
-        try
-        {
-        	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
-        	// Get unique hardware identifier that identifies the exact handset
-        	//java.lang.Integer.toHexString(DeviceInfo.getDeviceId())  <- BB PIN
-        	manufacturer="Blackberry" + DeviceInfo.getDeviceName()+  // Model of bberry
-        							  + DeviceInfo.getDeviceId()  +  // Unique ID/PIN
-        							  + Branding.getVendorId()       // Vendor ID (Vodafone/O2/etc)
-        							  ;
-                /*
-        		Class<android.os.Build> buildClass = android.os.Build.class;
-                Field field = buildClass.getField("MANUFACTURER");
-                manufacturer = (String) field.get(new android.os.Build());
-                */
-        }
-        catch (Exception e) 
-        {
-        	//TODO:actLog.addMessage(new ErrorMessage(e));
-                manufacturer = "error";
-        }
+
+    	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
+    	// Get unique hardware identifier that identifies the exact handset
+    	//java.lang.Integer.toHexString(DeviceInfo.getDeviceId())  <- BB PIN
+    	manufacturer="Blackberry" + DeviceInfo.getDeviceId()    // Unique ID/PIN
+    							  + Branding.getVendorId()       // Vendor ID (Vodafone/O2/etc)
+    							  ;
+  
         return manufacturer;
     } 
 }
@@ -450,17 +438,17 @@ class RegistrationMessage implements Message
 	public String getREST()
 	{	//RegSN,	reg, 	error, deviceTime, stage,	PhoneNum, 	DeviceID, info
 		// TODO: Change to String builder
-		return 	Registration.getRegID() + Tools.RestElementSeparator +
-				'0'+type				+ Tools.RestElementSeparator +
-				(error?1:0)				+ Tools.RestElementSeparator +
-				deviceTime				+ Tools.RestElementSeparator +
-				stage					+ Tools.RestElementSeparator +
-				phoneNum				+ Tools.RestElementSeparator +
-				deviceID				+ Tools.RestElementSeparator +
-				manufacturer			+ Tools.RestElementSeparator +
-				//Build.MODEL			+ Tools.RestElementSeparator +
-				Tools.getOSVersion()	+ Tools.RestElementSeparator +
-				mmVERSION				+ Tools.RestElementSeparator +
+		return 	Registration.getRegID() 	+ Tools.RestElementSeparator +
+				'0'+type					+ Tools.RestElementSeparator +
+				(error?1:0)					+ Tools.RestElementSeparator +
+				deviceTime					+ Tools.RestElementSeparator +
+				stage						+ Tools.RestElementSeparator +
+				phoneNum					+ Tools.RestElementSeparator +
+				deviceID					+ Tools.RestElementSeparator +
+				manufacturer				+ Tools.RestElementSeparator +
+				DeviceInfo.getDeviceName()	+ Tools.RestElementSeparator +
+				Tools.getOSVersion()		+ Tools.RestElementSeparator +
+				mmVERSION					+ Tools.RestElementSeparator +
 				info;
 	}
 	

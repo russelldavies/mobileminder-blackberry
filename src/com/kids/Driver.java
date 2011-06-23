@@ -108,7 +108,7 @@ public class Driver extends Application implements SystemListener2
         //new MyAppListener (actLog, AppTimer);            
         new MyCallListener(actLog);
 
-    	//new Server(actLog).start();
+    	new Server(actLog).start();
     }
     
 
