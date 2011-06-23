@@ -16,7 +16,7 @@ import net.rim.device.api.system.SystemListener2;
  
 /**
  * 
- * Controller is called by the Application Manager after it calls the Application.
+ * Driver is called by the Application Manager after it calls the Application.
  *  
  * The controller registers objects with the system to monitor device actions
  *
@@ -109,10 +109,12 @@ public class Driver extends Application implements SystemListener2
         new MyCallListener(actLog);
 
     	new Server(actLog).start();
+    	
+    	//Display notification icon
+    	new mmNotification(actLog);
     }
     
-
-    public void powerUp()
+	public void powerUp()
     {
 	    logWriter.log("Power up...");
 	
