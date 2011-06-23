@@ -24,43 +24,40 @@ import net.rim.device.api.system.SystemListener2;
 
 //class Controller extends Application
 public class Driver extends Application implements SystemListener2
-{       // Enable logging
-        static Debug logWriter = Logger.getInstance();
-                
-        LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
-                
-        //new way of creating the database
-        //LocalDataFactory factory = createOsSpecificDBFactory();
-       // LocalDataReader actlog = factory.createLocalDataReader();
-                
-        /**
-         * After calling to enterEventDispatcher() the application enters the event-processing loop.
-         * 
-         *
-         */
-        public static void main(String[] args)
-        {
-            //How to create proper startup apps:
-            //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
-            Driver appInstance = new Driver();
-                
-                
-            // If system startup is still in progress when this
-            // application is run.
-            if (ApplicationManager.getApplicationManager().inStartup())
-                {
-                logWriter.log("Still starting up");
-                appInstance.addSystemListener(appInstance);
-            }
-            else
-                {
-                logWriter.log("Fully booted up");
-                appInstance.doStartupWorkLater();
-            }
-            //The event thread processes incoming messages and sends them to the listeners.
-                //new Controller().enterEventDispatcher();
-            appInstance.enterEventDispatcher();
+{
+	// Enable logging
+    static Debug logWriter = Logger.getInstance();
+    LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
+	//private Registration 	Reg;
+            
+    /**
+     * After calling to enterEventDispatcher() the application enters the event-processing loop.
+     * 
+     *
+     */
+    public static void main(String[] args)
+    {
+        //How to create proper startup apps:
+        //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
+        Driver appInstance = new Driver();
+            
+            
+        // If system startup is still in progress when this
+        // application is run.
+        if (ApplicationManager.getApplicationManager().inStartup())
+            {
+            logWriter.log("Still starting up");
+            appInstance.addSystemListener(appInstance);
         }
+        else
+            {
+            logWriter.log("Fully booted up");
+            appInstance.doStartupWorkLater();
+        }
+        //The event thread processes incoming messages and sends them to the listeners.
+            //new Controller().enterEventDispatcher();
+        appInstance.enterEventDispatcher();
+    }
        
 /**
  * Initialises the objects that will register themselves with the appropriate event listeners
@@ -102,16 +99,21 @@ public class Driver extends Application implements SystemListener2
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
-        //new MyMailListener(actLog);
-        new MyTextListener(actLog);
         //new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
+        //new MyMailListener(actLog);
+        new MyTextListener(actLog);
         new MyCallListener(actLog);
 
+        //new Registration(actLog).start();	// Causing IllegalThreadStateException
+        
+    	// Start up connection to the server
+    	//Leave this to load last coz it accesses the database early on.
+    	//We need to leave as much time as possible before tring to access it since we
+    	//cant be sure the SD card has been mounted yet.
     	new Server(actLog).start();
     	
-    	//Display notification icon
-    	new mmNotification(actLog);
+
     }
     
 	public void powerUp()

@@ -24,20 +24,19 @@ import net.rim.device.api.system.DeviceInfo;
  */
 public class Registration extends Thread
 {
-    private 	  	boolean regOK = false;
-    private 		LocalDataReader actLog;// = LocalDataAccess.getLocalDataAccessRef();
-    private 	  	RegData regData;
-    //private 	  	Context context;
-    private static 	String 	regID = "0";
-   // private TelephonyManager telephonyMgr;
+    private LocalDataReader actLog;
+    private mmNotification  statusIcon;
+    private 		Debug	logger = Logger.getInstance();
     private 		Server 	server;
+    private 	  	RegData regData;
+    private 	  	boolean regOK = false;
+    private static 	String 	regID = "0";
     private	final	int		sleepTimeLong	= 1000*60*60*24;//24h
-    private	final	int		sleepTimeShort 	= 1000;		//3sec
+    private	final	int		sleepTimeShort 	= 3000;		//3sec
     //private			String 	phoneID;
     //private			String 	phoneNum;
     private final 	int 	finePhoneNum_timeOut = 10;
-    //private Phone telephonyMgr;
-    private Debug logger = Logger.getInstance();
+    
  
   /**
    *
@@ -52,6 +51,7 @@ public class Registration extends Thread
     	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
 		//context = _context;
 		actLog 	= _actLog;
+		statusIcon = new mmNotification();
 		server 	= new Server(_actLog);
 		regData = new RegData(/*_context*/);
 
@@ -238,6 +238,7 @@ public class Registration extends Thread
     	{
     		//phoneID=System.getProperty("meid");
     		phoneID=CDMAInfo.getDecimalMEID();
+    		// If its STILL null, just set the ID to 0
     		if (null == phoneID) phoneID="0";
     	}
 
@@ -252,6 +253,9 @@ public class Registration extends Thread
     {
     	String  stateText = "";
     	
+    	// Update the notification icon
+		statusIcon.setNumValue(inputStage);
+
     	switch(inputStage) 
     	{
 			case 0: //New install
@@ -277,22 +281,11 @@ public class Registration extends Thread
     		//default:break;
     	}
     	
-    	
-    	// This updates the status bar in Android to display:
-    	// ID: isRegistered, etc
-    	// Needed for Blackberry?
-    	/*
-    	switch(inputStage) 
-    	{
-	    	case 0: //New install
-	    		Controller.UpdateStatus(stateText);
-	    		break;
-	    	case 1://New & has SN
-	    	case 2: //Wed Reg
-	    	case 3: //Device Reg
-	    		Controller.UpdateStatus(stateText+" ["+regID+"]");
-				break;
-    	}*/
+    	// I havent figured out how to set the text on the icon yet.
+    	// I think we'll have to make the icon clickable and open a new window with
+    	//serial number and other details on it.
+    	//http://supportforums.blackberry.com/t5/Java-Development/How-can-I-make-notification-icons-clickable/td-p/1164831
+    	//statusIcon.setText(stateText);
     }
     
     /**

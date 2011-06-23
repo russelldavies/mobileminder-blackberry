@@ -19,24 +19,24 @@ import net.rim.device.api.system.EncodedImage;
  */
 public class mmNotification
 {
-    private LocalDataWriter actLog;
     static Debug logWriter = Logger.getInstance();
 
 	ApplicationIndicatorRegistry reg;
+	//ApplicationIndicator indicator;
 	ApplicationIndicator appIndicator;
 	ApplicationIcon icon;
 	EncodedImage image;
 	int iconValue;
+	boolean iconWithValue = false;
 
-	public mmNotification(LocalDataWriter inputAccess)
+	public mmNotification()
 	{
 		logWriter.log("mmNotification constructor");
-		actLog		 = inputAccess;
 		reg   		 = ApplicationIndicatorRegistry.getInstance();
 		image 		 = EncodedImage.getEncodedImageResource("mmicon.png" );
 		icon  		 = new ApplicationIcon( image );
-		appIndicator = reg.getApplicationIndicator();
-		iconValue    = 0;		
+		iconValue    = 0;
+		setupIcon();
 	}
 	
 	/**
@@ -48,10 +48,14 @@ public class mmNotification
 		logWriter.log("mmNotification::setupIcon");
 		//ApplicationIndicator indicator = reg.register( icon, true, true);
 		// Do we need to create a new ApplicatinIndicator? Or just do this:
-		reg.register( icon, true, true);
+		reg.register( icon, iconWithValue, true);
+		appIndicator = reg.getApplicationIndicator();
 
-		// Set and display icon
-		appIndicator.set( icon, iconValue );
+		// Set and display icon, and possibly a numeric value beside it
+		if (iconWithValue)
+			appIndicator.set( icon, iconValue );
+		else
+			appIndicator.setIcon(icon);
 	}
 	
 	/**
@@ -83,5 +87,16 @@ public class mmNotification
 	{
 		logWriter.log("mmNotification::toggleIconVisibility");
 		appIndicator.setVisible(iconVisibility);
+	}
+	
+	public void updateIcon()
+	{
+		reg.unregister();
+		setupIcon();
+	}
+	
+	public void set(boolean withNum)
+	{
+		iconWithValue = withNum;
 	}
 }
