@@ -4,12 +4,15 @@ import java.util.Date;
 import java.util.Random;
 
 
+import com.kids.Logger;
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.MMTools;
 
 public abstract class ToolKit implements MMTools
 {
 	//private static Date deviceStartTime;
 	public static final String RestElementSeparator = ",";
+	private Debug logger = Logger.getInstance();
 
 	public static int stopWatchTime;
 
@@ -103,6 +106,13 @@ public abstract class ToolKit implements MMTools
 	 */
 	abstract public boolean isNumber(String _text);
 	
+	 /**
+	 * Return true if the argument string seems to be a
+	 * Hex data string, like "a0 13 2f ". Whitespace is
+	 * ignored.
+	 */
+	abstract public boolean isHex(String _sampleData); 
+	 
 	/**
 	 * This method formats a string into a hex string
 	 * 
@@ -135,8 +145,8 @@ public abstract class ToolKit implements MMTools
 		Random rand = new Random();
 		int top = rand.nextInt(16);
 		int tail = rand.nextInt(16);
-		String hexTop = Integer.toHexString(top);
-		String hexTail = Integer.toHexString(tail);
+		String hexTop = Integer.toHexString(top).toUpperCase();
+		String hexTail = Integer.toHexString(tail).toUpperCase();
 		//Top=======Hex_string=======tail
 		hexTop = hexTop.concat(_input).concat(hexTail);
 		//logger.log("topAndTail:returns:"+hexTop);
@@ -154,5 +164,48 @@ public abstract class ToolKit implements MMTools
 		String returnString = _input.substring(1, (_input.length() - 1));
 		//logger.log("reversetopAndTail:returns:"+returnString);
 		return returnString;
+	}
+	
+	public int charOccurence(String _str, char _char)
+	{		
+		int numOfChars = 0;
+		
+		for(int count = _str.length() ; count >=0 ; count--)
+		{
+			if (_char == _str.charAt(count))
+				numOfChars++;
+		}
+		
+		/* ANDROID
+		for(char ch: _str.toCharArray()) 
+		{ 
+			if( ch == _char ) 
+			{ 
+				++numOfChars; 
+			} 
+		}
+		*/
+		
+		return numOfChars;
+		
+		/*
+		logger.log("charOccurence");
+		int lastIndex = 0;
+		int count =0;
+
+		if(_str != null && 0 < _str.length())
+		{
+			logger.log("looping..");
+			//check for separator occurrence
+			while(lastIndex != -1)
+			{
+					lastIndex = _str.indexOf(_char,lastIndex);
+						if( lastIndex != -1)
+						{	count ++;}
+			}
+		}
+		logger.log("returning");
+		return count;
+		*/
 	}
 }

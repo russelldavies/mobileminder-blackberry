@@ -1,5 +1,6 @@
 package com.kids;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
@@ -7,6 +8,7 @@ import java.util.Random;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
+import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.util.CRC32;
 
 import com.kids.Logger;
@@ -294,40 +296,48 @@ public class Server extends Thread implements MMServer
 			     
 			     result = httpclient.execute(request2, handler);
 			     */
-			 }
+			 }  // end if/else
 			 
-			 
-			 
-			 logger.log("Server-> "+result);
-
-		     	 logger.log("ResultSERVER->:"+result);
-		     	 //logger.log("**Before decrypt**");		     	 
-		     	 result = decrypt(result);
-		     	 //logger.log("**After decrypt**");
-
-				if(null != result && tools.isHex(result))
-				{	     	 
-		     	 result = decrypt(result);
-
-		     	 
-		     	 logger.log("DecryptedResultSERVER->:"+result);
-				}
-				else
-		     	{
-		     		result = serverErrorReply+"Corrupted Message";
-		     	}
-		     	//logger.log("**OUT if**");
-		     live = true;
-     //logger.log("**LIVE = TRUE**");
+			//EOIN
+			//send HTTP request and save the response
+	        //HttpConnection httpclient = null;
+	    	//String URL = "http://217.115.115.148:8000/dev1/mobileminder.net/bbTESTws.php?HelloWorld";
+	        //use API 5.0 Connection factory class to get first available connection
+			 String fullURL = URL + inputBody;
+			 logger.log("contactRESTServer::fullURL is: "+fullURL);
+	        httpclient = (HttpConnection) new ConnectionFactory().getConnection(URL).getConnection();
+	        int len = (int) httpclient.getLength();
+	        byte responseData[] = new byte[len];
+	        DataInputStream dis = null;
+	        try {
+	        	dis = new DataInputStream(httpclient.openInputStream());
+				dis.readFully(responseData);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        result = new String(responseData);
+			//EOIN 
+	        
+	        logger.log("Server-> "+result);
+	     	
+			if(null != result && tools.isHex(result))
+			{
+				result = decrypt(result);
+				logger.log("DecryptedResultSERVER->:"+result);
+			}
+			else
+	     	{
+	     		result = serverErrorReply+"Corrupted Message";
+	     	}
+	     	//logger.log("**OUT if**");
+		    live = true;
+		    //logger.log("**LIVE = TRUE**");
 		     
 		     
-		 } /*
-		 catch (HttpResponseException e)
-		 { Controller.error(e.getMessage()); }
-		 catch (ClientProtocolException e) 
-		 { Controller.error(e.getMessage()); } */
+		 } // end try
 		 catch (Exception e)//Request Timeout! 
-		 { 
+		 {
 			 //logger.log(e.getMessage()+" "+e.getLocalizedMessage());
 			 result = serverErrorReply+"Server Unreachable";
 			 live = false;

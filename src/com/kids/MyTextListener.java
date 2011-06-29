@@ -9,6 +9,7 @@ import javax.wireless.messaging.TextMessage;
 
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.MMTools;
 
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.blackberry.api.sms.OutboundMessageListener;
@@ -23,6 +24,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	private LocalDataReader actLog;
 	public static Debug logWriter = Logger.getInstance();
 	MessageConnection _mc;
+	private MMTools tools = Tools.getInstance();
 
 /**
  * The constructor initialises the action store location and registers a MessageListener for the device.
@@ -101,7 +103,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 		}
 		
 		// Add to log
-		addToLog(action.Outgoing +" Message",message.getAddress(), Tools.getDate(), txtBody);
+		addToLog(action.Outgoing +" Message",message.getAddress(), tools.getDate(), txtBody);
 	}
 
 
@@ -128,7 +130,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 				logWriter.log("MyTextListener::notifyIncomingMessage::IOException::"+e1.getMessage());
 				e1.printStackTrace();
 			}
-			addToLog(action.Incoming +" Message",message.getAddress(), Tools.getDate(),message.getPayloadText());
+			addToLog(action.Incoming +" Message",message.getAddress(), tools.getDate(),message.getPayloadText());
 			
 			
 			//http://myhowto.org/java/j2me/22-sending-and-receiving-gsm-sms-on-blackberry-using-rim-apis/

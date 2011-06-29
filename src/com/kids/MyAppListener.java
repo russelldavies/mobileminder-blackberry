@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 /**
@@ -108,6 +109,8 @@ class AppMessage implements Message
 	private String 		 fullPackageName;
 	private StringBuffer stringREST;
 	private Date		 startTime;
+	private MMTools 	 tools = Tools.getInstance();
+
 			
 /**
  * The constructor initialises all the message parameters
@@ -123,7 +126,7 @@ class AppMessage implements Message
 		public void setMessage(String _appName, String _packageName)
 		{
 			appName = _appName;
-			launchTime = Tools.getDate();
+			launchTime = tools.getDate();
 			startTime = new Date();//get the time now
 			fullPackageName = _packageName;
 		}

@@ -2,6 +2,7 @@ package com.kids;
 
 import java.util.Date;
 
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 /**
  * 
@@ -17,6 +18,7 @@ public class MailMessage implements Message
 	private byte    	  sentStatus; //0:Incoming/1:Outgoing
 	private boolean		  hasAttachment;
 	private Date		  sentTime;
+	private MMTools 	  tools = Tools.getInstance();
 
 	/**
 	 * The constructor initialises a normal mail message -> "01"
@@ -35,7 +37,7 @@ public class MailMessage implements Message
 	{		
 		contactEmail 	= _email;
 		sentStatus 		= _outgoing;
-		deviceTime 		= Tools.getDate();
+		deviceTime 		= tools.getDate();
 	//	Controller.log("xxxxxx number:"+number);
 	}
 

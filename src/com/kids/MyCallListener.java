@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
+import com.kids.prototypes.MMTools;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
@@ -33,6 +34,8 @@ public class MyCallListener extends AbstractPhoneListener
         private		  int 		callEndTime		= 0;
         private 	  boolean	isOutgoing		= false;
         			  Debug     logWriter		= Logger.getInstance();
+		private 	  MMTools 	tools 			= Tools.getInstance();
+
 
         /**
          * The constructor initialises the action store location and registers the callListener for the device.
@@ -67,7 +70,7 @@ public class MyCallListener extends AbstractPhoneListener
             logWriter.log("Setting CallMessage...");
             callMessage.setMessage( contactNumber,
                                     isOutgoing,
-                                    Tools.getDate(),
+                                    tools.getDate(),
                                     (callEndTime-callStartTime)/1000
                                   );
             

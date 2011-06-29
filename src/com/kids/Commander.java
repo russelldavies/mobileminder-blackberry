@@ -5,6 +5,7 @@ import java.util.Vector;
 import com.kids.net.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 /**
@@ -18,7 +19,8 @@ public class Commander extends Thread
 	private final int 				time;
 	private LocalDataReader 		actLog;
 	private final int 				commandSignal = 0;
-	private Debug logger = Logger.getInstance();
+	private Debug 					logger = Logger.getInstance();
+	private MMTools 				tools = Tools.getInstance();
 	//CommandMessage commandMessage;
 	//AppControl appControl;
 
@@ -230,7 +232,7 @@ public class Commander extends Thread
  * Sets the time when the command started to be processed.
  */
 		public void setStartTime()
-		{startTime = Tools.getDate();}
+		{startTime = tools.getDate();}
 		
 /**
  * Retrieves the time when the command started to be processed.
@@ -243,7 +245,7 @@ public class Commander extends Thread
  * Sets the current time when the command finished processing.
  */
 		public void setEndTime()
-		{endTime = Tools.getDate();}
+		{endTime = tools.getDate();}
 /**
  * Gets the current time when the command finished processing.
  * @return Time when the command finished processing

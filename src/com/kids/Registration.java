@@ -3,6 +3,7 @@ package com.kids;
 import com.kids.net.Reply;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 import net.rim.blackberry.api.phone.Phone;
@@ -36,6 +37,7 @@ public class Registration extends Thread
     //private			String 	phoneID;
     //private			String 	phoneNum;
     private final 	int 	finePhoneNum_timeOut = 10;
+    public static MMTools tools = Tools.getInstance();
     
  
   /**
@@ -50,10 +52,10 @@ public class Registration extends Thread
     {
     	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
 		//context = _context;
-		actLog 	= _actLog;
-		statusIcon = new mmNotification();
-		server 	= new Server(_actLog);
-		regData = new RegData(/*_context*/);
+		actLog 		= _actLog;
+		statusIcon  = new mmNotification();
+		server 		= new Server(_actLog);
+		regData 	= new RegData(/*_context*/);
 
 		/*
 			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());
@@ -162,7 +164,7 @@ public class Registration extends Thread
     		else
     		{
     			logger.log("ASKING SERVER FOR REG!!");
-    			nextStage = Tools.txt2num(response.getInfo());//saves the new stage from the reply message
+    			nextStage = tools.txt2num(response.getInfo());//saves the new stage from the reply message
     			if(currentStageValue == nextStage)
     			{	
     				newState = false; 
@@ -388,7 +390,7 @@ class RegistrationMessage implements Message
 								String inputManufacturer)
 	{
 		error 		 = false;
-		deviceTime 	 = Tools.getDate();
+		deviceTime 	 = Registration.tools.getDate();
 		stage 		 = inputStage;
 		manufacturer = inputManufacturer;
 		/*

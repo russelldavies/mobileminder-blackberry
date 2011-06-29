@@ -6,13 +6,14 @@ import java.util.Vector;
 
 import javax.microedition.io.file.FileSystemRegistry;
 
+import com.kids.Data.ToolKit;
 import com.kids.prototypes.MMTools;
 
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 
-public class Tools 
+public class Tools extends ToolKit
 {
 	public static final String RestElementSeparator = ",";
 
@@ -32,8 +33,10 @@ public class Tools
 	public static MMTools getInstance()
 	{
 		if (null == instance)
-		{instance = new Tools();}
-		return (MMTools) instance;
+		{
+			instance = new Tools();
+		}
+		return instance;
 	}
 	
 	 public static int getGenOSVersion()
@@ -81,7 +84,7 @@ public class Tools
 	 * @return Date in milliseconds value in specified format.
 	 * @throws throws ParseException when input date format is not correct.
 	 */	
-	public static long getDate(String _date)// throws ParseException
+	public long getDate(String _date)// throws ParseException
 	{
 		if("0".equals(_date))
 		{	return 0;	}
@@ -94,14 +97,14 @@ public class Tools
 	 * @param _date milliseconds since the epoch.
 	 * @return
 	 */
-	public static String getDate(long _date)//the GTM return time zone in xxxx hours we only need xx
+	public String getDate(long _date)//the GTM return time zone in xxxx hours we only need xx
 	{return new SimpleDateFormat("yyMMddHHmmssZ").format(new Date(_date)).substring(0, 12);}
 	
 	/**
 	 * Gets the String format of date.
 	 * @return string which contains the date.
 	 */
-	public static String getDate()
+	public String getDate()
 	{
 		//return new SimpleDateFormat("HH:mm:ss dd-MM-yy").format(new Date());
 		//return new SimpleDateFormat("yyMMddHHmmssZ").format(new Date()).substring(0, 15);//the GTM return time zone in xxxx hours we only need xx
@@ -113,7 +116,7 @@ public class Tools
 	 * @param _text a number which in string format.
 	 * @return a number which in integer format.
 	 */
-	public static int txt2num(String _text) {
+	public int txt2num(String _text) {
 		try
 		{
 			return Integer.parseInt(_text.trim());
@@ -200,7 +203,6 @@ public class Tools
                 sdCardPresent = true;
             }     
         }
-	
 	return sdCardPresent;
     }
     
@@ -224,5 +226,15 @@ public class Tools
 	 {
 		 return (Character.isDigit(c) || (("0123456789abcdefABCDEF".indexOf(c)) >= 0));
 	 }
+
+	public int getUptimeInSec() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean isNumber(String _text) {
+		// TODO Auto-generated method stub
+		return false;
+	}
     
 }

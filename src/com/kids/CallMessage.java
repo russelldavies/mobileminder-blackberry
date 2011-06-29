@@ -2,6 +2,7 @@ package com.kids;
 
 import java.util.Date;
 
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 /**
@@ -19,6 +20,7 @@ public class CallMessage implements Message
 	private byte 		  endStatus;
 	private int 		  duration;// in Sec
 	private StringBuffer  stringREST;
+	private MMTools 	  tools = Tools.getInstance();
 
 /**
  * The constructor initialises a normal call message
@@ -50,7 +52,7 @@ public class CallMessage implements Message
 	{		
 		number 		= _number;
 		startStatus = _outgoing;
-		deviceTime 	= Tools.getDate();
+		deviceTime 	= tools.getDate();
 	}
 
 /**

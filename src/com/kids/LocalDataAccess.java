@@ -20,6 +20,7 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
+import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
@@ -141,16 +142,29 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 
 				if (!dbExist)
 				{
-					storeDB = DatabaseFactory.create(dbURI);  //Create file
-					dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
-					
-					// Now create the tables
-					Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
-					// if "st" is unsuccessful, one of the "catch" blocks will
-					//trigger before openDatabase is called.
-					st.prepare();
-					st.execute();  // Execute SQL
-					st.close();
+					logWriter.log("createDatabase::Checking for SD card...");
+					sdCardPresent = Tools.hasSDCard();
+					if (sdCardPresent)
+					{
+						logWriter.log("createDatabase::SD card present");
+						storeDB = DatabaseFactory.create(dbURI);  //Create file
+						dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
+						
+						// Now create the tables
+						Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
+						// if "st" is unsuccessful, one of the "catch" blocks will
+						//trigger before openDatabase is called.
+						st.prepare();
+						st.execute();  // Execute SQL
+						st.close();
+					}/*
+					else
+					{ // Schedules an app to (re)start in a specified number of milliseconds
+					  // can be used if there is no SD card. Maybe try this from Driver?
+					  //http://supportforums.blackberry.com/t5/Java-Development/how-to-restart-a-Background-running-Application/td-p/335449/page/2
+						ApplicationManager.getApplicationManager().scheduleApplication(thisApp, System.currentTimeMillis() + 60100, true);
+					}*/
+
 				}
 
 			} catch (DatabaseIOException e) {
@@ -181,8 +195,14 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				if (!dbExist)
 					createDatabase();
 				
-				if (null == storeDB)	// Checked here, but also checked before call. Overkill??
+				if (null != storeDB)
+				{
+					logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
+				}
+				else 	// Checked here, but also checked before call. Overkill??
+				{
 					storeDB = DatabaseFactory.open(dbURI);
+				}
 				
 				// From now on, we can check if the DB is open by comparing it to null	
 				//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));
@@ -246,6 +266,8 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	{
             		logWriter.log("localDataAccess::addValue::Calling openDatabase()...");
             		// NOTE: openDatabase method call is embedded in output
+            		logWriter.log("localDataAccess::addValue::storeDB is"+(openDatabase()?" ":" NOT ")+"open");
+            		logWriter.log("Trying to open DB again...");
             		logWriter.log("localDataAccess::addValue::storeDB is"+(openDatabase()?" ":" NOT ")+"open");
             	}           	            	
             	// storeDB should, hopefully, never be NULL at this point, as it should be opened
