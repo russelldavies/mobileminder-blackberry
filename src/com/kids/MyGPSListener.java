@@ -1,6 +1,16 @@
 package com.kids;
 
+/**
+ * Class handles getting the GPS coordinates, and the frequency it updates
+ * http://docs.blackberry.com/ja-jp/developers/deliverables/29185/GPS_overview_1679738_11.jsp
+ */
 
+import javax.microedition.location.Criteria;
+import javax.microedition.location.Location;
+import javax.microedition.location.LocationException;
+import javax.microedition.location.LocationProvider;
+
+import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
 
@@ -14,6 +24,8 @@ public class MyGPSListener extends Thread
 {
 	private LocalDataWriter actLog;
 	private int 			timer;
+			Debug     		logWriter		= Logger.getInstance();
+			GPSMessage 		gpsMessage;
 
 /**
  * The GPSListener constructor initialise the action store location and the interval value.
@@ -27,6 +39,8 @@ public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 	{
 		actLog = inputAccess;
 		timer  = inputGPSTimer;
+		gpsMessage = new GPSMessage();
+
 		this.start();
 	}
 	
@@ -41,12 +55,12 @@ public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 	
 	
 	public void run()
-	{/*
+	{
 		try
 	    {
 			while(true)
 			{
-				this.sleep(timer);
+				sleep(timer);
 				
 				Criteria criteria = new Criteria();
 				criteria.setHorizontalAccuracy(       Criteria.NO_REQUIREMENT);
@@ -64,19 +78,31 @@ public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 		            float  altitude  = mylocation.getQualifiedCoordinates().getAltitude();
 		            float  speed     = mylocation.getSpeed();
 					
+		            /*
 					actLog.addAction(action.TYPE_GPS,
 									 "Course:"+heading+" Speed:"+speed,
 									 "lon:"+longitude+" lat:"+latitude);
+					*/
+		            actLog.addMessage(gpsMessage);
 				}
 			}
 		} 
         catch (LocationException e)
-        {actLog.addAction(true,action.TYPE_GPS,e.toString());}
+        {
+        	logWriter.log("myGPSListener::run::LocationException::"+e.getMessage());
+        	//actLog.addAction(true,action.TYPE_GPS,e.toString());
+        }
         catch (InterruptedException e)
-		{actLog.addAction(true,action.TYPE_GPS,e.toString());}
+		{
+        	logWriter.log("myGPSListener::run::InterruptedException::"+e.getMessage());
+        	//actLog.addAction(true,action.TYPE_GPS,e.toString());
+		}
         catch (Exception e)
-		{actLog.addAction(true,action.TYPE_GPS,e.toString());}
-*/
+		{
+        	logWriter.log("myGPSListener::run::Exception::"+e.getMessage());
+        	//actLog.addAction(true,action.TYPE_GPS,e.toString());
+		}
+
 	}	// end run()
 }
 

@@ -2,7 +2,6 @@ package com.kids;
 
 import java.util.Date;
 
-import com.kids.Registration;
 import com.kids.prototypes.Message;
 
 /**

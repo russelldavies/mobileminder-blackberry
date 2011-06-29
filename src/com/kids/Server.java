@@ -1,28 +1,42 @@
 package com.kids;
 
-//BLACKBERRY
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+
+import net.rim.device.api.util.CRC32;
+
+import com.kids.Logger;
 import com.kids.net.Reply;
 import com.kids.net.Security;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMServer;
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
-import net.rim.device.api.util.CRC32;
-
+/*
+interface Message
+{
+	String 	getType();//call,text..
+	boolean getError();
+	String 	getTime();
+	String 	getInfo();
+	String 	getREST();//calls this.toString()
+}
+*/
 /**
  * This class monitors for new actions stored in the local storage for recording actions and sends them to the web server at specific intervals.
  */
 public class Server extends Thread implements MMServer
 {
-	//public static final String RestElementSeparator = ",";
+
 	private Debug logger = Logger.getInstance();
+	private MMTools tools = Tools.getInstance();
+
 	/*
 	private final String ServerFeedBack_good = "ok";
 	private final String ServerFeedBack_Stop = "no";
@@ -34,7 +48,7 @@ public class Server extends Thread implements MMServer
 	private final String 	URL;
 	private HttpConnection	httpclient;
 //	private String 	 		deviceId;
-	private int 		 	freq = 1000 * 30; //freq = 1000 * 60 * 5; //5 min
+	private int 		 	freq = 1000 * 15; //freq = 1000 * 60 * 5; //5 min
 	private boolean			live;
 	private String serverErrorReply;
 	private Random generator;
@@ -52,16 +66,22 @@ public class Server extends Thread implements MMServer
 	{		
 		logger.log("Starting.. Server");
 		security = new Security();
+		//URL = Controller.getString(R.string.URL_webservice);
+		//logger.log(URL);
 		//URL		= "http://www.associatemobile.com/mobileminder/WebService.php?";
 		//Development Server
 		URL 	 = "http://217.115.115.148:8000/dev1/mobileminder.net/WebService.php?";
 		//URL = "http://192.168.0.20/mobileminder.net/WebService.php?";
+	//	URL = "http://192.168.1.41/mobileminder.net/WebService.php?";
 		//URL 	 = "http://192.168.81.1/kids/webservice.php?";
 //		deviceId = "xxxxx";
-		serverErrorReply = 	Tools.RestElementSeparator+
+		serverErrorReply =  Tools.RestElementSeparator+
 							Tools.RestElementSeparator+//reply
 		 				 1 +Tools.RestElementSeparator+//error
-							Tools.RestElementSeparator;//CallingCODE
+		 				 	Tools.RestElementSeparator;//CallingCODE
+		//	Controller.getString(R.string.Error_ServerTimeOut);
+		
+		
 
 		actLog 	 = inputActLog;
 		//httpclient = new DefaultHttpClient();
@@ -71,6 +91,7 @@ public class Server extends Thread implements MMServer
 		startup();
 		
 		logger.log("Started Server");
+
 	}
 	
 	/**
@@ -110,11 +131,10 @@ public class Server extends Thread implements MMServer
 				{
 					//sends message to server and receives a reply. 
 					// NO String.split() IN J2ME - http://stackoverflow.com/questions/657627/split-string-logic-in-j2me
-					//resultREST = (contactServer(actLog.getFirst()).getREST()).split(RestElementSeparator);
-					resultREST = Tools.split(actLog.getFirst(), Tools.RestElementSeparator);
-
-					//if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
-					if(resultREST.length > 2 && "0" == resultREST[2])// No error
+					//resultREST = contactServer(actLog.getFirst()).getREST().split(Tools.RestElementSeparator);
+					resultREST = Tools.split(contactServer(actLog.getFirst()).getREST(), Tools.RestElementSeparator );
+										
+					if(resultREST.length > 2 && 0 == Integer.parseInt(resultREST[2]))// No error
 					{	actLog.removeFirst();
 						counter = -1;
 						
@@ -135,7 +155,6 @@ public class Server extends Thread implements MMServer
 						actLog.removeFirst();
 						break;
 					}
-
 				}
 			//}
 			
@@ -145,10 +164,29 @@ public class Server extends Thread implements MMServer
 			} 
 			catch (InterruptedException e) 
 			{	
-				logger.log("x::Server: InterruptedException");//actLog.addMessage(new ErrorMessage(e));
+				logger.log("Server: InterruptedException");//actLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}
+	/*
+	public String contactServer(String[] inputElements)
+	{
+		String separator 	= ",";
+		StringBuffer result = new StringBuffer();
+		
+	    if (inputElements.length > 0) 
+	    {
+	        result.append(inputElements[0]);
+	        for (int count=1; count<inputElements.length; count++) 
+	        {
+	            result.append(separator);
+	            result.append(inputElements[count]);
+	        }
+	    }
+
+		return contactServer(result.toString());
+	}
+	*/
 	
 	/**
 	 * This method will sends a rest message to the server.
@@ -182,15 +220,16 @@ public class Server extends Thread implements MMServer
 	 * @param inputBody the rest message to be sent to the server
 	 * @return reply from the server
 	 */
-	private String contactRESTServer(String inputBody, String sCrc, String pic)
+	private String contactRESTServer(String inputBody, String crc, String pic)
 	//public String contactServer(String inputBody)
 	{
 		logger.log("contactRESTServer1");
 		boolean getFlag = true;
+		boolean messageOk = false;
 		
 		logger.log("Before POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 		
-		if(null == sCrc || sCrc.equals("") 
+		if(null == crc || crc.equals("") 
 		//|| 0 == pic.length )
 		|| null == pic || pic.equals(""))
 		{	getFlag = true;	}
@@ -199,7 +238,7 @@ public class Server extends Thread implements MMServer
 		
 		/*
 		 //Use to test decryption
-		  
+		   
 		//String output = decrypt("10A451DB09778325F294F60FEFFD98146B89F62528FDE0DBC356E0DBC356E08");
 		//logger.log("\n\nThis is the result for 1: "+output);
 		//String output2 = decrypt("10DD939F09689814EF11F6FF6377D925C3568381A377F6DBC3FD980A28FD980A28FDe");
@@ -212,48 +251,33 @@ public class Server extends Thread implements MMServer
 		*/
 		
 		logger.log("SERVERBeforeEncrypt->:"+inputBody);
-		inputBody =  topAndTail(stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
+		inputBody =  tools.topAndTail(tools.stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
 		logger.log("SERVERAfterEncrypt<-:"+inputBody);
 		logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
 		
 		 String result = null; 
-		 //HttpGet  request  = new HttpGet (URL + inputBody.toUpperCase());
-		 //HttpPost request2 = new HttpPost(URL + inputBody.toUpperCase());
+		 /*
+		 HttpGet request = new HttpGet(URL + inputBody.toUpperCase());
+		 HttpPost request2 = new HttpPost(URL + inputBody.toUpperCase());
 		 
-		
-		 //ResponseHandler<String> handler = new BasicResponseHandler();  
+		 ResponseHandler<String> handler = new BasicResponseHandler();  
+		 */
 		 try
 		 {
-			 // Attach data to send
 			 if(getFlag)
-			 {	// GET
+			 {
 				 httpclient.setRequestMethod(HttpConnection.GET);
 				 httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
 			 }
 			 else
-			 {  // POST
+			 { 
 				 httpclient.setRequestMethod(HttpConnection.POST);
 				 // Not sure if this will work
-				 int length = inputBody.length()+sCrc.length()+pic.length();
+				 int length = inputBody.length()+crc.length()+pic.length();
 				 httpclient.setRequestProperty("Content-Length", ""+length);
-				 httpclient.setRequestProperty("crc", sCrc);
+				 httpclient.setRequestProperty("crc", crc);
 				 httpclient.setRequestProperty("pic", pic);
-				 logger.log("In Send POST: SERVER:CRC="+sCrc+" SERVERHEX="+pic);
-				 
-				 
-				 ////////// Is this necessary??
-				 // Headers: Possible way to store key value pairs in Blackberry
-				 /*
-				 Headers nameValuePairs = null;
-				 nameValuePairs.setHeader("crc", crc);
-				 logger.log("CRC sent to server:"+crc);
-				 nameValuePairs.setHeader("pic", pic);
-				 */
-				 ///////////////////////////////
-				 				 
-				 // Object for encoding URL, replacing special chars and spaces. 
-				 // format: id=zx&name=john&foo=bar
-				 //URLEncodedPostData postData;
+				 logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 				 
 				 /*
 				 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -265,43 +289,39 @@ public class Server extends Thread implements MMServer
 			     {	request2.setEntity(new UrlEncodedFormEntity(nameValuePairs));	} 
 			     catch (UnsupportedEncodingException e1) 
 			     {logger.log("Server: UnsupportedEncodingException");}//actLog.addMessage(new ErrorMessage(e1));}
-			     */
 			     
-			     //result = httpclient.execute(request2, handler);
+			     logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+			     
+			     result = httpclient.execute(request2, handler);
+			     */
 			 }
 			 
-			 //Send the data to the server
-			 OutputStream os = httpclient.openOutputStream();
-			 os.write(inputBody.getBytes("UTF-8"));
-			 os.flush();
-			 os.close();
 			 
-			 // Take note of response
-			 result=httpclient.getResponseMessage();
-			 //result=httpclient.getResponseCode();
 			 
-			 //Close connection to server
-			 shutdown();
+			 logger.log("Server-> "+result);
 
-			 logger.log("ResultSERVER->:"+result);
-	     	 //logger.log("**Before decrypt**");		     	 
-	     	 result = decrypt(result);
-	     	 //logger.log("**After decrypt**");
-	     	 
-	     	 logger.log("DecryptedResultSERVER->:"+result);
-	     	
-	     	 if(null == result || result.equals(""))
-	     	 {
-	     		 //result = serverErrorReply+Controller.getString(R.string.Error_CorruptedMessage);
-	     		result = serverErrorReply+"x";
-	     	 }
-	     	 //logger.log("**OUT if**");
+		     	 logger.log("ResultSERVER->:"+result);
+		     	 //logger.log("**Before decrypt**");		     	 
+		     	 result = decrypt(result);
+		     	 //logger.log("**After decrypt**");
+
+				if(null != result && tools.isHex(result))
+				{	     	 
+		     	 result = decrypt(result);
+
+		     	 
+		     	 logger.log("DecryptedResultSERVER->:"+result);
+				}
+				else
+		     	{
+		     		result = serverErrorReply+"Corrupted Message";
+		     	}
+		     	//logger.log("**OUT if**");
 		     live = true;
-		     //logger.log("**LIVE = TRUE**");
+     //logger.log("**LIVE = TRUE**");
 		     
 		     
-		 }	 // End try() 
-		 /*
+		 } /*
 		 catch (HttpResponseException e)
 		 { Controller.error(e.getMessage()); }
 		 catch (ClientProtocolException e) 
@@ -309,14 +329,13 @@ public class Server extends Thread implements MMServer
 		 catch (Exception e)//Request Timeout! 
 		 { 
 			 //logger.log(e.getMessage()+" "+e.getLocalizedMessage());
-			 //result = serverErrorReply+Controller.getString(R.string.Error_ServerTimeOut);
 			 result = serverErrorReply+"Server Unreachable";
 			 live = false;
 			 
 			 //No need to log
 			 //actLog.addMessage(new ErrorMessage(e));
 		 }
-		 // Returns HTTP 200 OK, or an error
+		 
 		 return result;
 	}
 	
@@ -367,22 +386,26 @@ public class Server extends Thread implements MMServer
 	 * This method establishes the connection with the server.
 	 */
 	public void startup()
-	{	try {
-		httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
-	} catch (IOException e) {
-		logger.log("x::Error opening HTTP connection to server");
-		e.printStackTrace();
-	}	}
+	{
+		try {
+			httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
+		} catch (IOException e) {
+			logger.log("x::Error opening HTTP connection to server");
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * This method terminates the connection with the server.
 	 */
 	public void shutdown()
-	{	try {
-		httpclient.close();
-	} catch (IOException e) {
-		logger.log("x::Error closing connection to HTTP server");
-		e.printStackTrace();
-	}	}
+	{
+		try {
+			httpclient.close();
+		} catch (IOException e) {
+			logger.log("x::Error closing connection to HTTP server");
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * This method checks the status of the server.
 	 * @return true if the server is live, otherwise is down.
@@ -431,7 +454,7 @@ public class Server extends Thread implements MMServer
 		crc=0;//crc.reset();
  
 		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
-		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
+		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(tools.reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
 		//for debugging
 		/*for(int counts = 0; counts<replyArray.length; counts++)
 		{
@@ -475,29 +498,7 @@ public class Server extends Thread implements MMServer
 			for(int count = 0; count < inputLength; count++)
 			{	returnString += charSET.charAt(generator.nextInt(charSET.length())); }
 		return returnString;
-	}
-	
-	/**
-	 * This method formats a string into a hex string
-	 * 
-	 * @param b string
-	 * @return hex string
-	 */
-		 public static String stringToHex(String s)
-		 {
-			char[] b;
-			b = s.toCharArray();
-		//s	s.getBytes();
-			 
-		    StringBuffer sb = new StringBuffer(b.length * 2);
-		    for (int i = 0; i < b.length; i++) 
-		    {	int v = b[i] & 0xff;
-		    	if (v < 16){	sb.append('0');}
-		    	sb.append(Integer.toHexString(v));
-		    }
-		    	return sb.toString().toUpperCase();
-		 }
-	
+	}	
 	
 	/**
 	 * This method formats a hex string into a String
@@ -505,49 +506,16 @@ public class Server extends Thread implements MMServer
 	 * @param hex hex string 
 	 * @return String
 	 */
-	 public String hexToString(String hex){
-		  
+	 public String hexToString(String hex)
+	 {
+		 
 		 StringBuffer output = new StringBuffer();
 		 String str = "";
-		    for (int i = 0; i < hex.length(); i+=2) {
-		        str = hex.substring(i, i+2);
-		        output.append((char)Integer.parseInt(str, 16));
-		    }
-		    return output.toString();
-	  }
-	 
-	
-	/**
-	 * This method formats a HEX string, adding a random HEX value to the start and end of the string
-	 * 
-	 * @param _input HEX string
-	 * @return hex string
-	 */
-	public static String topAndTail(String _input)
-	{
-		Random rand = new Random();
-		int top = rand.nextInt(16);
-		int tail = rand.nextInt(16);
-		String hexTop = Integer.toHexString(top);
-		String hexTail = Integer.toHexString(tail);
-		//Top=======Hex_string=======tail
-		hexTop = hexTop.concat(_input).concat(hexTail);
-		//logger.log("topAndTail:returns:"+hexTop);
-		return hexTop;
-	}
-	
-	/**
-	 * This method formats a HEX string, removing a random HEX value from the start and end of the string
-	 * 
-	 * @param _input HEX string
-	 * @return hex string
-	 */
-	public static String reverseTopAndTail(String _input)
-	{
-		String returnString = _input.substring(1, (_input.length() - 1));
-		//logger.log("reversetopAndTail:returns:"+returnString);
-		return returnString;
-	}
-
-	
+	     for (int i = 0; i < hex.length(); i+=2)
+	     {
+	         str = hex.substring(i, i+2);
+	         output.append((char)Integer.parseInt(str, 16));
+	     }
+	     return output.toString();
+	 }
 }

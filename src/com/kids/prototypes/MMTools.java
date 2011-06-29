@@ -1,7 +1,5 @@
 package com.kids.prototypes;
 
-//import java.text.ParseException;
-
 public interface MMTools 
 {
 		
@@ -21,7 +19,7 @@ public interface MMTools
 		 * @throws ParseException 
 		 * @throws throws ParseException when input date format is not correct.
 		 */	
-		public long getDate(String _date);// throws ParseException;
+		public long getDate(String _date); //throws ParseException;
 		
 		/**
 		 * Gets the string format of date in specified format.
@@ -77,4 +75,12 @@ public interface MMTools
 		 */
 		public String reverseTopAndTail(String _input);
 
+		 /**
+		 * Return true if the argument string seems to be a
+		 * Hex data string, like "a0 13 2f ". Whitespace is
+		 * ignored.
+		 */
+		public boolean isHex(String _sampleData);
+		
+		public int charOccurence(String _str, char _char);
 }

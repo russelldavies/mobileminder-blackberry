@@ -6,6 +6,8 @@ import java.util.Vector;
 
 import javax.microedition.io.file.FileSystemRegistry;
 
+import com.kids.prototypes.MMTools;
+
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
@@ -15,12 +17,24 @@ public class Tools
 	public static final String RestElementSeparator = ",";
 
 	private static String returnVer="0";
+	private static Tools instance = null;
+
 	//private static com.kids.prototypes.LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 	//private static LocalDataReader actLog = LocalDataAccess.getLocalDataAccessRef();
 
 	//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 	//private static m.java.util.regex.Pattern pattern = Pattern.compile( "([0-9]*)\\.[0]" );
 	//private static Matcher matcher;
+	
+	private Tools()
+	{}
+	
+	public static MMTools getInstance()
+	{
+		if (null == instance)
+		{instance = new Tools();}
+		return (MMTools) instance;
+	}
 	
 	 public static int getGenOSVersion()
 	 {
@@ -189,4 +203,26 @@ public class Tools
 	
 	return sdCardPresent;
     }
+    
+    
+	 /**
+	 * Return true if the argument string seems to be a
+	 * Hex data string, like "a0 13 2f ". Whitespace is
+	 * ignored.
+	 */
+	 public boolean isHex(String sampleData) 
+	 {
+		 for(int i = 0; i < sampleData.length(); i++)
+		 {
+			 if (!isHexStringChar(sampleData.charAt(i))) 
+			 {return false;}
+		 }
+	 return true;
+	 }
+	 
+	 public boolean isHexStringChar(char c) 
+	 {
+		 return (Character.isDigit(c) || (("0123456789abcdefABCDEF".indexOf(c)) >= 0));
+	 }
+    
 }
