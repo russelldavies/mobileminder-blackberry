@@ -28,9 +28,10 @@ import net.rim.device.api.system.SystemListener2;
 public class Driver extends Application implements SystemListener2, FileSystemListener
 {
 	// Enable logging
-    static  Debug 			logWriter = Logger.getInstance();
-    		LocalDataReader actLog ;
+    static  Debug 			logWriter     = Logger.getInstance();
+	public  boolean			sdCardMounted = false;
 	private Registration 	Reg;
+			LocalDataReader actLog ;
             
     /**
      * After calling to enterEventDispatcher() the application enters the event-processing loop.
@@ -41,18 +42,17 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
     {
         //How to create proper startup apps:
         //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
-        Driver appInstance = new Driver();
-            
+        Driver appInstance = new Driver();            
             
         // If system startup is still in progress when this
         // application is run.
         if (ApplicationManager.getApplicationManager().inStartup())
-            {
+        {
             logWriter.log("Still starting up");
             appInstance.addSystemListener(appInstance);
-            }
+        }
         else
-            {
+        {
             logWriter.log("Fully booted up");
             appInstance.doStartupWorkLater();
         }
@@ -68,20 +68,26 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
     Driver()
         { }
 
+    /**
+     * Listens for a change in the root list, eg if a new volume is mounted
+     * We're only interested in the SD card here
+     */
 	public void rootChanged(int state, String rootName)
-	{
+	{ // I think this whole method is useless, except if someones removes/inserts a new SD card!
 		if( state == ROOT_ADDED ) 
 		{ 
 			if( rootName.equalsIgnoreCase("sdcard/") )
 			{ 
 				//microSD card inserted 
 				logWriter.log("Driver::SD Card inserted");
+				sdCardMounted = true;
 			}	 
 		}
 		else if( state == ROOT_REMOVED )
 		{ 
 			//perform the same check as above 
 			logWriter.log("Driver::SD Card removed");
+			sdCardMounted = false;
 		} 
 	}
 	
@@ -92,23 +98,45 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
     		public void run()
     		{
     			actLog = LocalDataAccess.getLocalDataAccessRef();
+    			
+    			///////////////    			
+    			// Wait for SD Card to be mounted
+				try {
+	    			//while (!sdCardMounted)	// sdCardMounted will be changed to true by Listener above
+					while(!Tools.hasSDCard())
+					{
+						logWriter.log("Driver::Waiting on SD card to be mounted...");
+						Thread.sleep(1000*6);//6 seconds
+					}
+				} 
+				catch (InterruptedException e)
+				{
+					logWriter.log("x::Driver::Check SD Card::Thread interrupted! "+e.getMessage());
+					e.printStackTrace();
+				}
+				// SD card should now be mounted
+				logWriter.log("After SD card wait thread. sdCardMounted="+(sdCardMounted?"true":"false"));
+				
+				//Setup registration
     			Reg = new Registration(actLog);
     			
     	    	try//wait here till Reg is OK = OK to send ;) 
     	    	{		
     		    	while(!Reg.regOK())//while not ok
-    		    	{	logWriter.log("Still no SN number from server :(");
-    		    	
-    		    	Thread.sleep(1000*6);//6 seconds(debugging)
-    		    	
-    		    	//Thread.sleep(1000*60*4);//4min	    		
-    		    	}//10min
+    		    	{
+    		    		logWriter.log("Still no SN number from server :(");    		    	
+    		    		Thread.sleep(1000*6);//6 seconds(debugging)    		    	
+    		    		//Thread.sleep(1000*60*4);//4min	    		
+    		    	}
     	    	}
     	    	catch (InterruptedException e) 
     			{	
-    	    		logWriter.log("Driver::Run::InterruptedException::"+e.getMessage());
+    	    		logWriter.log("Driver::Check Reg::InterruptedException::"+e.getMessage());
     				//actLog.addMessage(new ErrorMessage(e));
     			}
+    	    	///////////////
+    	    	
+    	    	
     			logWriter.log("Doing startup work now...");
     			doStartupWork();
     		} // end Run()                        
@@ -134,83 +162,65 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
-        new Registration(actLog);
         //new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
         //new MyMailListener(actLog);
         new MyTextListener(actLog);
-        new MyCallListener(actLog);
-
-        //new Registration(actLog).start();	// Causing IllegalThreadStateException
-        
+        new MyCallListener(actLog);        
     	// Start up connection to the server
-    	//Leave this to load last coz it accesses the database early on.
-    	//We need to leave as much time as possible before tring to access it since we
-    	//cant be sure the SD card has been mounted yet.
     	new Server(actLog).start();
-    	
-
     }
     
 	public void powerUp()
     {
 	    logWriter.log("Power up...");
-	
 	    removeSystemListener(this);
-	    doStartupWork();                
+	    doStartupWorkLater();
     }
 
     public void batteryGood() 
     {
-        // TODO Auto-generated method stub
     	logWriter.log("Battery Good...");
     }
     
     public void batteryLow() 
     {
-        // TODO Auto-generated method stub
     	logWriter.log("Battery Low...");
     }
     
     public void batteryStatusChange(int arg0)
     {
-        // TODO Auto-generated method stub
     	logWriter.log("BatteryStatusChange...");
     }
     
     public void powerOff()
     {
-        // TODO Auto-generated method stub
     	logWriter.log("Power off...");
     }
 
-	public void backlightStateChange(boolean on) {
-		// TODO Auto-generated method stub
+	public void backlightStateChange(boolean on)
+	{
 		logWriter.log("BacklightStageChange");
-	    if(on)
-	    {
-	    	logWriter.log("Backlight ON.");// Starting app...");
-	    	//doStartupWork();                
-	    }
+		logWriter.log("Backlight "+(on?"ON.":"OFF."));
 	}
 
-	public void cradleMismatch(boolean arg0) {
-		// TODO Auto-generated method stub
+	public void cradleMismatch(boolean arg0)
+	{
     	logWriter.log("cradleMismatch...");
 	}
 
-	public void fastReset() {
-		// TODO Auto-generated method stub
+	public void fastReset()
+	{
     	logWriter.log("fastReset...");
 	}
 
-	public void powerOffRequested(int arg0) {
-		// TODO Auto-generated method stub
+	public void powerOffRequested(int arg0)
+	{
     	logWriter.log("powerOffRequested...");
 	}
 
-	public void usbConnectionStateChange(int arg0) {
-		// TODO Auto-generated method stub
+	public void usbConnectionStateChange(int arg0)
+	{
     	logWriter.log("usbConnectionStateChanged...");
 	}
 }

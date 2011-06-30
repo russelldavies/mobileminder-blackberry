@@ -57,9 +57,9 @@ public class Registration extends Thread
     {
     	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
 		//context = _context;
-		actLog = _actLog;
-		server 	= new Server(_actLog);
-		regData 	= new RegData();
+		actLog 	  = _actLog;
+		server 	  = new Server(_actLog);
+		regData   = new RegData();
 
 		/*
 			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());
@@ -73,7 +73,8 @@ public class Registration extends Thread
 			logger.log("SimOperatorName:"		+telephonyMgr.getSimOperatorName());
 			logger.log("SimSerialNumber:"		+telephonyMgr.getSimSerialNumber());
 			logger.log("SubscriberId:"			+telephonyMgr.getSubscriberId());
-			logger.log("VoiceMailNumber:"		+telephonyMgr.getVoiceMailNumber());*/
+			logger.log("VoiceMailNumber:"		+telephonyMgr.getVoiceMailNumber());
+		*/
 			//data.setRegSN("0");		//FOR TESTING!!
 			//data.setStageValue(0);	//FOR TESTING!!
 			

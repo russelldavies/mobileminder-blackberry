@@ -101,9 +101,8 @@ public class Server extends Thread implements MMServer
 	 *  
 	 */
 	public void run()
-	{
-		
-		logger.log("Server running"+actLog.length());
+	{		
+		logger.log("Server running");
 		String[] resultREST;
 		/*		for(int count = 0; count <characters.length(); count++)
 		{
@@ -258,21 +257,18 @@ public class Server extends Thread implements MMServer
 		logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
 		
 		 String result = null; 
-		 /*
-		 HttpGet request = new HttpGet(URL + inputBody.toUpperCase());
-		 HttpPost request2 = new HttpPost(URL + inputBody.toUpperCase());
-		 
-		 ResponseHandler<String> handler = new BasicResponseHandler();  
-		 */
+
 		 try
 		 {
 			 if(getFlag)
 			 {
+				 logger.log("contactRESTServer using GET");
 				 httpclient.setRequestMethod(HttpConnection.GET);
 				 httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
 			 }
 			 else
 			 { 
+				 logger.log("contactRESTServer using POST");
 				 httpclient.setRequestMethod(HttpConnection.POST);
 				 // Not sure if this will work
 				 int length = inputBody.length()+crc.length()+pic.length();
@@ -280,22 +276,6 @@ public class Server extends Thread implements MMServer
 				 httpclient.setRequestProperty("crc", crc);
 				 httpclient.setRequestProperty("pic", pic);
 				 logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
-				 
-				 /*
-				 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-			     nameValuePairs.add(new BasicNameValuePair("crc", crc ));
-			     logger.log("CRC Sent to Server:"+crc);
-			     nameValuePairs.add(new BasicNameValuePair("pic", pic));
-			     
-			     try 
-			     {	request2.setEntity(new UrlEncodedFormEntity(nameValuePairs));	} 
-			     catch (UnsupportedEncodingException e1) 
-			     {logger.log("Server: UnsupportedEncodingException");}//actLog.addMessage(new ErrorMessage(e1));}
-			     
-			     logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
-			     
-			     result = httpclient.execute(request2, handler);
-			     */
 			 }  // end if/else
 			 
 			//EOIN
@@ -309,11 +289,15 @@ public class Server extends Thread implements MMServer
 	        int len = (int) httpclient.getLength();
 	        byte responseData[] = new byte[len];
 	        DataInputStream dis = null;
-	        try {
+	        try 
+	        {
 	        	dis = new DataInputStream(httpclient.openInputStream());
+	        	logger.log("DataInputStream opened. Reading data...");
 				dis.readFully(responseData);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			}
+	        catch (IOException e)
+	        {
+				logger.log("x::Server::contactRESTServer::IOException::"+e.getMessage());
 				e.printStackTrace();
 			}
 	        result = new String(responseData);
@@ -344,8 +328,7 @@ public class Server extends Thread implements MMServer
 			 
 			 //No need to log
 			 //actLog.addMessage(new ErrorMessage(e));
-		 }
-		 
+		 }		 
 		 return result;
 	}
 	

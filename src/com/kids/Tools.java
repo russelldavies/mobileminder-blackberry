@@ -235,6 +235,5 @@ public class Tools extends ToolKit
 	public boolean isNumber(String _text) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-    
+	}    
 }
