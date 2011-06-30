@@ -76,7 +76,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     
     public static String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
     public static Database storeDB			 = null;
-    public static URI      dbURI;
+    public static URI      dbURI			 = null;
     
     public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
     public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
@@ -91,7 +91,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         	//String mc             = System.getProperty("fileconn.dir.memorycard");
             //String mcname         = System.getProperty("fileconn.dir.memorycard.name");
 	
-        	// This never gets called in the simulator. Real phones might mount the SD card quicker,
+        	// This is never true in the simulator. Real phones might mount the SD card quicker,
         	// so this check is valid here, purely for those current/future faster devices.
 	        if (Tools.hasSDCard())
 	        {
@@ -114,10 +114,10 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
 				logWriter.log("getdbURI::URI"+(null==dbURI ? " is not " : " is ")+"usable");
 			} catch (IllegalArgumentException e) {
-				logWriter.log("x::getdbURI::IllegalArgumentException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::getdbURI::IllegalArgumentException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (MalformedURIException e) {
-				logWriter.log("x::getdbURI::MalformedURIException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::getdbURI::MalformedURIException::"+e.getMessage());
 				e.printStackTrace();
 			}	
 		}
@@ -168,13 +168,13 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				}
 
 			} catch (DatabaseIOException e) {
-				logWriter.log("x::LocalDataAccess:createDatabase::DatabaseIOException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::createDatabase::DatabaseIOException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabasePathException e) {
-				logWriter.log("x::LocalDataAccess:createDatabase::DatabasePathException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::createDatabase::DatabasePathException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseException e) {
-				logWriter.log("x::LocalDataAccess:createDatabase::DatabaseException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::createDatabase::DatabaseException::"+e.getMessage());
 				e.printStackTrace();
 			}		
         }
@@ -207,17 +207,17 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				// From now on, we can check if the DB is open by comparing it to null	
 				//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));
 			} catch (ControlledAccessException e) {
-				logWriter.log("x::LocalDataAccess:openDatabase::ControlledAccessException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseIOException e) {
-				logWriter.log("x::LocalDataAccess:openDatabase::DatabaseIOException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabasePathException e) {
-				logWriter.log("x::LocalDataAccess:openDatabase::DatabasePathException::"+e.getMessage());
+				logWriter.log("x::LocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
 				e.printStackTrace();
 			}
 			return (null==storeDB?false:true);
-        }
+        } // end openDatabase
         
 		/**
          * This method adds the phone actions messages into the table used to store phone actions.

@@ -1,61 +1,65 @@
 package com.kids;
 
-import com.kids.net.Reply;
-import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.MMTools;
-import com.kids.prototypes.Message;
-
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
 import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.database.DatabaseFactory;
+import net.rim.device.api.database.DatabaseIOException;
+import net.rim.device.api.database.DatabasePathException;
 import net.rim.device.api.database.Row;
 import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.CDMAInfo;
+import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.DeviceInfo;
+
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.MMServer;
+import com.kids.prototypes.MMTools;
+import com.kids.prototypes.Message;
+import com.kids.net.Reply;
 
 /**
  * This class checks the registration stage that currently the device is in.
  */
 public class Registration extends Thread
 {
-    private LocalDataReader actLog;
-    private mmNotification  statusIcon;
-    private 		Debug	logger = Logger.getInstance();
-    private 		Server 	server;
-    private 	  	RegData regData;
     private 	  	boolean regOK = false;
+	private 		LocalDataReader actLog;
+    private 	  	RegData regData;
+    //private 	  	Context context;
     private static 	String 	regID = "0";
+   // private TelephonyManager telephonyMgr;
+    private 		MMServer 	server;
     private	final	int		sleepTimeLong	= 1000*60*60*24;//24h
-    private	final	int		sleepTimeShort 	= 3000;		//3sec
+    private	final	int		sleepTimeShort 	= 6000;		//3sec
     //private			String 	phoneID;
     //private			String 	phoneNum;
     private final 	int 	finePhoneNum_timeOut = 10;
-    public static MMTools tools = Tools.getInstance();
-    
+    //private TelephonyManager telephonyMgr;
+    private Debug logger = Logger.getInstance();
+	private MMTools tools = Tools.getInstance();
+
  
   /**
-   *
    * This constructor initialises the context parameter, creates its own instance of Server and regData.
    * It requests a Registration ID and the registration stage of the current device from the web server.
    * 
    * @param _context Interface to global environment that the current application is running in.
    * @param _actLog Instance of the LocalDataAccess class that is passed as a parameter to instantiate that Server.
    */
-    public Registration(/*Context _context,*/ LocalDataReader _actLog)
+    public Registration(LocalDataReader _actLog)
     {
     	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
 		//context = _context;
-		actLog 		= _actLog;
-		statusIcon  = new mmNotification();
-		server 		= new Server(_actLog);
-		regData 	= new RegData(/*_context*/);
+		actLog = _actLog;
+		server 	= new Server(_actLog);
+		regData 	= new RegData();
 
 		/*
 			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());
@@ -114,7 +118,8 @@ public class Registration extends Thread
 			} 
     		catch(InterruptedException e) 
     		{	
-    			//TODO:actLog.addMessage(new ErrorMessage(e));
+    			//TODO:
+    			//actLog.addMessage(new ErrorMessage(e));
     			break;	
     		}
     		
@@ -163,10 +168,11 @@ public class Registration extends Thread
     		}*/
     		else
     		{
-    			logger.log("ASKING SERVER FOR REG!!");
+    			logger.log("ASKING SERVER FOR REG!!: "+response.getInfo());
     			nextStage = tools.txt2num(response.getInfo());//saves the new stage from the reply message
     			if(currentStageValue == nextStage)
     			{	
+    				logger.log("REG: currentStageValue == nextStage"+currentStageValue+"=="+nextStage);
     				newState = false; 
     				if(currentStageValue < 2)//Just waiting to reg online
     				{	time = sleepTimeShort;	}
@@ -175,9 +181,11 @@ public class Registration extends Thread
     			}
     			else
     			{
+    				logger.log("REG: currentStageValue != nextStage"+currentStageValue+"!="+nextStage);
     				newState = true;
     				if(0 == currentStageValue)
 					{	
+    					logger.log("REG: currentStageValue = "+currentStageValue);
 						regID = response.getRegID();
 						regData.setRegSN(regID);
 	    			}
@@ -189,6 +197,7 @@ public class Registration extends Thread
 
 	    	if(!newState)
 	    	{
+	    		logger.log("REG: newState = true");
 	    		try 
 	    		{
 	    			logger.log("RegSleep"+time);
@@ -197,12 +206,14 @@ public class Registration extends Thread
 					//ser.startup();
 					logger.log("RegWalk");
 				} 
-	    		catch(InterruptedException e) 
+	    		catch(Exception e) 
 	    		{	
-	    			//TODO:actLog.addMessage(new ErrorMessage(e));
+	    			//TODO
+	    			//actLog.addMessage(new ErrorMessage(e));
 	    			break;	
 	    		}
 	    	}
+	    	
     	}
     	
     	
@@ -213,18 +224,11 @@ public class Registration extends Thread
      * @return A String of phone number. Null if line is unavailable.
      */
     private String phoneNumber()
-    {    	
+    {
     	if (null == Phone.getDevicePhoneNumber(false))
     	{ return "0"; }
     	else
     	{ return Phone.getDevicePhoneNumber(false); }
-    	
-    	/*ANDROID
-    	if(null == telephonyMgr.getLine1Number())
-    	{return "0";}
-    	else
-    	{return telephonyMgr.getLine1Number();}
-    	*/
     }
 
     /**
@@ -234,7 +238,7 @@ public class Registration extends Thread
     private String phoneID()
     {
     	// Possible issue: http://stackoverflow.com/questions/680782/getting-device-imei
-    	String phoneID  = System.getProperty("imei");//telephonyMgr.getDeviceId();
+    	String phoneID  = System.getProperty("imei");
     	
     	if (null == phoneID)
     	{
@@ -255,39 +259,43 @@ public class Registration extends Thread
     {
     	String  stateText = "";
     	
-    	// Update the notification icon
-		statusIcon.setNumValue(inputStage);
-
     	switch(inputStage) 
     	{
 			case 0: //New install
-				stateText = "Requesting Serial Number...";
-				//stateText = context.getString(R.string.RequestSN);
+				stateText = "Requesting Serial Number...";//context.getString(R.string.RequestSN);
     			//ok = false;
     			break;
     		case 1://New & has SN
-    			stateText = "Not activated SN:";
-    			//stateText = context.getString(R.string.yourSN);//+data.getRegSN();
+    			stateText = "Not activated SN:";//context.getString(R.string.yourSN);//+data.getRegSN();
     			//ok = false;
     			break;
     		case 2: //Wed Reg
-    			stateText = "Trial account";
-    			//stateText = context.getString(R.string.RegTrial);
+    			stateText = "Trial account";//context.getString(R.string.RegTrial);
     			regOK = true;
     			break;
     		case 3: //Device Reg
-    			stateText = "Fully Active";
-    			//stateText = context.getString(R.string.RegActive);
+    			stateText = "Fully Active";//context.getString(R.string.RegActive);
     			regOK = true;
     			break;
     		//default:break;
     	}
     	
-    	// I havent figured out how to set the text on the icon yet.
-    	// I think we'll have to make the icon clickable and open a new window with
-    	//serial number and other details on it.
-    	//http://supportforums.blackberry.com/t5/Java-Development/How-can-I-make-notification-icons-clickable/td-p/1164831
-    	//statusIcon.setText(stateText);
+    	//TODO
+    	// Update the user notification, probably in the global inbox
+    	// This will tell the user what their serial number is
+    	/*
+    	switch(inputStage) 
+    	{
+	    	case 0: //New install
+	    		Controller.UpdateStatus(stateText);
+	    		break;
+	    	case 1://New & has SN
+	    	case 2: //Wed Reg
+	    	case 3: //Device Reg
+	    		Controller.UpdateStatus(stateText+" ["+regID+"]");
+				break;
+    	}
+    	*/
     }
     
     /**
@@ -349,7 +357,6 @@ public class Registration extends Thread
         if (manufacturer != null) 
         {  return manufacturer;   }
 
-
     	// Device info - http://blog.vimviv.com/blackberry/blackberry-device-information-api/
     	// Get unique hardware identifier that identifies the exact handset
     	//java.lang.Integer.toHexString(DeviceInfo.getDeviceId())  <- BB PIN
@@ -377,6 +384,8 @@ class RegistrationMessage implements Message
 	private 		String	deviceID;
 	private 		String 	info;
 	private 		String 	manufacturer;
+	private MMTools tools = Tools.getInstance();
+
 	/**
 	 * This the constructor of RegistrationMessage. It sets the values for RegistrationMessage.
 	 * @param inputStage Current registration stage of the device.
@@ -390,7 +399,7 @@ class RegistrationMessage implements Message
 								String inputManufacturer)
 	{
 		error 		 = false;
-		deviceTime 	 = Registration.tools.getDate();
+		deviceTime 	 = tools.getDate();
 		stage 		 = inputStage;
 		manufacturer = inputManufacturer;
 		/*
@@ -406,7 +415,7 @@ class RegistrationMessage implements Message
 		else
 		{*/	deviceID = inputDeviceID;//}
 		
-		info 		= "RIM";
+		info 		= "Blackberry";
 	}
 	
 	/**
@@ -435,7 +444,7 @@ class RegistrationMessage implements Message
 		// TODO: Change to String builder
 		return 	Registration.getRegID() 	+ Tools.RestElementSeparator +
 				'0'+type					+ Tools.RestElementSeparator +
-				(error?1:0)					+ Tools.RestElementSeparator +
+				//(error?1:0)					+ Tools.RestElementSeparator +
 				deviceTime					+ Tools.RestElementSeparator +
 				stage						+ Tools.RestElementSeparator +
 				phoneNum					+ Tools.RestElementSeparator +
@@ -472,27 +481,154 @@ class RegistrationMessage implements Message
  *
  */
 class RegData
-{//TODO: Make compatible with legacy and new Blackberry versions, ie add vector + sqlite support
-	private int currentState;
-	private final String DATABASE_NAME    = "CVKe";
-    private final String DATABASE_TABLE   = "regDB";
-    private final String KEY_STAGE		  = "Stage";
-    private final String KEY_NUMBER	  	  = "Number";
-    private final String DATABASE_CREATE  = "create table `"+DATABASE_TABLE+"` ("
-														 	+"`"+KEY_STAGE +"` integer NOT NULL,"
-															+"`"+KEY_NUMBER+"` TEXT	NOT NULL);";
+{
+    public static Debug logWriter = Logger.getInstance();
 
-    private DatabaseHelper storeDB;
+	private int currentState;
+	private final static String DATABASE_NAME    = "CVKe";
+    private final static String DATABASE_TABLE   = "regDB";
+    private final static String KEY_STAGE		 = "Stage";
+    private final static String KEY_NUMBER	  	 = "Number";
+    private final static String DATABASE_CREATE  = "create table `"+DATABASE_TABLE+"` ("
+														 		   +"`"+KEY_STAGE +"` integer NOT NULL,"
+														 		   +"`"+KEY_NUMBER+"` TEXT	NOT NULL);";
+
+    public static String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
+    public static Database storeDB			 = null;
+    public static URI      dbURI;
+    //private static DatabaseHelper storeDB;
+    
+    public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
+    public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
+
     /**
      * This is the constructor regData. It creates the environment for the local database and sets current registration stage.
      * 
      * @param inputContext Interface to global environment that the current application is running in.
      */
-    public RegData(/*Context inputContext*/)// throws SQLException 
+    public RegData() 
     {
-    	storeDB  = new DatabaseHelper(/*inputContext*/);
+    	logWriter.log("RegData constructor");
+    	//storeDB  = new Database();//new DatabaseHelper();
     	currentState = getStageValueDB();
+    	
     }
+    
+    /**
+     * Method that sets the URI of the database, so it can be used with DatabaseFactory
+     */
+	private static void getdbURI()
+	{
+		logWriter.log("In RegData getdbURI method");
+		try {
+			dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
+			logWriter.log("RegData::getdbURI::URI"+(null==dbURI ? " is not " : " is ")+"usable");
+		} catch (IllegalArgumentException e) {
+			logWriter.log("x::RegData::getdbURI::IllegalArgumentException::"+e.getMessage());
+			e.printStackTrace();
+		} catch (MalformedURIException e) {
+			logWriter.log("x::RegData::getdbURI::MalformedURIException::"+e.getMessage());
+			e.printStackTrace();
+		}	
+	}
+    
+	/**
+	 * Method for creating a database, if one does not exist.
+	 * Should not be called directly. Call openDatabase instead, which in turn calls this.
+	 */
+    private static void createDatabase()
+    {
+    	logWriter.log("In RegData createDatabase method");
+		try {
+			// This is called in openDatabase() anyway so shouldnt need to be called here
+			//if (null == dbURI) getdbURI();	// Ensure dbURI is usable
+			
+			// Check to see if the database already exists.
+			// dbExist is initialised to false, so this will catch an error
+			// when the device gets rebooted, and dbExist is reset to false,
+			// even though the database was previously created.
+			// Plus, the below code creates the tables. We don't want to do that twice!
+			dbExist=DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
+
+			if (!dbExist)
+			{
+				logWriter.log("createDatabase::Checking for SD card...");
+				sdCardPresent = Tools.hasSDCard();
+				if (sdCardPresent)
+				{
+					logWriter.log("createDatabase::SD card present");
+					storeDB = DatabaseFactory.create(dbURI);  //Create file
+					dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
+					
+					// Now create the tables
+					Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
+					// if "st" is unsuccessful, one of the "catch" blocks will
+					//trigger before openDatabase is called.
+					st.prepare();
+					st.execute();  // Execute SQL
+					st.close();
+				}/*
+				else
+				{ // Schedules an app to (re)start in a specified number of milliseconds
+				  // can be used if there is no SD card. Maybe try this from Driver?
+				  //http://supportforums.blackberry.com/t5/Java-Development/how-to-restart-a-Background-running-Application/td-p/335449/page/2
+					ApplicationManager.getApplicationManager().scheduleApplication(thisApp, System.currentTimeMillis() + 60100, true);
+				}*/
+
+			}
+
+		} catch (DatabaseIOException e) {
+			logWriter.log("x::RegData::createDatabase::DatabaseIOException::"+e.getMessage());
+			e.printStackTrace();
+		} catch (DatabasePathException e) {
+			logWriter.log("x::RegData::createDatabase::DatabasePathException::"+e.getMessage());
+			e.printStackTrace();
+		} catch (DatabaseException e) {
+			logWriter.log("x::RegData::createDatabase::DatabaseException::"+e.getMessage());
+			e.printStackTrace();
+		}		
+    }
+
+    /**
+     * Method to open the database. It also calls createDatabase if no DB exists
+     * 
+     */
+    public static boolean openDatabase()
+    {
+    	logWriter.log("In RegData openDatabase method");
+		try {
+			// Ensure URI is valid
+			if (null == dbURI)
+				getdbURI();
+
+			// and make sure the DB exists. SHOULD always exist here, but just to be safe...
+			if (!dbExist)
+				createDatabase();
+			
+			if (null != storeDB)
+			{
+				logWriter.log("RegData::openDatabase::The DB is already open!");
+			}
+			else 	// Checked here, but also checked before call. Overkill??
+			{
+				storeDB = DatabaseFactory.open(dbURI);
+			}
+			
+			// From now on, we can check if the DB is open by comparing it to null	
+			//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));
+		} catch (ControlledAccessException e) {
+			logWriter.log("x::RegData::openDatabase::ControlledAccessException::"+e.getMessage());
+			e.printStackTrace();
+		} catch (DatabaseIOException e) {
+			logWriter.log("x::RegData::openDatabase::DatabaseIOException::"+e.getMessage());
+			e.printStackTrace();
+		} catch (DatabasePathException e) {
+			logWriter.log("x::RegData::openDatabase::DatabasePathException::"+e.getMessage());
+			e.printStackTrace();
+		}
+		return (null==storeDB?false:true);
+    } // end openDatabase
+    
 /**
  * This method retrieves the current registration stage value.
  * @return current registration value.
@@ -512,8 +648,8 @@ class RegData
     	cursor.close();
     	if(cursor.isClosed()) 
     	{	logger.log("==Cursor is closed..."); }*/
-    	
-    	return storeDB.queryINTfirst(DATABASE_TABLE, null, null, null, null, null, null);	//getStoreDBoutput().getInt(0);
+
+    	return queryINTfirst(DATABASE_TABLE, null, null, null, null, null, null);	//getStoreDBoutput().getInt(0);
     }
     /**
      * This method sets the current registration stage value in the local database.
@@ -525,7 +661,7 @@ class RegData
     	currentState = inputVal;//set for quick local access
     	//ContentValues initialValues = new ContentValues();
         //initialValues.put(KEY_STAGE, inputVal);
-        storeDB.update(KEY_STAGE,String.valueOf(inputVal));//(DATABASE_TABLE, initialValues, null, null);
+        update(KEY_STAGE,String.valueOf(inputVal));//(DATABASE_TABLE, initialValues, null, null);
         
     }
     /**
@@ -541,8 +677,7 @@ class RegData
     		logger.log("==Cursor is closed...");
     	logger.log("==getRegSN()...");
     	return temp;*/
-    	return storeDB.querySTRINGfirst(DATABASE_TABLE, null, null, null, null, null, null);
-    	 
+    	return querySTRINGfirst(DATABASE_TABLE, null, null, null, null, null, null);
     }
     
     /**
@@ -552,9 +687,7 @@ class RegData
      */
     public void setRegSN(String inputVal)//KEY_NUMBER
     {
-    	//ContentValues initialValues = new ContentValues();
-        //initialValues.put(KEY_NUMBER, inputVal);
-        storeDB.update(KEY_NUMBER,inputVal);//(DATABASE_TABLE, initialValues, null, null);
+    	update(KEY_NUMBER,inputVal);
     }
     
     /**
@@ -570,28 +703,6 @@ class RegData
 		return cursor;
 	}*/
     
-	/**
-	 * 
-	 * This class creates the database and sets up the first entry.
-	 *
-	 */
-	private class DatabaseHelper// extends SQLiteOpenHelper 
-	{
-		public static final String  DATABASE_NAME    = "CVKf";
-	    public static final String  DATABASE_TABLE   = "LocalData";
-		//private SQLiteDatabase sql_db;
-		private Database sql_db;
-		private String DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
-	    public URI dbURI;
-		/**
-		 * This is the default constructor that is needed when implementing the SOLiteOpenHelper.
-		 * 
-		 * @param inputContext Interface to global environment that the current application is running in.
-		 */
-		DatabaseHelper(/*Context inputContext*/) 
-		{
-			super();			
-		}
 		
 		/**
 		 * 
@@ -605,58 +716,33 @@ class RegData
 		{
 			// Update table
 			// The Strings "whereClause" and "whereArgs[]" are null
+			
+			logWriter.log("In RegData update");
+			
+			//Ensure a connection to the database exists
+            if (null == storeDB)
+            	openDatabase(); 
+            
 			try
-	        {
-				dbURI = URI.create(DATABASE_LOCATION+DATABASE_NAME);
-				sql_db = DatabaseFactory.openOrCreate(dbURI);
-	            
+	        {           
 				String sqlUpdate = "UPDATE "+DATABASE_TABLE+" SET "+rowToUpdate+"="+theValue;// WHERE "+KEY_NUMBER+"=?";
-	            Statement st = sql_db.createStatement(sqlUpdate);
+	            Statement st = storeDB.createStatement(sqlUpdate);
 	            st.prepare();
                 st.execute();
                 st.reset();
-	            
-	            /*
-	            
-	            //TODO: Put proper values in here
-	            // How can we extract from the Android ContentValues?
-	            Hashtable ht = new Hashtable(2);
-	            ht.put("Test1", new Integer(10));
-	            ht.put("Test2",  new Integer(7));
-	            //ht.put(KEY_STAGE,KEY_NUMBER);  ??
-	            
-	            
-	            Enumeration names = ht.keys();
-	            Enumeration ages  = ht.elements();
-	            
-	            while (names.hasMoreElements())
-	            {
-	                Integer iAge   = (Integer)ages.nextElement();
-	                String strName = (String)names.nextElement();
-	                st.bind(1,iAge.intValue());
-	                st.bind(2,strName);
-	                st.execute();
-	                st.reset();
-	            }*/
 	            st.close();
-	            sql_db.close();
 	        }
 	        catch ( Exception e )
 	        {
-	            System.out.println( e.getMessage() );
+	        	logWriter.log("x::RegData::update::Exception::"+e.getMessage());
+	            //System.out.println( e.getMessage() );
 	            e.printStackTrace();
 	        }
 
-			
-			
-			/*
-			sql_db = this.getWritableDatabase();
-			sql_db.update(table, values, whereClause, whereArgs);
-			sql_db.close();*/
-		}
+		}	// end update()
 		
 		/**
-		 * This method query the given table, returns the value of the requested column as an int.
+		 * This method query the given table, returns the value of the requested column as an int. 
 		 * It opens the database to read/query and then closes it.
 		 * @param table The table name to compile the query against.
 		 * @param columns A list of which columns to return.
@@ -669,48 +755,44 @@ class RegData
 		 */
 		public int queryINTfirst(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) 
 		{
-			//sql_db. //= this.getReadableDatabase();
+			logWriter.log("In RegData queryINTfirst");
 			// SELECT colums FROM table WHERE
 			int column_value=0;
 			
+			//Ensure a connection to the database exists
+            if (null == storeDB)
+            	openDatabase(); 
+			
 			try
-			{
-				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
-	            sql_db = DatabaseFactory.open(dbURI);
-	            
+			{	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = sql_db.createStatement("SELECT "+KEY_STAGE+" FROM "+DATABASE_TABLE);
+	            Statement st = storeDB.createStatement("SELECT "+KEY_STAGE+" FROM "+DATABASE_TABLE);
 	
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
 				
-				//Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 				cursor.first();
-				Row row = cursor.getRow();//.getInt(0);
+				Row row = cursor.getRow();
+				// Here's the only line thats changed from querySTRINGfirst
 				column_value = row.getInteger(0);
 				st.close();
 				cursor.close();
-				sql_db.close();
 
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::queryINTfirst::IllegalArgumentException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::queryINTfirst::DatabaseException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DataTypeException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::queryINTfirst::DataTypeException::"+e.getMessage());
 				e.printStackTrace();
 			} 
 			return column_value;
 		}
 		
 		/**
-		 * This method query the given table, returns the value of the requested column as a String. 
-		 * It opens the database to read/query and then closes it.
+		 * This method query the given table, returns the value of the requested column as a String. It opens the database to read/query and then closes it.
 		 * @param table The table name to compile the query against.
 		 * @param columns A list of which columns to return.
 		 * @param selection A filter declaring which rows to return.
@@ -722,149 +804,40 @@ class RegData
 		 */
 		public String querySTRINGfirst(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) 
 		{
+			logWriter.log("In RegData querySTRINGfirst");
 			String column_value="";
 			
+			//Ensure a connection to the database exists
+            if (null == storeDB)
+            	openDatabase(); 
+
+			
 			try
-			{
-				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
-	            sql_db = DatabaseFactory.open(dbURI);
-	            
+			{	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = sql_db.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
+	            Statement st = storeDB.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
 	
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
 				
-				//Cursor cursor = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 				cursor.first();
-				Row row = cursor.getRow();//.getInt(0);
+				Row row = cursor.getRow();
+				// Here's the only line thats changed from querySTRINGfirst
 				column_value = row.getString(1);
 				st.close();
 				cursor.close();
-				sql_db.close();
 
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::querySTRINGfirst::IllegalArgumentException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::querySTRINGfirst::DatabaseException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DataTypeException e) {
-				// TODO Auto-generated catch block
+				logWriter.log("x::RegData::querySTRINGfirst::DataTypeException::"+e.getMessage());
 				e.printStackTrace();
 			} 
 			return column_value;
-			
-			
-			
-			
-			
-			
-			/*
-			sql_db = this.getReadableDatabase();
-			Cursor c = sql_db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
-			c.first();//.moveToFirst();
-			Row row;
-			row = c.getRow();
-			String s = row.getString(1);//c.getString(1);
-			c.close();
-			sql_db.close();
-			return s;*/
-		}
-		
-		/**
-		 * This method creates the database calls setupFirstEntry to initialise the local storage.
-		 * 
-		 * @param _db SQLiteDatabase
-		 */
-		//@Override
-		public void onCreate(Database _db) 
-		{
-			try 
-			{
-				_db.beginTransaction();
-				_db.createStatement(DATABASE_CREATE);
-				_db.commitTransaction();
-			}
-			catch (DatabaseException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			setupFirstEntry(_db);
-		}
-		
-		/**
-		 * This method initialises the local storage.
-		 * 
-		 * @param _db SQLiteDatabase
-		 */
-		private void setupFirstEntry(Database _db)
-		{
-			//int column_value=0;
-			
-			try
-			{
-				dbURI = URI.create(DATABASE_LOCATION + DATABASE_NAME);
-	            sql_db = DatabaseFactory.open(dbURI);
-	            
-	            //Initialises the database to zero.
-	            Statement st = sql_db.createStatement("INSERT INTO "+DATABASE_TABLE+"("+KEY_STAGE+","+KEY_NUMBER+") VALUES(0,0)");
-	            
-				st.close();
-				sql_db.close();
 
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (MalformedURIException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DatabaseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-		
-			
-			/*
-		    ContentValues initialValues = new ContentValues();
-	        initialValues.put(KEY_STAGE, 0);
-	        initialValues.put(KEY_NUMBER,0);
-	     // initialValues.put(KEY_TIME,  Tools.getDate());
-	        _db.insert(DATABASE_TABLE, null, initialValues);
-	        */
-		}
-		
-		/**
-		 * This method allows for the upgrade of the database version.
-		 * The method checks if the database exists and then deletes the database and creates a new database in its place. 
-		 * 
-		 * @param _db SQLiteDatabase
-		 * @param _oldVersion previous database version
-		 * @param _newVersion new database version
-		 */
-		//@Override
-		public void onUpgrade(Database _db, int _oldVersion, int _newVersion) 
-		{			
-			try {
-				_db.beginTransaction();
-				_db.createStatement("DROP IF TABLE EXISTS "+DATABASE_TABLE);
-				_db.commitTransaction();
-			} catch (DatabaseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//_db.execSQL("DROP IF TABLE EXISTS "+DATABASE_TABLE);
-			onCreate(_db);
-		}
-		
-		//@Override
-		public void close() 
-		{
-			//TODO://super.close();
-		}
-	}
+		}	
 }

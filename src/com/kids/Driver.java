@@ -7,6 +7,8 @@
 
 package com.kids;
 
+import javax.microedition.io.file.FileSystemListener;
+
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
@@ -23,12 +25,12 @@ import net.rim.device.api.system.SystemListener2;
  */
 
 //class Controller extends Application
-public class Driver extends Application implements SystemListener2
+public class Driver extends Application implements SystemListener2, FileSystemListener
 {
 	// Enable logging
-    static Debug logWriter = Logger.getInstance();
-    LocalDataReader actLog ;//= LocalDataAccess.getLocalDataAccessRef();
-	//private Registration 	Reg;
+    static  Debug 			logWriter = Logger.getInstance();
+    		LocalDataReader actLog ;
+	private Registration 	Reg;
             
     /**
      * After calling to enterEventDispatcher() the application enters the event-processing loop.
@@ -48,7 +50,7 @@ public class Driver extends Application implements SystemListener2
             {
             logWriter.log("Still starting up");
             appInstance.addSystemListener(appInstance);
-        }
+            }
         else
             {
             logWriter.log("Fully booted up");
@@ -66,19 +68,52 @@ public class Driver extends Application implements SystemListener2
     Driver()
         { }
 
-    
+	public void rootChanged(int state, String rootName)
+	{
+		if( state == ROOT_ADDED ) 
+		{ 
+			if( rootName.equalsIgnoreCase("sdcard/") )
+			{ 
+				//microSD card inserted 
+				logWriter.log("Driver::SD Card inserted");
+			}	 
+		}
+		else if( state == ROOT_REMOVED )
+		{ 
+			//perform the same check as above 
+			logWriter.log("Driver::SD Card removed");
+		} 
+	}
+	
     private void doStartupWorkLater()
     {
     	invokeLater(new Runnable()
     	{
     		public void run()
     		{
+    			actLog = LocalDataAccess.getLocalDataAccessRef();
+    			Reg = new Registration(actLog);
+    			
+    	    	try//wait here till Reg is OK = OK to send ;) 
+    	    	{		
+    		    	while(!Reg.regOK())//while not ok
+    		    	{	logWriter.log("Still no SN number from server :(");
+    		    	
+    		    	Thread.sleep(1000*6);//6 seconds(debugging)
+    		    	
+    		    	//Thread.sleep(1000*60*4);//4min	    		
+    		    	}//10min
+    	    	}
+    	    	catch (InterruptedException e) 
+    			{	
+    	    		logWriter.log("Driver::Run::InterruptedException::"+e.getMessage());
+    				//actLog.addMessage(new ErrorMessage(e));
+    			}
     			logWriter.log("Doing startup work now...");
     			doStartupWork();
-    		}
-                        
-    	});
-    }
+    		} // end Run()                        
+    	}); // end invokeLater(Runnable())
+    } // end doStartupWorkLater
     
     private void doStartupWork()
     {
@@ -99,6 +134,7 @@ public class Driver extends Application implements SystemListener2
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
+        new Registration(actLog);
         //new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
         //new MyMailListener(actLog);
