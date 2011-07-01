@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
 import net.rim.device.api.io.transport.ConnectionFactory;
@@ -87,7 +86,7 @@ public class Server extends Thread implements MMServer
 		live = true;
 		generator = new Random();
 		
-		startup();
+		//startup();
 		logger.log("Started Server");
 	}
 	
@@ -219,11 +218,13 @@ public class Server extends Thread implements MMServer
 	private String contactRESTServer(String inputBody, String crc, String pic)
 	//public String contactServer(String inputBody)
 	{
+		//DEBUG: Andrews REST String
+		inputBody = "0,09,110701141039+01,0,15555215554,000000000000000,unknown,sdk,7,2,Android";
 		logger.log("contactRESTServer1");
 		boolean getFlag = true;
-		boolean messageOk = false;
+		//boolean messageOk = false;
 		
-		logger.log("Before POST: SERVER:CRC="+crc+" ,SERVERHEX="+pic);
+		//logger.log("Before POST: SERVER:CRC="+crc+" ,SERVERHEX="+pic);
 		
 		if(null == crc || crc.equals("") 
 		//|| 0 == pic.length )
@@ -248,8 +249,9 @@ public class Server extends Thread implements MMServer
 		
 		logger.log("SERVERBeforeEncrypt->:"+inputBody);
 		inputBody =  tools.topAndTail(tools.stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
-	//	logger.log("SERVERAfterEncrypt<-:"+inputBody);
-	//	logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
+		logger.log("SERVERAfterEncrypt<-:"+inputBody);
+		//logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
+	
 		
 		 String result = null; 
 
@@ -278,9 +280,12 @@ public class Server extends Thread implements MMServer
 	        //HttpConnection httpclient = null;
 	    	//String URL = "http://217.115.115.148:8000/dev1/mobileminder.net/bbTESTws.php?HelloWorld";
 	        //use API 5.0 Connection factory class to get first available connection
-			 String fullURL = URL + inputBody;
-			 logger.log("contactRESTServer::fullURL is: "+fullURL);
-	        httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
+			String fullURL = URL + inputBody;
+			logger.log("contactRESTServer::fullURL is: "+fullURL);
+	        
+			httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
+	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
+	        
 	        int len = (int) httpclient.getLength();
 	        logger.log("contactRESTsever::Length of reply is: "+len);
 	        byte responseData[] = new byte[len];
@@ -375,25 +380,28 @@ public class Server extends Thread implements MMServer
 	 * This method establishes the connection with the server.
 	 */
 	public void startup()
-	{
+	{/*
 		try {
+			logger.log("In startup. Connecting to wrong URL!");
 			httpclient = (HttpConnection) Connector.open(URL, Connector.READ_WRITE);
 		} catch (IOException e) {
 			logger.log("x::Error opening HTTP connection to server");
 			e.printStackTrace();
-		}
+		}*/
 	}
 	/**
 	 * This method terminates the connection with the server.
 	 */
 	public void shutdown()
 	{
+		/*
 		try {
+			logger.log("In shutdown!");
 			httpclient.close();
 		} catch (IOException e) {
 			logger.log("x::Error closing connection to HTTP server");
 			e.printStackTrace();
-		}
+		}*/
 	}
 	/**
 	 * This method checks the status of the server.
@@ -416,6 +424,7 @@ public class Server extends Thread implements MMServer
 					+inputText;
 		
 
+		logger.log("String to be encrypted: "+inputText);
 		return security.cryptFull(inputText, true);
 	}
 	
@@ -423,22 +432,29 @@ public class Server extends Thread implements MMServer
 	{
 		logger.log("In getCrcValue");
 		//logger.log("In get CRC Values");
+		int crc1 = 0,crc2=0;
+		long crc3=0;
+		
+		/*
 		int crc = 0;//crc.reset();
-		//crc = CRC32.update(crc,inputText.getBytes());
 		crc = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
-		
-		
-		// Ensure CRC is always positive/unsigned
-		// Convery integer CRC to unsigned binary string
+		logger.log("crc after update: "+crc);
 		String temp = Integer.toBinaryString(crc);
-		//Now parse the int from the string and assign back to int crc
-		//Integer tempInt = Integer.valueOf(temp);
-		//crc = Integer.parseInt(temp, 2);
-		//crc = (int) Long.parseLong(temp, 2);
-		//crc = tempInt.intValue();
-		
-		//logger.log("crc value is: "+crc);
+		logger.log("temp value is: "+temp);
+		logger.log("value being returned is: "+Long.parseLong(temp, 2));
 		return Long.parseLong(temp, 2);//crc;
+		*/
+		crc1 = CRC32.update(1, inputText.getBytes());
+		crc2 = CRC32.update(crc2, inputText.getBytes());
+		String temp = Integer.toBinaryString(crc1);
+		crc3 = Long.parseLong(temp,2);
+		logger.log("CRC1 is: "+crc1);
+		logger.log("CRC2 is: "+crc2);
+		logger.log("CRC3 is: "+crc3);
+		
+		//TODO: DEBUG. CRC FROM ANDROID
+		crc1=1903129755;
+		return crc1;
 	}
 	/**
 	 * This method decrypts the message which was encrypted.
@@ -453,12 +469,10 @@ public class Server extends Thread implements MMServer
 			logger.log("decrypt::No server Message to decrypt");
 			return null;
 		}
- 
-	//	logger.log("DECRYPT: 382");
-		
+ 		
 		int crc=0;//crc.reset();
  
-		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
+		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(tools.reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
 		//for debugging
 		/*for(int counts = 0; counts<replyArray.length; counts++)
@@ -477,10 +491,8 @@ public class Server extends Thread implements MMServer
  
 		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
 		// Ensure CRC is always positive/unsigned
-		// Convery integer CRC to unsigned binary string
+		// Convert integer CRC to unsigned binary string
 		String temp = Integer.toBinaryString(crc);
-		//Now parse the int from the string and assign back to int crc
-		//Integer tempInt = Integer.valueOf(temp);
 		long crcL = Long.parseLong(temp, 2);//tempInt.intValue();
 		
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
@@ -489,7 +501,8 @@ public class Server extends Thread implements MMServer
 		if(Long.parseLong(replyArray[1]) == crcL)//check CRC
 		{				
 		//	logger.log("DECRYPT: 405");
-			return text;	}
+			return text;
+		}
 		else
 		{	//logger.log("DECRYPT: 408");
 			return null;	
@@ -505,8 +518,12 @@ public class Server extends Thread implements MMServer
 	{
 		logger.log("In getRandomString(int)");
 		String returnString = "";
-			for(int count = 0; count < inputLength; count++)
-			{	returnString += charSET.charAt(generator.nextInt(charSET.length())); }
+		for(int count = 0; count < inputLength; count++)
+		{
+			returnString += charSET.charAt(generator.nextInt(charSET.length())); 
+		}
+		
+		logger.log("The Random number is: "+returnString);
 		return returnString;
 	}	
 	

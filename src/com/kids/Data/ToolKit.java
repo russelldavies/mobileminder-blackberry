@@ -132,7 +132,9 @@ public abstract class ToolKit implements MMTools
 	    	if (v < 16){	sb.append('0');}
 	    	sb.append(Integer.toHexString(v));
 	    }
-	    	return sb.toString().toUpperCase();
+	    //TODO: This is for debug
+	    logger.log("stringToHex returning: "+sb.toString().toUpperCase());
+	    return sb.toString().toUpperCase();
 	 }
 	
 	/**
@@ -152,6 +154,7 @@ public abstract class ToolKit implements MMTools
 		//Top=======Hex_string=======tail
 		hexTop = hexTop.concat(_input).concat(hexTail);
 		//logger.log("topAndTail:returns:"+hexTop);
+		logger.log("");
 		return hexTop;
 	}
 	
