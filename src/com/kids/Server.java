@@ -51,11 +51,11 @@ public class Server extends Thread implements MMServer
 //	private String 	 		deviceId;
 	private int 		 	freq = 1000 * 15; //freq = 1000 * 60 * 5; //5 min
 	private boolean			live;
-	private String serverErrorReply;
-	private Random generator;
-	private Security security;
-	private final String charSET = "!$&()*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz~";  
-	private int crc;
+	private String 			serverErrorReply;
+	private Random 			generator;
+	private Security 		security;
+	private final String 	charSET = "!$&()*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz~";  
+//	private int crc;
 	//create errormessage object
 
 	/**
@@ -81,18 +81,14 @@ public class Server extends Thread implements MMServer
 		 				 1 +Tools.RestElementSeparator+//error
 		 				 	Tools.RestElementSeparator;//CallingCODE
 		//	Controller.getString(R.string.Error_ServerTimeOut);
-		
-		
+				
 
 		actLog 	 = inputActLog;
-		//httpclient = new DefaultHttpClient();
 		live = true;
 		generator = new Random();
-		//crc = new CRC32();
-		startup();
 		
+		startup();
 		logger.log("Started Server");
-
 	}
 	
 	/**
@@ -252,8 +248,8 @@ public class Server extends Thread implements MMServer
 		
 		logger.log("SERVERBeforeEncrypt->:"+inputBody);
 		inputBody =  tools.topAndTail(tools.stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
-		logger.log("SERVERAfterEncrypt<-:"+inputBody);
-		logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
+	//	logger.log("SERVERAfterEncrypt<-:"+inputBody);
+	//	logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
 		
 		 String result = null; 
 
@@ -427,20 +423,22 @@ public class Server extends Thread implements MMServer
 	{
 		logger.log("In getCrcValue");
 		//logger.log("In get CRC Values");
-		crc = 0;//crc.reset();
+		int crc = 0;//crc.reset();
 		//crc = CRC32.update(crc,inputText.getBytes());
 		crc = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
 		
 		
 		// Ensure CRC is always positive/unsigned
 		// Convery integer CRC to unsigned binary string
-		//String temp = Integer.toBinaryString(crc);
+		String temp = Integer.toBinaryString(crc);
 		//Now parse the int from the string and assign back to int crc
 		//Integer tempInt = Integer.valueOf(temp);
+		//crc = Integer.parseInt(temp, 2);
+		//crc = (int) Long.parseLong(temp, 2);
 		//crc = tempInt.intValue();
 		
-		logger.log("crc value is: "+crc);
-		return crc;
+		//logger.log("crc value is: "+crc);
+		return Long.parseLong(temp, 2);//crc;
 	}
 	/**
 	 * This method decrypts the message which was encrypted.
@@ -458,7 +456,7 @@ public class Server extends Thread implements MMServer
  
 	//	logger.log("DECRYPT: 382");
 		
-		crc=0;//crc.reset();
+		int crc=0;//crc.reset();
  
 		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(tools.reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
@@ -472,18 +470,23 @@ public class Server extends Thread implements MMServer
 		logger.log("decrypt::replyArray size is: "+replyArray.length);
 		for(int count = 2; count<replyArray.length; count++)
 		{			
-			//logger.log("DECRYPT: 394");
 			text += replyArray[count];
 			if((replyArray.length-1) > count)
 			{	text += Tools.RestElementSeparator; }
 		}
  
-		//logger.log("DECRYPT: 400");
 		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
+		// Ensure CRC is always positive/unsigned
+		// Convery integer CRC to unsigned binary string
+		String temp = Integer.toBinaryString(crc);
+		//Now parse the int from the string and assign back to int crc
+		//Integer tempInt = Integer.valueOf(temp);
+		long crcL = Long.parseLong(temp, 2);//tempInt.intValue();
+		
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
 		logger.log("Client VAL: "+text);
-		logger.log("Cliene CRC: "+crc);
-		if(Long.parseLong(replyArray[1]) == crc)//check CRC
+		logger.log("Client CRC: "+crcL);
+		if(Long.parseLong(replyArray[1]) == crcL)//check CRC
 		{				
 		//	logger.log("DECRYPT: 405");
 			return text;	}

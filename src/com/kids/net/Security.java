@@ -19,7 +19,7 @@ public class Security
 	
 /**
  * This method encrypts or decrypts string using an offset.
- * @param inputText a string to be encrypted or decrpted.
+ * @param inputText a string to be encrypted or decrypted.
  * @param encrypt defines whether the string should be encrypted or decrepyted.
  * @return an encrypted or a decrypted string.
  */
