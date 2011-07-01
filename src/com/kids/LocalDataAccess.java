@@ -20,7 +20,6 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
-import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;

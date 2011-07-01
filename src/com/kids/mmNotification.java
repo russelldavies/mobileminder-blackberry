@@ -1,8 +1,6 @@
 package com.kids;
 
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataWriter;
-
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;

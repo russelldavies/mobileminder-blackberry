@@ -121,6 +121,7 @@ public abstract class ToolKit implements MMTools
 	 */
 	 public String stringToHex(String s)
 	 {
+		 logger.log("In stringToHex: "+s);
 		char[] b;
 		b = s.toCharArray();
 	//s	s.getBytes();
@@ -142,6 +143,7 @@ public abstract class ToolKit implements MMTools
 	 */
 	public String topAndTail(String _input)
 	{
+		logger.log("In topAndTail: "+_input);
 		Random rand = new Random();
 		int top = rand.nextInt(16);
 		int tail = rand.nextInt(16);

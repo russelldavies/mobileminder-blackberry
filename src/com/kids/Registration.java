@@ -568,17 +568,17 @@ class RegData
 					st.prepare();
 					st.execute();  // Execute SQL
 					st.close();
-				}/*
-				else
-				{ // Schedules an app to (re)start in a specified number of milliseconds
-				  // can be used if there is no SD card. Maybe try this from Driver?
-				  //http://supportforums.blackberry.com/t5/Java-Development/how-to-restart-a-Background-running-Application/td-p/335449/page/2
-					ApplicationManager.getApplicationManager().scheduleApplication(thisApp, System.currentTimeMillis() + 60100, true);
-				}*/
-
-			}
-
-		} catch (DatabaseIOException e) {
+					
+					// Now add the first values for REGISTRATION
+					Statement st2 = storeDB.createStatement("INSERT INTO "+DATABASE_TABLE+" VALUES(0,\"0\")");
+					st2.prepare();
+					st2.execute();
+					st2.close();
+					
+				} // end if(sdCardPresent)
+			} // end if(!dbExist)
+		}  // end try
+		catch (DatabaseIOException e) {
 			logWriter.log("x::RegData::createDatabase::DatabaseIOException::"+e.getMessage());
 			e.printStackTrace();
 		} catch (DatabasePathException e) {
@@ -587,8 +587,8 @@ class RegData
 		} catch (DatabaseException e) {
 			logWriter.log("x::RegData::createDatabase::DatabaseException::"+e.getMessage());
 			e.printStackTrace();
-		}		
-    }
+		}
+    } // end createDatabase()
 
     /**
      * Method to open the database. It also calls createDatabase if no DB exists
@@ -767,8 +767,9 @@ class RegData
 			try
 			{	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = storeDB.createStatement("SELECT "+KEY_STAGE+" FROM "+DATABASE_TABLE);
-	
+	            //Statement st = storeDB.createStatement("SELECT "+KEY_STAGE+" FROM "+DATABASE_TABLE);
+				Statement st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
+				
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
 				
@@ -816,8 +817,9 @@ class RegData
 			try
 			{	            
 	            //TODO: Make proper SQL Statement
-	            Statement st = storeDB.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
-	
+	            //Statement st = storeDB.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
+				Statement st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
+				
 	            st.prepare();
 	            Cursor cursor = st.getCursor();
 				

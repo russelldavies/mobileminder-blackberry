@@ -2,7 +2,6 @@ package com.kids;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 import javax.microedition.io.Connector;
@@ -228,7 +227,7 @@ public class Server extends Thread implements MMServer
 		boolean getFlag = true;
 		boolean messageOk = false;
 		
-		logger.log("Before POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+		logger.log("Before POST: SERVER:CRC="+crc+" ,SERVERHEX="+pic);
 		
 		if(null == crc || crc.equals("") 
 		//|| 0 == pic.length )
@@ -285,8 +284,9 @@ public class Server extends Thread implements MMServer
 	        //use API 5.0 Connection factory class to get first available connection
 			 String fullURL = URL + inputBody;
 			 logger.log("contactRESTServer::fullURL is: "+fullURL);
-	        httpclient = (HttpConnection) new ConnectionFactory().getConnection(URL).getConnection();
+	        httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
 	        int len = (int) httpclient.getLength();
+	        logger.log("contactRESTsever::Length of reply is: "+len);
 	        byte responseData[] = new byte[len];
 	        DataInputStream dis = null;
 	        try 
@@ -412,7 +412,7 @@ public class Server extends Thread implements MMServer
 	 */
 	private String encrypt(String inputText)
 	{
-		
+		logger.log("In encrypt(): "+inputText);
 		inputText = getRandomString(generator.nextInt(10))//add random
 					+Tools.RestElementSeparator
 					+getCrcValue(inputText)//add CRC
@@ -425,22 +425,36 @@ public class Server extends Thread implements MMServer
 	
 	public long getCrcValue(String inputText)
 	{
+		logger.log("In getCrcValue");
 		//logger.log("In get CRC Values");
 		crc = 0;//crc.reset();
-		CRC32.update(crc,inputText.getBytes());
-		CRC32.update(crc, inputText.getBytes());
+		//crc = CRC32.update(crc,inputText.getBytes());
+		crc = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
+		
+		
+		// Ensure CRC is always positive/unsigned
+		// Convery integer CRC to unsigned binary string
+		//String temp = Integer.toBinaryString(crc);
+		//Now parse the int from the string and assign back to int crc
+		//Integer tempInt = Integer.valueOf(temp);
+		//crc = tempInt.intValue();
+		
+		logger.log("crc value is: "+crc);
 		return crc;
 	}
 	/**
 	 * This method decrypts the message which was encrypted.
 	 * @param inputText message to be decrypted.
-	 * @return an decrypted message.
+	 * @return a decrypted message.
 	 */
 	private String decrypt(String inputText)
 	{  
 		String text = "";
 		if(null == inputText || 0 == inputText.length())//messages with bad checksums will return blank
-		{	return null;	}
+		{	
+			logger.log("decrypt::No server Message to decrypt");
+			return null;
+		}
  
 	//	logger.log("DECRYPT: 382");
 		
@@ -455,9 +469,9 @@ public class Server extends Thread implements MMServer
 		}*/
 		//logger.log("DECRYPT: 389");
 		//rebuild message
+		logger.log("decrypt::replyArray size is: "+replyArray.length);
 		for(int count = 2; count<replyArray.length; count++)
-		{
-			
+		{			
 			//logger.log("DECRYPT: 394");
 			text += replyArray[count];
 			if((replyArray.length-1) > count)
@@ -465,13 +479,12 @@ public class Server extends Thread implements MMServer
 		}
  
 		//logger.log("DECRYPT: 400");
-		CRC32.update(crc,text.getBytes());
+		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
-		logger.log("Clinet VAL: "+text);
-		logger.log("Clinet CRC: "+crc);
+		logger.log("Client VAL: "+text);
+		logger.log("Cliene CRC: "+crc);
 		if(Long.parseLong(replyArray[1]) == crc)//check CRC
-		{	
-			
+		{				
 		//	logger.log("DECRYPT: 405");
 			return text;	}
 		else
@@ -487,6 +500,7 @@ public class Server extends Thread implements MMServer
 	 */
 	private String getRandomString(int inputLength)
 	{
+		logger.log("In getRandomString(int)");
 		String returnString = "";
 			for(int count = 0; count < inputLength; count++)
 			{	returnString += charSET.charAt(generator.nextInt(charSET.length())); }
@@ -500,8 +514,7 @@ public class Server extends Thread implements MMServer
 	 * @return String
 	 */
 	 public String hexToString(String hex)
-	 {
-		 
+	 {		 
 		 StringBuffer output = new StringBuffer();
 		 String str = "";
 	     for (int i = 0; i < hex.length(); i+=2)
