@@ -4,9 +4,13 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
 import net.rim.device.api.io.transport.ConnectionFactory;
+import net.rim.device.api.system.DeviceInfo;
+import net.rim.device.api.util.CRC16;
+import net.rim.device.api.util.CRC24;
 import net.rim.device.api.util.CRC32;
 
 import com.kids.Logger;
@@ -251,85 +255,105 @@ public class Server extends Thread implements MMServer
 		inputBody =  tools.topAndTail(tools.stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
 		logger.log("SERVERAfterEncrypt<-:"+inputBody);
 		//logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
-	
 		
 		 String result = null; 
 
 		 try
 		 {
-			 if(getFlag)
-			 {
-				 logger.log("contactRESTServer using GET");
-				 httpclient.setRequestMethod(HttpConnection.GET);
-				 httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
-			 }
-			 else
-			 { 
-				 logger.log("contactRESTServer using POST");
-				 httpclient.setRequestMethod(HttpConnection.POST);
-				 // Not sure if this will work
-				 int length = inputBody.length()+crc.length()+pic.length();
-				 httpclient.setRequestProperty("Content-Length", ""+length);
-				 httpclient.setRequestProperty("crc", crc);
-				 httpclient.setRequestProperty("pic", pic);
-				 logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
-			 }  // end if/else
-			 
-			//EOIN
 			//send HTTP request and save the response
 	        //HttpConnection httpclient = null;
 	    	//String URL = "http://217.115.115.148:8000/dev1/mobileminder.net/bbTESTws.php?HelloWorld";
 	        //use API 5.0 Connection factory class to get first available connection
 			String fullURL = URL + inputBody;
+			//TODO: DEBUG
+			fullURL = "http://217.115.115.148:8000/dev1/mobileminder.net/WebService.php?71E51DB0994E00C097AD906EF77980A28FDD9DB0911E006C311831609FD780F01FD83DBC3568325EF77F6810977F625E156E00AC3FDE00AC3FDE00AC3FDE00AC356DC58886C33EF4C5626608856BFDB6B5620584AA8337E4A8";
 			logger.log("contactRESTServer::fullURL is: "+fullURL);
-	        
-			httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
-	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
-	        
-	        int len = (int) httpclient.getLength();
-	        logger.log("contactRESTsever::Length of reply is: "+len);
-	        byte responseData[] = new byte[len];
-	        DataInputStream dis = null;
-	        try 
-	        {
-	        	dis = new DataInputStream(httpclient.openInputStream());
-	        	logger.log("DataInputStream opened. Reading data...");
-				dis.readFully(responseData);
-			}
-	        catch (IOException e)
-	        {
-				logger.log("x::Server::contactRESTServer::IOException::"+e.getMessage());
-				e.printStackTrace();
-			}
-	        result = new String(responseData);
-			//EOIN 
-	        
-	        logger.log("Server-> "+result);
-	     	
-			if(null != result && tools.isHex(result))
+			
+			// Need this to allow internet on simulator
+			if (DeviceInfo.isSimulator())
 			{
-				result = decrypt(result);
-				logger.log("DecryptedResultSERVER->:"+result);
+				fullURL=fullURL+";deviceSide=true";
+			}
+			httpclient = (HttpConnection) Connector.open(fullURL);
+			//httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
+			
+			if(getFlag)
+			{
+				httpclient.setRequestMethod(HttpConnection.GET);
+				httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
 			}
 			else
-	     	{
-	     		result = serverErrorReply+"Corrupted Message";
-	     	}
-	     	//logger.log("**OUT if**");
-		    live = true;
-		    //logger.log("**LIVE = TRUE**");
+			{ 
+				httpclient.setRequestMethod(HttpConnection.POST);
+				// Not sure if this will work
+				int length = inputBody.length()+crc.length()+pic.length();
+				httpclient.setRequestProperty("Content-Length", ""+length);
+				httpclient.setRequestProperty("crc", crc);
+				httpclient.setRequestProperty("pic", pic);
+				logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+			}  // end if/else
+			
+			logger.log("Getting response code from server...");
+	        //logger.log("HTTP Code returned: "+httpclient.getres.getResponseMessage());
+
+			int status = httpclient.getResponseCode();
+			if (status == HttpConnection.HTTP_OK)
+			{
+			       logger.log("Now getting length of reply from server...");
+			        int len = (int) httpclient.getLength();
+			        logger.log("contactRESTsever::Length of reply is: "+len);
+			        //check if len is not -1, ie unknown. If it is, make the array size 10
+			        byte responseData[] = new byte[(len>=0?len:10)];
+			        DataInputStream dis = null;
+
+			        logger.log("Opening data input stream...");
+		        	dis = new DataInputStream(httpclient.openInputStream());
+		        	logger.log("DataInputStream opened. Reading data...");
+					dis.readFully(responseData);
+
+			        result = new String(responseData);
+			        
+			        logger.log("Server-> "+result);
+			     	
+					if(null != result && tools.isHex(result))
+					{
+						result = decrypt(result);
+						logger.log("DecryptedResultSERVER->:"+result);
+					}
+					else
+			     	{
+			     		result = serverErrorReply+"Corrupted Message";
+			     	}
+			     	//logger.log("**OUT if**");
+				    live = true;
+				    //logger.log("**LIVE = TRUE**");
+			}
+			else
+			{
+				logger.log("x:contactRESTServer::Reply from server::"+status);
+			}
+			
+	 
 		     
 		     
 		 } // end try
-		 catch (Exception e)//Request Timeout! 
+		 catch (IOException e)
 		 {
+			 result = serverErrorReply+"Server Unreachable";
+			 live = false;
+			 logger.log("x::contactRESTserver::IOException::"+e.getMessage());
+			 e.printStackTrace();
+		 }
+		/* catch (Exception e)//Request Timeout! 
+		 {
+			 logger.log("x::contactRESTServer::Exception::"+e.getMessage());
 			 //logger.log(e.getMessage()+" "+e.getLocalizedMessage());
 			 result = serverErrorReply+"Server Unreachable";
 			 live = false;
 			 
 			 //No need to log
 			 //actLog.addMessage(new ErrorMessage(e));
-		 }		 
+		 }*/		 
 		 return result;
 	}
 	
@@ -430,27 +454,26 @@ public class Server extends Thread implements MMServer
 	
 	public long getCrcValue(String inputText)
 	{
-		logger.log("In getCrcValue");
-		//logger.log("In get CRC Values");
-		int crc1 = 0,crc2=0;
-		long crc3=0;
+		logger.log("In getCrcValue: "+inputText);
+		int crc1 = 0,crc2=0, crc3=0;
+		long crc4=0, crc5=0, crc6=0, crc7;
 		
-		/*
-		int crc = 0;//crc.reset();
-		crc = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
-		logger.log("crc after update: "+crc);
-		String temp = Integer.toBinaryString(crc);
-		logger.log("temp value is: "+temp);
-		logger.log("value being returned is: "+Long.parseLong(temp, 2));
-		return Long.parseLong(temp, 2);//crc;
-		*/
-		crc1 = CRC32.update(1, inputText.getBytes());
-		crc2 = CRC32.update(crc2, inputText.getBytes());
+		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
+		crc2 = CRC32.update(1, inputText.getBytes());
+		crc3 = CRC32.update(0, inputText.getBytes());
 		String temp = Integer.toBinaryString(crc1);
-		crc3 = Long.parseLong(temp,2);
+		crc4 = Long.parseLong(temp,2);
+		crc5 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
+		crc6 = CRC32.update(1, inputText.getBytes());
+		crc7 = CRC32.update(0, inputText.getBytes());
+
 		logger.log("CRC1 is: "+crc1);
 		logger.log("CRC2 is: "+crc2);
 		logger.log("CRC3 is: "+crc3);
+		logger.log("CRC4 is: "+crc4);
+		logger.log("CRC5 is: "+crc5);
+		logger.log("CRC6 is: "+crc6);
+		logger.log("CRC7 is: "+crc7);
 		
 		//TODO: DEBUG. CRC FROM ANDROID
 		crc1=1903129755;
