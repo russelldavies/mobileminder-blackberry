@@ -223,7 +223,7 @@ public class Server extends Thread implements MMServer
 	//public String contactServer(String inputBody)
 	{
 		//DEBUG: Andrews REST String
-		inputBody = "0,09,110701141039+01,0,15555215554,000000000000000,unknown,sdk,7,2,Android";
+		//inputBody = "0,09,110701141039+01,0,15555215554,000000000000000,unknown,sdk,7,2,Android";
 		logger.log("contactRESTServer1");
 		boolean getFlag = true;
 		//boolean messageOk = false;
@@ -458,25 +458,12 @@ public class Server extends Thread implements MMServer
 		int crc1 = 0,crc2=0, crc3=0;
 		long crc4=0, crc5=0, crc6=0, crc7;
 		
-		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
-		crc2 = CRC32.update(1, inputText.getBytes());
-		crc3 = CRC32.update(0, inputText.getBytes());
-		String temp = Integer.toBinaryString(crc1);
-		crc4 = Long.parseLong(temp,2);
-		crc5 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
-		crc6 = CRC32.update(1, inputText.getBytes());
-		crc7 = CRC32.update(0, inputText.getBytes());
+		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes()) ^ 0xffffffff;
 
 		logger.log("CRC1 is: "+crc1);
-		logger.log("CRC2 is: "+crc2);
-		logger.log("CRC3 is: "+crc3);
-		logger.log("CRC4 is: "+crc4);
-		logger.log("CRC5 is: "+crc5);
-		logger.log("CRC6 is: "+crc6);
-		logger.log("CRC7 is: "+crc7);
 		
 		//TODO: DEBUG. CRC FROM ANDROID
-		crc1=1903129755;
+		//crc1=1903129755;
 		return crc1;
 	}
 	/**
