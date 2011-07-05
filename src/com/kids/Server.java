@@ -50,7 +50,6 @@ public class Server extends Thread implements MMServer
 	//private final int		HeartBeat = 99;
 	private LocalDataReader actLog;
 	private final String 	URL;
-	private HttpConnection	httpclient;
 //	private String 	 		deviceId;
 	private int 		 	freq = 1000 * 15; //freq = 1000 * 60 * 5; //5 min
 	private boolean			live;
@@ -236,21 +235,7 @@ public class Server extends Thread implements MMServer
 		{	getFlag = true;	}
 		else
 		{	getFlag = false;	}
-		
-		/*
-		 //Use to test decryption
-		   
-		//String output = decrypt("10A451DB09778325F294F60FEFFD98146B89F62528FDE0DBC356E0DBC356E08");
-		//logger.log("\n\nThis is the result for 1: "+output);
-		//String output2 = decrypt("10DD939F09689814EF11F6FF6377D925C3568381A377F6DBC3FD980A28FD980A28FDe");
-		//logger.log("\n\nThis is the result for 2: "+output2);
-		String output3 = decrypt("8928470E3129542F24C98142C7AFC0C2CA91725EF568381A377F6DBC311981409FDF681EF11F62509895175C3119816A3927881E17A985CAFB67DEF287A988221017DDBA310");
-		logger.log("\n\nThis is the result for 3: "+output3);
-		String output4 = decrypt("104034949DB49814EF11F6FF6377D925C3568381A377F6DBC3FD980A28FD980A28FDa");
-		logger.log("\n\nThis is the result for 4: "+output4);
-		logger.log("\n\nend");
-		*/
-		
+			
 		logger.log("SERVERBeforeEncrypt->:"+inputBody);
 		inputBody =  tools.topAndTail(tools.stringToHex(encrypt(inputBody.trim())));//encrypt REST -> convert to HEX -> top&tail with HEX value
 		logger.log("SERVERAfterEncrypt<-:"+inputBody);
@@ -266,7 +251,7 @@ public class Server extends Thread implements MMServer
 	        //use API 5.0 Connection factory class to get first available connection
 			String fullURL = URL + inputBody;
 			//TODO: DEBUG
-			fullURL = "http://217.115.115.148:8000/dev1/mobileminder.net/WebService.php?71E51DB0994E00C097AD906EF77980A28FDD9DB0911E006C311831609FD780F01FD83DBC3568325EF77F6810977F625E156E00AC3FDE00AC3FDE00AC3FDE00AC356DC58886C33EF4C5626608856BFDB6B5620584AA8337E4A8";
+			//fullURL = "http://217.115.115.148:8000/dev1/mobileminder.net/WebService.php?71E51DB0994E00C097AD906EF77980A28FDD9DB0911E006C311831609FD780F01FD83DBC3568325EF77F6810977F625E156E00AC3FDE00AC3FDE00AC3FDE00AC356DC58886C33EF4C5626608856BFDB6B5620584AA8337E4A8";
 			logger.log("contactRESTServer::fullURL is: "+fullURL);
 			
 			// Need this to allow internet on simulator
@@ -274,16 +259,31 @@ public class Server extends Thread implements MMServer
 			{
 				fullURL=fullURL+";deviceSide=true";
 			}
-			httpclient = (HttpConnection) Connector.open(fullURL);
-			//httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
+			//Make device connect via wifi
+			logger.log("Make sure it connects via wifi...");
+			fullURL+=";inteface=wifi";
+			
+			logger.log("Setting up HTTP connection...");
+			//HttpConnection httpclient = (HttpConnection) Connector.open(fullURL);
+			HttpConnection httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
+			logger.log("Connection set up!");
+			
+	        int len = (int) httpclient.getLength();
+	        logger.log("length retrieved");
+	        byte responseData[] = new byte[len];
+	        DataInputStream dis = null;
 			
 			if(getFlag)
 			{
-				httpclient.setRequestMethod(HttpConnection.GET);
-				httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
+				logger.log("Using GET");
+				//httpclient.setRequestMethod(HttpConnection.GET);
+				logger.log("GET set. Setting length...");
+				//httpclient.setRequestProperty("Content-Length", ""+inputBody.length());
+				logger.log("Length set!");
 			}
 			else
 			{ 
+				logger.log("Using POST");
 				httpclient.setRequestMethod(HttpConnection.POST);
 				// Not sure if this will work
 				int length = inputBody.length()+crc.length()+pic.length();
@@ -293,49 +293,45 @@ public class Server extends Thread implements MMServer
 				logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 			}  // end if/else
 			
-			logger.log("Getting response code from server...");
-	        //logger.log("HTTP Code returned: "+httpclient.getres.getResponseMessage());
+			logger.log("Getting response message from server...");
+	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
 
 			int status = httpclient.getResponseCode();
 			if (status == HttpConnection.HTTP_OK)
 			{
-			       logger.log("Now getting length of reply from server...");
-			        int len = (int) httpclient.getLength();
-			        logger.log("contactRESTsever::Length of reply is: "+len);
-			        //check if len is not -1, ie unknown. If it is, make the array size 10
-			        byte responseData[] = new byte[(len>=0?len:10)];
-			        DataInputStream dis = null;
+				logger.log("Now getting length of reply from server...");
+		        //int len = (int) httpclient.getLength();
+		        logger.log("contactRESTsever::Length of reply is: "+len);
+		        //check if len is not -1, ie unknown. If it is, make the array size 10
+		        //byte responseData[] = new byte[(len>=0?len:10)];
+		        //DataInputStream dis = null;
 
-			        logger.log("Opening data input stream...");
-		        	dis = new DataInputStream(httpclient.openInputStream());
-		        	logger.log("DataInputStream opened. Reading data...");
-					dis.readFully(responseData);
+		        logger.log("Opening data input stream...");
+	        	dis = new DataInputStream(httpclient.openInputStream());
+	        	logger.log("DataInputStream opened. Reading data...");
+				dis.readFully(responseData);
 
-			        result = new String(responseData);
-			        
-			        logger.log("Server-> "+result);
-			     	
-					if(null != result && tools.isHex(result))
-					{
-						result = decrypt(result);
-						logger.log("DecryptedResultSERVER->:"+result);
-					}
-					else
-			     	{
-			     		result = serverErrorReply+"Corrupted Message";
-			     	}
-			     	//logger.log("**OUT if**");
-				    live = true;
-				    //logger.log("**LIVE = TRUE**");
+		        result = new String(responseData);
+		        
+		        logger.log("Server-> "+result);
+		     	
+				if(null != result && tools.isHex(result))
+				{
+					result = decrypt(result);
+					logger.log("DecryptedResultSERVER->:"+result);
+				}
+				else
+		     	{
+		     		result = serverErrorReply+"Corrupted Message";
+		     	}
+		     	//logger.log("**OUT if**");
+			    live = true;
+			    //logger.log("**LIVE = TRUE**");
 			}
 			else
 			{
 				logger.log("x:contactRESTServer::Reply from server::"+status);
-			}
-			
-	 
-		     
-		     
+			}		     
 		 } // end try
 		 catch (IOException e)
 		 {
@@ -360,7 +356,7 @@ public class Server extends Thread implements MMServer
 	
 	/**
 	 * This method replaces characters in the inputString that can not be used in a URL with a "_" . 
-	 * It uses the chatAt() method in the Security class to recognise the unusable characters.
+	 * It uses the charmAt() method in the Security class to recognise the unusable characters.
 	 * 
 	 * Note: The underscores are then replaced with spaces on the server side
 	 * 
@@ -455,15 +451,32 @@ public class Server extends Thread implements MMServer
 	public long getCrcValue(String inputText)
 	{
 		logger.log("In getCrcValue: "+inputText);
-		int crc1 = 0,crc2=0, crc3=0;
-		long crc4=0, crc5=0, crc6=0, crc7;
+		int crc1 = 0;
 		
 		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes()) ^ 0xffffffff;
 
+		
+		//This loop will try stop incorrect CRCs, ie CRCs with a negative value
+		for(int count=0 ; crc1<=0 ; count++)
+		{
+			// Reset CRC
+			crc1=0;
+			// Get new CRC
+			crc1 = ~crc1;
+			//crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
+			// Do the loop 10 times and if it still hasnt got a decent CRC, give up!
+			if(count >= 10)
+				crc1=1;
+		}
+
 		logger.log("CRC1 is: "+crc1);
+		if (crc1==1)
+			logger.log("x::Error with CRC. CRC is negative! Prepare for NullPointerException!!");
 		
 		//TODO: DEBUG. CRC FROM ANDROID
 		//crc1=1903129755;
+		
+		//return (crc1<=0?abs(crc1):crc1);
 		return crc1;
 	}
 	/**
@@ -480,15 +493,14 @@ public class Server extends Thread implements MMServer
 			return null;
 		}
  		
-		int crc=0;//crc.reset();
  
 		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(tools.reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
 		//for debugging
-		/*for(int counts = 0; counts<replyArray.length; counts++)
+		for(int counts = 0; counts<replyArray.length; counts++)
 		{
 			logger.log("ReplyArray elements: "+replyArray[counts]);
-		}*/
+		}
 		//logger.log("DECRYPT: 389");
 		//rebuild message
 		logger.log("decrypt::replyArray size is: "+replyArray.length);
@@ -499,7 +511,10 @@ public class Server extends Thread implements MMServer
 			{	text += Tools.RestElementSeparator; }
 		}
  
+		int crc=0;//crc.reset();
+//		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
 		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
+
 		// Ensure CRC is always positive/unsigned
 		// Convert integer CRC to unsigned binary string
 		String temp = Integer.toBinaryString(crc);
@@ -507,16 +522,20 @@ public class Server extends Thread implements MMServer
 		
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
 		logger.log("Client VAL: "+text);
-		logger.log("Client CRC: "+crcL);
-		if(Long.parseLong(replyArray[1]) == crcL)//check CRC
+		logger.log("Client CRC: "+crc);
+		logger.log("testLong CRC:"+crcL);
+		
+		return text;
+		/* THIS CODE IS NOT WORKING. NEED TO FIX CRC BEFORE IT WILL EVER BE "TRUE"
+		if(Long.parseLong(replyArray[1]) == crc)//check CRC
 		{				
 		//	logger.log("DECRYPT: 405");
 			return text;
 		}
 		else
 		{	//logger.log("DECRYPT: 408");
-			return null;	
-		} 
+			return null;	//TODO: This causes a NullPointerException in 
+		} */
 	}
 	
 	/**
