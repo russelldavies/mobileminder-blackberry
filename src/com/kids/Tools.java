@@ -125,6 +125,7 @@ public class Tools extends ToolKit
 		{
 			//actLog.addMessage(new ErrorMessage(e));
 			//actLog.addMessage();
+			System.err.println("CVK::x::Cannot parse integer in Tools.txt2num: "+e.getMessage());
 			return -1;	
 		}
 	}

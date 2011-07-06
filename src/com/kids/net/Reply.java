@@ -1,12 +1,11 @@
 package com.kids.net;
 
-import java.util.Vector;
-
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.MMTools;
 import com.kids.COMMAND_TARGETS;
 import com.kids.Logger;
 import com.kids.Tools;
-import com.kids.prototypes.Debug;
-
+import com.kids.Data.MMLinkedList;
 /**
  * This class transforms the data into easier accessible form.
  */
@@ -18,6 +17,7 @@ public class Reply
 	private String  callingCODE;
 	private String  info;
 	private Debug logger = Logger.getInstance();
+	private MMTools tools = Tools.getInstance();;
 	
 	//Command Reply Class Variables
 	private int index;
@@ -29,48 +29,68 @@ public class Reply
  * @param restMessage a String contains the data from the web server.
  */
 	public Reply(String restMessage)
-	{
-		
-		restString = restMessage;
-		String[]replyArray = Tools.split(restString, Tools.RestElementSeparator);
-		logger.log("rest messsage: "+restMessage);
+	{	
 		if(null != restMessage)
 		{
+			restString = restMessage;
+			String[]replyArray;
+
+		/*	if(tools.charOccurence(restMessage, Tools.RestElementSeparator.charAt(0)) == 3)
+			{	
+				replyArray = new String[4];
+				replyArray = restString.split(Tools.RestElementSeparator);
+				replyArray[3] = "";
+			}
+			else*/
+			{	replyArray = com.kids.Tools.split(restString, com.kids.Tools.RestElementSeparator);}
+			
+			logger.log("rest messsage: "+restMessage);
 			
 		//	if(replyArray[3].equals("00"))
 
 			//logger.log(replyArray[1]);
 			
-			try
-			{
-				if(replyArray[1].length() > 0 		//check if string is blank
-							&& Integer.parseInt(replyArray[1])==0)	 //command
-				{	//id,type,index,target,args
-	
-					int commandID = Integer.parseInt(replyArray[2]);
-					if(0 == commandID)//id,type,comID,tag,arg -> 12345,00,0,,
-						{inishliseCom(replyArray[0], replyArray[1],commandID , "","");}
-					else
-						{inishliseCom(replyArray[0], replyArray[1],commandID , replyArray[3],replyArray[4]);}
-				}
-				else//all others
-				{	//id,calling code,error,info
-					try
-					{
-					inishlise(replyArray[0],Integer.parseInt(replyArray[2])!=0,replyArray[1],replyArray[3]);
+				try
+				{
+					if(0 < replyArray[1].length()  		//check if string is blank
+								&& Integer.parseInt(replyArray[1])==0)	 //command
+					{	//id,type,index,target,args
+		
+						int commandID = Integer.parseInt(replyArray[2]);
+						
+						if(0 == commandID)//id,type,comID,tag,arg -> 12345,00,0,,
+							{inishliseCom(replyArray[0], replyArray[1],commandID , "","");}
+						else
+							{inishliseCom(replyArray[0], replyArray[1],commandID , replyArray[3],replyArray[4]);}
 					}
-					catch(NumberFormatException e)
-					{logger.log("Reply: NumberFormatException: "+e);}
+					else//all others
+					{	//id,calling code,error,info
+						if(replyArray.length == 3)
+						{
+							logger.log("ReplyArray length=3");
+							inishlise(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2])!=0, "");
+						}
+						else
+						{
+							try
+								{
+									logger.log("ReplyArray length=4");
+									inishlise(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2])!=0, replyArray[3]);
+								}
+							
+							catch(NumberFormatException e)
+							{logger.log("Reply: NumberFormatException: "+e);}
+						}
+					}
 				}
-			}
-			catch(ArrayIndexOutOfBoundsException e)
-			{	
-				logger.log("Reply: ArrayIndexOutOfBoundsException: "+e);
-				logger.log("StackTrace: "+e.getMessage());
-				//actlog.addMessage(new ErrorMessage(e));
-			}
+				catch(ArrayIndexOutOfBoundsException e)
+				{	
+					logger.log("Reply: ArrayIndexOutOfBoundsException: "+e);
+					//logger.log("StackTrace: "+Log.getStackTraceString(e));
+					//actlog.addMessage(new ErrorMessage(e));
+				}
+			
 		}
-
 		
 		//else
 		//{	error = true;	}
@@ -85,11 +105,12 @@ public class Reply
  * @param inputCallingCode the event type.
  * @param inputInfo the body of the message.
  */
-	private void inishlise(String inputRegID, boolean inputError, String inputCallingCode, String inputInfo)
+	private void inishlise(String inputRegID, String inputCallingCode, boolean inputError, String inputInfo)
 	{
 		regID		= inputRegID;
 		error 		= inputError;
 		callingCODE = inputCallingCode;
+		logger.log("ReplyInfo: "+inputInfo);
 		info 		= inputInfo;
 	}
 	
@@ -166,8 +187,8 @@ public class Reply
  * @return the regID. Returns the target for the command message
  */
 	public String getTarget()
-	{
-		return COMMAND_TARGETS.from(target);	
+	{	
+		return COMMAND_TARGETS.from(target);
 	}
 	
 /**
@@ -185,7 +206,7 @@ public class Reply
 		//59
 		String command = args.substring(temp+1, args.length() - offSet);//2,65-59-1=5
 		//_del
-		String [] commandArray = Tools.split(command, "_");
+		String [] commandArray = com.kids.Tools.split(command, "_");
 		//[0][1]del
 		String data = args.substring(args.length() - offSet ,args.length());
 		//59-65 <-error
@@ -211,10 +232,12 @@ public class Reply
 
 	public static String[] stringToArray(String inputCSV)
 	{
-		//ArrayList<String> tempList = new ArrayList<String>();	
-		Vector tempList = new Vector();
+		//ArrayList<String> tempList = new ArrayList<String>();		
+		MMLinkedList tempList = new MMLinkedList();
 		//logger.log("stringToArray Arraylist inputCSV = "+inputCSV);
 
+	      
+	      
 		char[] tempCharList = inputCSV.toCharArray();
 		int start = 0, end = 0;
 
@@ -223,9 +246,9 @@ public class Reply
 			if (tempCharList[count] == ',')
 			{
 				if(start == end)
-				{tempList.addElement(new String());}//.add(new String());}
+				{tempList.add(new String());}
 				else
-				{	tempList.addElement(inputCSV.substring(start, end));} 
+				{	tempList.add(new String(inputCSV.substring(start, end)));} 
 				end++;
 				start = end;
 			}			
@@ -236,15 +259,15 @@ public class Reply
 		//This accounts for the lasts value in the string, that will not be detected within the loop that searches for commas
 
 		if(start == end)
-		{tempList.addElement(new String());}
+		{tempList.add(new String());}
 		
 		else
-		{	tempList.addElement(inputCSV.substring(start, end));}
-
-			
-		String[] returnArray = new String[tempList.size()];
-		tempList.copyInto(returnArray);//.toArray(returnArray);
-
+		{	tempList.add(new String(inputCSV.substring(start, end)));}
+	    
+		//String[] returnArray = new String[tempList.size()];
+		
+		String[] returnArray = new String[tempList.size()];// = tempList.toArray();
+		tempList.toArray(returnArray);
 		return returnArray;
 	}
 }

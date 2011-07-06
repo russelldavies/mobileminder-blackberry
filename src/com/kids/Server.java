@@ -4,13 +4,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
 import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.system.DeviceInfo;
-import net.rim.device.api.util.CRC16;
-import net.rim.device.api.util.CRC24;
 import net.rim.device.api.util.CRC32;
 
 import com.kids.Logger;
@@ -241,7 +238,8 @@ public class Server extends Thread implements MMServer
 		logger.log("SERVERAfterEncrypt<-:"+inputBody);
 		//logger.log("SERVERAfterEncrypt(Decrypted)<-:"+decrypt(inputBody));
 		
-		 String result = null; 
+		String result = null; 
+		//String result = "0,0,0,0";	// blank message 
 
 		 try
 		 {
@@ -260,8 +258,8 @@ public class Server extends Thread implements MMServer
 				fullURL=fullURL+";deviceSide=true";
 			}
 			//Make device connect via wifi
-			logger.log("Make sure it connects via wifi...");
-			fullURL+=";inteface=wifi";
+			//logger.log("Make sure it connects via wifi...");
+			//fullURL+=";inteface=wifi";
 			
 			logger.log("Setting up HTTP connection...");
 			//HttpConnection httpclient = (HttpConnection) Connector.open(fullURL);
@@ -282,7 +280,7 @@ public class Server extends Thread implements MMServer
 				logger.log("Length set!");
 			}
 			else
-			{ 
+			{
 				logger.log("Using POST");
 				httpclient.setRequestMethod(HttpConnection.POST);
 				// Not sure if this will work
@@ -297,7 +295,7 @@ public class Server extends Thread implements MMServer
 	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
 
 			int status = httpclient.getResponseCode();
-			if (status == HttpConnection.HTTP_OK)
+			if (status == HttpConnection.HTTP_OK && len > 0)
 			{
 				logger.log("Now getting length of reply from server...");
 		        //int len = (int) httpclient.getLength();
@@ -330,7 +328,8 @@ public class Server extends Thread implements MMServer
 			}
 			else
 			{
-				logger.log("x:contactRESTServer::Reply from server::"+status);
+				logger.log("x::contactRESTServer::Reply from server::"+status);
+				logger.log("x::contactRESTServer::Reply length is: "+len);
 			}		     
 		 } // end try
 		 catch (IOException e)
@@ -441,8 +440,7 @@ public class Server extends Thread implements MMServer
 					+Tools.RestElementSeparator
 					+getCrcValue(inputText)//add CRC
 					+Tools.RestElementSeparator
-					+inputText;
-		
+					+inputText;		
 
 		logger.log("String to be encrypted: "+inputText);
 		return security.cryptFull(inputText, true);
@@ -453,31 +451,32 @@ public class Server extends Thread implements MMServer
 		logger.log("In getCrcValue: "+inputText);
 		int crc1 = 0;
 		
-		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes()) ^ 0xffffffff;
+		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
 
-		
-		//This loop will try stop incorrect CRCs, ie CRCs with a negative value
-		for(int count=0 ; crc1<=0 ; count++)
-		{
-			// Reset CRC
-			crc1=0;
-			// Get new CRC
-			crc1 = ~crc1;
-			//crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());
-			// Do the loop 10 times and if it still hasnt got a decent CRC, give up!
-			if(count >= 10)
-				crc1=1;
-		}
+		// Ensure CRC is always positive/unsigned
+		// Convert integer CRC to unsigned binary string
+		String temp = Integer.toBinaryString(crc1);
+		long crcL = Long.parseLong(temp, 2);//tempInt.intValue();
 
+		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());// ^ 0xffffffff;
+
+		/*
+		crc1 = CRC32.update(CRC32.INITIAL_VALUE, inputText.getBytes());// ^ 0xffffffff;
+
+		//Check if its negative, if so, invert
+		crc1 = crc1<0 ? crc1^0xffffffff : crc1;
+		String temp = Integer.toBinaryString(crc1);
+		long crcL = Long.parseLong(temp, 2);//tempInt.intValue();
+*/
 		logger.log("CRC1 is: "+crc1);
-		if (crc1==1)
-			logger.log("x::Error with CRC. CRC is negative! Prepare for NullPointerException!!");
+		logger.log("CRClong is: "+crcL);
+				
+		//crc1 = crcL;
 		
 		//TODO: DEBUG. CRC FROM ANDROID
 		//crc1=1903129755;
 		
-		//return (crc1<=0?abs(crc1):crc1);
-		return crc1;
+		return crc1;//(crc1 < 0) ? (-crc1) : crc1;
 	}
 	/**
 	 * This method decrypts the message which was encrypted.
@@ -513,7 +512,7 @@ public class Server extends Thread implements MMServer
  
 		int crc=0;//crc.reset();
 //		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
-		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes());
+		crc = CRC32.update(CRC32.INITIAL_VALUE, text.getBytes())  ^ 0xffffffff;
 
 		// Ensure CRC is always positive/unsigned
 		// Convert integer CRC to unsigned binary string
@@ -525,17 +524,15 @@ public class Server extends Thread implements MMServer
 		logger.log("Client CRC: "+crc);
 		logger.log("testLong CRC:"+crcL);
 		
-		return text;
-		/* THIS CODE IS NOT WORKING. NEED TO FIX CRC BEFORE IT WILL EVER BE "TRUE"
-		if(Long.parseLong(replyArray[1]) == crc)//check CRC
+		if(Long.parseLong(replyArray[1]) == crcL)//check CRC
 		{				
 		//	logger.log("DECRYPT: 405");
 			return text;
 		}
 		else
 		{	//logger.log("DECRYPT: 408");
-			return null;	//TODO: This causes a NullPointerException in 
-		} */
+			return null;	//TODO: This causes a NullPointerException in Tools.split
+		}
 	}
 	
 	/**

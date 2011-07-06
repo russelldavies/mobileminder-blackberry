@@ -134,7 +134,7 @@ public class Registration extends Thread
     		currentStageValue = regData.getStageValue();
     		logger.log("REG asking server");
     		response  = requestNextStage(currentStageValue);//send current stage 
-    		logger.log("REG server says"+response.getREST());
+    		logger.log("REG server says: "+response.getREST());
     		/*
     		if(null == phoneNum)
     		{
@@ -182,7 +182,7 @@ public class Registration extends Thread
     			}
     			else
     			{
-    				logger.log("REG: currentStageValue != nextStage"+currentStageValue+"!="+nextStage);
+    				logger.log("REG: currentStageValue != nextStage "+currentStageValue+"!="+nextStage);
     				newState = true;
     				if(0 == currentStageValue)
 					{	
@@ -201,7 +201,7 @@ public class Registration extends Thread
 	    		logger.log("REG: newState = true");
 	    		try 
 	    		{
-	    			logger.log("RegSleep"+time);
+	    			logger.log("RegSleep:"+time);
 	    			//ser.shutdown();
 					Thread.sleep(time);//1Day
 					//ser.startup();
@@ -210,7 +210,7 @@ public class Registration extends Thread
 	    		catch(Exception e) 
 	    		{	
 	    			//TODO
-	    			//actLog.addMessage(new ErrorMessage(e));
+	    			logger.log("x::Registration::run()::Exception::"+e.getMessage());
 	    			break;	
 	    		}
 	    	}
@@ -659,6 +659,7 @@ class RegData
      */
     public void setStageValue(int inputVal)//KEY_STAGE
     {
+    	logWriter.log("Registration::setStageValue:;Updating stage in database");
     	currentState = inputVal;//set for quick local access
     	//ContentValues initialValues = new ContentValues();
         //initialValues.put(KEY_STAGE, inputVal);
