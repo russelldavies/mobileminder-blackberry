@@ -1,6 +1,15 @@
 package com.kids;
 
+import java.util.Date;
+
 import com.kids.prototypes.Debug;
+
+import net.rim.blackberry.api.mail.Address;
+import net.rim.blackberry.api.mail.Folder;
+import net.rim.blackberry.api.mail.Message;
+import net.rim.blackberry.api.mail.MessagingException;
+import net.rim.blackberry.api.mail.Session;
+import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
@@ -97,4 +106,35 @@ public class mmNotification
 	{
 		iconWithValue = withNum;
 	}
+	
+	
+	/**
+	 * Adds a message to the global inbox, in this case, containing registration info for the client
+	 * @param fromAddress The text we want to appear in the "FROM" field
+	 * @param message The body of the message, ie Registration info
+	 */
+	public static void addMsgToInbox(String _message)
+	{  
+		Address fromAddress;
+		
+		
+        try {  
+            Session session = Session.waitForDefaultSession();  
+            Store store = session.getStore();  
+            Folder[] folders = store.list(Folder.INBOX);  
+            Folder inbox = folders[0];  
+  
+            final Message msg = new Message(inbox);  
+            msg.setContent(_message);  
+            msg.setFrom(_address);  
+            msg.setStatus(Message.Status.RX_RECEIVED, Message.Status.RX_RECEIVED);  
+            msg.setSentDate(new Date(System.currentTimeMillis()));  
+            msg.setFlag(Message.Flag.REPLY_ALLOWED, true);  
+            msg.setInbound(true);  
+            msg.setSubject("Mobile Minder Registration Info");  
+            inbox.appendMessage(msg);  
+        } catch (MessagingException e) {  
+            e.printStackTrace();  
+        }  
+    }
 }

@@ -1,5 +1,12 @@
 package com.kids;
 
+import java.util.Date;
+
+import net.rim.blackberry.api.mail.Address;
+import net.rim.blackberry.api.mail.Folder;
+import net.rim.blackberry.api.mail.MessagingException;
+import net.rim.blackberry.api.mail.Session;
+import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
@@ -282,23 +289,10 @@ public class Registration extends Thread
     		//default:break;
     	}
     	
-    	//TODO
-    	// Update the user notification, probably in the global inbox
-    	// This will tell the user what their serial number is
-    	/*
-    	switch(inputStage) 
-    	{
-	    	case 0: //New install
-	    		Controller.UpdateStatus(stateText);
-	    		break;
-	    	case 1://New & has SN
-	    	case 2: //Wed Reg
-	    	case 3: //Device Reg
-	    		Controller.UpdateStatus(stateText+" ["+regID+"]");
-				break;
-    	}
-    	*/
-    }
+    	// Update the user notification in the global inbox
+    	// This message will contain the regID so they can register online.
+    	mmNotification.addMsgToInbox(getRegID());
+     }
     
     /**
      * This method sends a request to the server with device information and gets a return reply.
