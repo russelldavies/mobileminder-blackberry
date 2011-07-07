@@ -1,10 +1,8 @@
 package com.kids.net;
 
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.MMTools;
 import com.kids.COMMAND_TARGETS;
 import com.kids.Logger;
-import com.kids.Tools;
 import com.kids.Data.MMLinkedList;
 /**
  * This class transforms the data into easier accessible form.
@@ -17,7 +15,7 @@ public class Reply
 	private String  callingCODE;
 	private String  info;
 	private Debug logger = Logger.getInstance();
-	private MMTools tools = Tools.getInstance();;
+//	private MMTools tools = Tools.getInstance();;
 	
 	//Command Reply Class Variables
 	private int index;

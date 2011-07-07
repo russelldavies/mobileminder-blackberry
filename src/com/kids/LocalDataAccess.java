@@ -73,12 +73,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                                                    					+"`"+KEY_TIME   +"` TEXT    NOT NULL,"     
                                                    					+"`"+KEY_VALUE  +"` TEXT);";
     
-    public static String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
-    public static Database storeDB			 = null;
-    public static URI      dbURI			 = null;
+    public String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
+    public Database storeDB			 = null;
+    public URI      dbURI			 = null;
     
-    public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
-    public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
+    public boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
+    public boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
     
     /**
      * This is the constructor of LocalDataAccess. It creates the environment for the table in the local database used to store phone actions..
@@ -106,7 +106,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         /**
          * Method that sets the URI of the database, so it can be used with DatabaseFactory
          */
-		private static void getdbURI()
+		private void getdbURI()
 		{
 			logWriter.log("In getdbURI method");
 			try {
@@ -125,7 +125,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 		 * Method for creating a database, if one does not exist.
 		 * Should not be called directly. Call openDatabase instead, which in turn calls this.
 		 */
-        private static void createDatabase()
+        private void createDatabase()
         {
         	logWriter.log("In createDatabase method");
 			try {
@@ -141,13 +141,13 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 
 				if (!dbExist)
 				{
-					logWriter.log("createDatabase::Checking for SD card...");
-					sdCardPresent = Tools.hasSDCard();
-					if (sdCardPresent)
-					{
+				//	logWriter.log("createDatabase::Checking for SD card...");
+				//	sdCardPresent = Tools.hasSDCard();
+				//	if (sdCardPresent)
+				//	{
 						logWriter.log("createDatabase::SD card present");
 						storeDB = DatabaseFactory.create(dbURI);  //Create file
-						dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
+						dbExist = DatabaseFactory.exists(dbURI); // Does DB exist now? ie T or F
 						
 						// Now create the tables
 						Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
@@ -156,14 +156,9 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 						st.prepare();
 						st.execute();  // Execute SQL
 						st.close();
-					}/*
-					else
-					{ // Schedules an app to (re)start in a specified number of milliseconds
-					  // can be used if there is no SD card. Maybe try this from Driver?
-					  //http://supportforums.blackberry.com/t5/Java-Development/how-to-restart-a-Background-running-Application/td-p/335449/page/2
-						ApplicationManager.getApplicationManager().scheduleApplication(thisApp, System.currentTimeMillis() + 60100, true);
-					}*/
-
+						storeDB = DatabaseFactory.open(dbURI);
+						//storeDB.close(); storeDB=null;
+					//}
 				}
 
 			} catch (DatabaseIOException e) {
@@ -182,39 +177,32 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          * Method to open the database. It also calls createDatabase if no DB exists
          * 
          */
-        public static boolean openDatabase()
+        public boolean openDatabase()
         {
         	logWriter.log("In openDatabase method");
-			try {
-				// Ensure URI is valid
-				if (null == dbURI)
-					getdbURI();
 
-				// and make sure the DB exists. SHOULD always exist here, but just to be safe...
-				if (!dbExist)
-					createDatabase();
-				
-				if (null != storeDB)
-				{
-					logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
-				}
-				else 	// Checked here, but also checked before call. Overkill??
-				{
-					storeDB = DatabaseFactory.open(dbURI);
-				}
-				
-				// From now on, we can check if the DB is open by comparing it to null	
-				//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));
+			// Ensure URI is valid
+			if (null == dbURI)
+				getdbURI();
+
+			// and make sure the DB exists.
+			if (!dbExist)
+				createDatabase();
+			
+			try
+			{
+				storeDB = DatabaseFactory.open(dbURI);
 			} catch (ControlledAccessException e) {
-				logWriter.log("x::LocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
+				logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseIOException e) {
-				logWriter.log("x::LocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
+				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabasePathException e) {
-				logWriter.log("x::LocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
+				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
 				e.printStackTrace();
 			}
+ 
 			return (null==storeDB?false:true);
         } // end openDatabase
         
@@ -225,6 +213,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         //@Override
         public synchronized void addMessage(Message _message) 
         {
+        	logWriter.log("innerLocalDataAccess::addMessage");
         	addValue(_message.getREST());        
         }
         
@@ -261,21 +250,16 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	logWriter.log("addValue::Try INSERT");
 
             	// Check if database is open. storeDB=null should mean it hasnt been opened yet
-            	if (null == storeDB )
-            	{
-            		logWriter.log("localDataAccess::addValue::Calling openDatabase()...");
-            		// NOTE: openDatabase method call is embedded in output
-            		logWriter.log("localDataAccess::addValue::storeDB is"+(openDatabase()?" ":" NOT ")+"open");
-            		logWriter.log("Trying to open DB again...");
-            		logWriter.log("localDataAccess::addValue::storeDB is"+(openDatabase()?" ":" NOT ")+"open");
-            	}           	            	
+     //       	if (null == storeDB )
+     //       		openDatabase();
+      	            	
             	// storeDB should, hopefully, never be NULL at this point, as it should be opened
             	
                 st = storeDB.createStatement(sqlInsert.toString());
                 st.prepare();
                 st.execute();
                 st.close();  
-                storeDB.close(); storeDB=null;
+               // storeDB.close(); storeDB=null;
             } catch (DatabaseException e) {
             	logWriter.log("x::LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                 e.printStackTrace();
@@ -291,6 +275,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         public String getFirst()
         {
+        	logWriter.log("innerLocalDataAccess::getFirst");
         	String result=null;
             result = getValue(0);
             return result;
@@ -303,6 +288,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         public String getValue(int _index)
         {
+        	logWriter.log("innerLocalDataAccess::getValue");
             Row row;
             String value = "";
             // Get cursor pointing to first item in DB
@@ -315,6 +301,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 // String 2 in the DB is the REST string, eg (0:ID, 1:Time, 2:REST)
                 value = row.getString(2);
                 result.close();
+                //storeDB.close(); storeDB=null;
             } 
             catch (DatabaseException e) 
             {
@@ -338,15 +325,18 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         public void removeFirst()
         {
-                Row row;
-                Cursor result = null;;
+        	logWriter.log("innerLocalDataAccess::removeFirst");
+
+        		Row row;
+                Cursor result = null;
                 try {
-                        result = selectAllFromDB();
-                        result.position(0);
-                        //move to First
-                        row=result.getRow();
-                        removeValue(row.getInteger(0));//Get ID and remove. row(0) is unique ID in DB
-                        result.close();
+                    result = selectAllFromDB();
+                    result.first();//.position(0);
+                    //move to First
+                    row=result.getRow();
+                    removeValue(row.getInteger(0));//Get ID and remove. row(0) is unique ID in DB
+                    result.close();
+                    //storeDB.close(); storeDB=null;
                 } catch (DatabaseException e) {
                         logWriter.log("x::LocalDataAccess::removeFirst::DatabaseException:"+e.getMessage());
                         e.printStackTrace();
@@ -354,7 +344,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                         logWriter.log("x::LocalDataAccess::removeFirst::DataTypeException:"+e.getMessage());
                         e.printStackTrace();
                 }
-                result = null;
         }
         
         /**
@@ -363,6 +352,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         public synchronized void removeValue(int _index)
         {
+        	logWriter.log("innerLocalDataAccess::removeValue");
         	//Build SQL statement
         	StringBuffer sqlCreate = new StringBuffer();
         	sqlCreate.append("DELETE FROM ");
@@ -379,7 +369,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 st.prepare();
                 st.execute();
                 st.close();
-                storeDB.close(); storeDB=null;
+                //storeDB.close(); storeDB=null;
             } catch (ControlledAccessException e) {
                 logWriter.log("x::LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
                 e.printStackTrace();
@@ -400,27 +390,32 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          * @return The length of the current cursor object.
          */
         public int length()
-        {       
+        {
+        	logWriter.log("innerLocalDataAccess::length");
             Cursor result = selectAllFromDB();
             int size=0;
             try {
-                    //result.last returns FALSE is its empty (result=null if cant be opened)
-                    // Otherwise, it moves to the last position
-            		logWriter.log("if result.last");
-            		 // TODO: Causing NullPointerException when DB cant be opened
-                    if( null != result && result.last())
-                    {   // Assuming its not empty, getPosition will return an INT, else a null
-                    	// but it wouldnt be in here if it was empty
-                    	logWriter.log("inside result.last. setting size...");
-                        size = result.getPosition();
-                        logWriter.log("Closing result");
-                        result.close();
-                        storeDB.close(); storeDB=null;
-                    }
-                    else
-                    {
-                    	logWriter.log("Cursor result cannot be opened!");
-                    }
+                //result.last returns FALSE is its empty (result=null if cant be opened)
+                // Otherwise, it moves to the last position
+        		logWriter.log("if result.last");
+        		 // TODO: Causing NullPointerException when DB cant be opened
+        		
+        		if(null == result)
+        		{	logWriter.log("x:length::cursor in NULL");}
+                if( null != result && result.last())
+                { 
+                	logWriter.log("inside result.last. setting size...");
+                	// Assuming its not empty, getPosition will return an INT, else a null
+                	// but it wouldnt be in here if it was empty
+                    size = result.getPosition();
+                    logWriter.log("Closing result");
+                    result.close();
+                    //storeDB.close(); storeDB=null;
+                }
+                else
+                {
+                	logWriter.log("x::innerLocalDataAccess::length::Database empty!");
+                }
             } catch (DatabaseException e) {
                     logWriter.log("x::LocalDataAccess::length::"+e.getMessage());
                     e.printStackTrace();
@@ -437,125 +432,32 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
          */
         private Cursor selectAllFromDB()
         {
-			logWriter.log("innerLocalDataAccess::getStoreDBouput");
+			logWriter.log("innerLocalDataAccess::selectAllFromDB");
         	Statement st;
-            Cursor c=null;
-            
+            Cursor c = null;
             //Ensure a connection to the database exists
             if (null == storeDB)
             	openDatabase();            
             
-                try {
-					st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
-	                st.prepare();
-	                st.execute();
-	                c = st.getCursor();
-	                //st.close(); //TODO: We're returning a cursor to the DB. Do we need to close the statement?
-				} catch (DatabaseException e) {
-					logWriter.log("x::innerLocalDataAccess::getStoreDBouput::DatabaseException::"+e.getMessage());
-					e.printStackTrace();
-				}
+            try 
+            {
+				st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
+                st.prepare();
+                st.execute();
+                c = st.getCursor();
+                //st.close(); //TODO: We're returning a cursor to the DB. Do we need to close the statement?
+			} 
+            catch (DatabaseException e) 
+			{
+				logWriter.log("x::innerLocalDataAccess::getStoreDBouput::DatabaseException::"+e.getMessage());
+				e.printStackTrace();
+			}
 
 			// Return CURSOR or NULL
             return c;
         }
 }
-        
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-
-        /**
-         * This class is used to create the local database.
-         *
-         */
-class DatabaseHelper //extends SQLiteOpenHelper 
-{
-        /**
-         * This is the default constructor that is needed when implementing the SOLiteOpenHelper.
-         * 
-         * @param _context Interface to global environment that the current application is running in.
-         */
-        DatabaseHelper(/*Context _context*/) 
-        {
-                //super(/*_context,*/ LocalDataAccess.DATABASE_NAME, null, 2);//DATABASE_VERSION);
-                super();
-        }
-        
-        /**
-         * This method creates the database calls setupFirstEntry to initialise the local storage.
-         * @param NONE
-         */
-        public void onCreate(/*Database _db*/) 
-        {
-             try
-             {
-            	//innerLocalDataAccess.dbURI = URI.create(innerLocalDataAccess.DATABASE_LOCATION+innerLocalDataAccess.DATABASE_NAME);
-            	innerLocalDataAccess.logWriter.log("DataBaseHelper create...");
-            	innerLocalDataAccess.logWriter.log("DatabaseHelper::dbURI is: "+innerLocalDataAccess.dbURI.toString());
-                //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-                if (null == innerLocalDataAccess.storeDB)
-                	innerLocalDataAccess.openDatabase();
-            	Statement st = innerLocalDataAccess.storeDB.createStatement(innerLocalDataAccess.DATABASE_CREATE);
-                
-                st.prepare();
-                st.execute();
-                st.close();
-                innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.storeDB = null;
-            }
-            catch ( Exception e ) 
-            {         
-                    innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onCreate::"+e.getMessage());
-                e.printStackTrace();
-            }
-            
-            //ANDROID
-            //_db.execSQL(LocalDataAccess.DATABASE_CREATE);
-        }
-        
-        /**
-         * This method initialises the local storage.
-         * @param _db SQLiteDatabase
-         */
-        public void onUpgrade(/*Database _db, int oldVersion, int _newVersion*/) 
-        {
-             try
-            { 
-            	 innerLocalDataAccess.logWriter.log("DBHelper::onUpgrade");
-            	 //This should be opened at the beginning and kept open
-                //innerLocalDataAccess.storeDB = DatabaseFactory.open(innerLocalDataAccess.dbURI);
-                Statement st = innerLocalDataAccess.storeDB.createStatement("DROP IF TABLE EXISTS "
-                                                                             +innerLocalDataAccess.DATABASE_TABLE);
-    
-                st.prepare();
-                st.execute();
-                st.close();
-                innerLocalDataAccess.storeDB.close(); innerLocalDataAccess.storeDB = null;
-            }
-            catch ( Exception e ) 
-            {
-            	innerLocalDataAccess.logWriter.log("x::LocalDataAccess::DBHelper::onUpgrade::"+e.getMessage());
-                e.printStackTrace();
-            }
-                        
-        }
-        
-        public static void addOtherMessage(Message otherMessages)
-        {
-                //LocalDataAccess.otherMessages.addElement(otherMessages);//.add(otherMessages);
-        }
-}
-
-
-
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+       
 
 
 
@@ -568,7 +470,7 @@ class innerLegacyDataAccess implements LocalDataReader
 {       
         private PersistentObject store;//HD
         private Vector LocalData;      //list of Actions
-        Debug logWriter = Logger.getInstance();
+        private Debug logWriter = Logger.getInstance();
         
         /**
          * 

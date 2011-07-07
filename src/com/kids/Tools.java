@@ -116,7 +116,8 @@ public class Tools extends ToolKit
 	 * @param _text a number which in string format.
 	 * @return a number which in integer format.
 	 */
-	public int txt2num(String _text) {
+/*	public int txt2num(String _text)
+	{
 		try
 		{
 			return Integer.parseInt(_text.trim());
@@ -128,7 +129,7 @@ public class Tools extends ToolKit
 			System.err.println("CVK::x::Cannot parse integer in Tools.txt2num: "+e.getMessage());
 			return -1;	
 		}
-	}
+	}*/
 
 	/**
 	 * Checks the inputNumber to check whether it matches the number pattern.

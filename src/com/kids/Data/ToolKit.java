@@ -94,10 +94,18 @@ public abstract class ToolKit implements MMTools
 		{
 			return Integer.parseInt(_text.trim());
 		}
-		catch(Exception e)
-		{	//LocalDataAccess.addOtherMessage(new ErrorMessage(e));
-			return -1;	
-		}
+		catch(NumberFormatException e)
+		{
+			logger.log("x::txt2num::NumberFormatException::"+e.getMessage());
+			//return -1;
+			return 0;
+		}/*
+		catch (Exception e)
+		{
+			logger.log("x::txt2num::Exception::"+e..getMessage());
+			//return -1;
+			return 0;			
+		}*/
 	}
 	/**
 	 * Checks the inputNumber to check whether it matches the number pattern.

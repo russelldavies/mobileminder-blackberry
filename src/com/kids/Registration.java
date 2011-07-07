@@ -170,7 +170,8 @@ public class Registration extends Thread
     		else
     		{
     			logger.log("ASKING SERVER FOR REG!!: "+response.getInfo());
-    			nextStage = tools.txt2num(response.getInfo());//saves the new stage from the reply message
+    			//saves the new stage from the reply message
+    			nextStage = tools.txt2num(response.getInfo());
     			if(currentStageValue == nextStage)
     			{	
     				logger.log("REG: currentStageValue == nextStage"+currentStageValue+"=="+nextStage);
@@ -307,11 +308,11 @@ public class Registration extends Thread
      */
     private Reply requestNextStage(int _currentStage)
     {
-    	server.startup();
+    	//server.startup();
     	logger.log("requestNextStage1");
     	Reply result = server.contactServer(new RegistrationMessage(_currentStage,phoneNumber(),phoneID(),getDeviceManufacturer()));
     	logger.log("requestNextStage2");
-    	server.shutdown();
+    	//server.shutdown();
     	return result;
     }
     /*
@@ -734,9 +735,9 @@ class RegData
                 st.reset();
 	            st.close();
 	        }
-	        catch ( Exception e )
+	        catch ( DatabaseException e )
 	        {
-	        	logWriter.log("x::RegData::update::Exception::"+e.getMessage());
+	        	logWriter.log("x::RegData::update::DatabaseException::"+e.getMessage());
 	            //System.out.println( e.getMessage() );
 	            e.printStackTrace();
 	        }
