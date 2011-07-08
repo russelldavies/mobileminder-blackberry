@@ -53,8 +53,6 @@ public class Registration extends Thread
    */
     public Registration(LocalDataReader _actLog)
     {
-    	//telephonyMgr = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE); 
-		//context = _context;
 		actLog 	  = _actLog;
 		server 	  = new Server(_actLog);
 		regData   = new RegData();
@@ -81,7 +79,6 @@ public class Registration extends Thread
     }
    
     /**
-     * 
      * This method constantly checks the account status of the device at defined intervals.
      * Checks if the sim of the device has been unlocked. 
      */
@@ -103,9 +100,7 @@ public class Registration extends Thread
 			//phoneNum = phoneNumber();
     		try 
     		{//Socket is removed while application is idle to save resources on the device
-    			
-				Thread.sleep(sleepTimeShort);//1min
-				
+				Thread.sleep(sleepTimeShort);//1min	
 			} 
     		catch(InterruptedException e) 
     		{	
@@ -183,8 +178,7 @@ public class Registration extends Thread
 	    	}
 	    	//update the registration serial number in the DB
 	    	regData.setRegSN(regID);
-    	}
-    	
+    	}   	
     	
     }
     
@@ -231,30 +225,30 @@ public class Registration extends Thread
     	switch(inputStage) 
     	{
 			case 0: //New install
-				stateText = "Requesting Serial Number...";
-				// Don't need to send a message here.
+				stateText = "Requesting Serial Number...\nPlease ensure you are connected to the internet";
+				logger.log("In switch: value is: 0");
     			break;
     		case 1://New & has SN
     			stateText = "New Mobile Minder serial number retrieved!";
+    			logger.log("In switch: value is: 1");
     			break;
     		case 2: //Wed Reg
     			stateText = "This is a trial account!";
+    			logger.log("In switch: value is: 2");
     			regOK = true;
     			break;
     		case 3: //Device Reg
     			stateText = "Mobile Minder is now fully Active!";
+    			logger.log("In switch: value is: 3");
     			regOK = true;
     			break;
     		//default:break;
     	}
+    	
+    	logger.log("After switch. Value was: "+inputStage);
 		// Update the user notification in the global inbox
     	// This message will contain the regID so they can register online.
-    	// But don't send the message if its in the initial stage, ie 0
-    	if (!messageSent && 0 < inputStage)
-    	{
-    		mmNotification.addMsgToInbox(stateText,inputStage,regID);
-    		messageSent=true;
-    	}
+		//mmNotification.addMsgToInbox(stateText,inputStage,regID);
      }
     
     /**
@@ -521,7 +515,9 @@ class RegData
 				if (sdCardPresent)
 				{
 					logWriter.log("createDatabase::SD card present");
+					logWriter.log("Creating a database at: "+dbURI.toString());
 					storeDB = DatabaseFactory.create(dbURI);  //Create file
+					logWriter.log("Database created");
 					dbExist = DatabaseFactory.exists(dbURI); // Will store if DB exists, ie T or F
 					
 					// Now create the tables

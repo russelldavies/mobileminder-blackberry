@@ -141,24 +141,27 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 
 				if (!dbExist)
 				{
-				//	logWriter.log("createDatabase::Checking for SD card...");
-				//	sdCardPresent = Tools.hasSDCard();
-				//	if (sdCardPresent)
-				//	{
+					logWriter.log("createDatabase::Checking for SD card...");
+					sdCardPresent = Tools.hasSDCard();
+					if (sdCardPresent)
+					{
 						logWriter.log("createDatabase::SD card present");
 						storeDB = DatabaseFactory.create(dbURI);  //Create file
+						logWriter.log("DB Created");
 						dbExist = DatabaseFactory.exists(dbURI); // Does DB exist now? ie T or F
-						
+						logWriter.log("after dbExist in LocalDataAccess");
 						// Now create the tables
 						Statement st = storeDB.createStatement( DATABASE_CREATE );  //Populate tables
 						// if "st" is unsuccessful, one of the "catch" blocks will
 						//trigger before openDatabase is called.
+						logWriter.log("after createStatement in LocalDataAccess");
+
 						st.prepare();
+						
 						st.execute();  // Execute SQL
 						st.close();
-						storeDB = DatabaseFactory.open(dbURI);
-						//storeDB.close(); storeDB=null;
-					//}
+						storeDB.close(); storeDB=null;
+					}
 				}
 
 			} catch (DatabaseIOException e) {
@@ -189,19 +192,22 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			if (!dbExist)
 				createDatabase();
 			
-			try
+			if (null == storeDB)
 			{
-				storeDB = DatabaseFactory.open(dbURI);
-			} catch (ControlledAccessException e) {
-				logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (DatabaseIOException e) {
-				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (DatabasePathException e) {
-				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
-				e.printStackTrace();
-			}
+				try
+				{
+					storeDB = DatabaseFactory.open(dbURI);
+				} catch (ControlledAccessException e) {
+					logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
+					e.printStackTrace();
+				} catch (DatabaseIOException e) {
+					logWriter.log("x::innerLocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
+					e.printStackTrace();
+				} catch (DatabasePathException e) {
+					logWriter.log("x::innerLocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
+					e.printStackTrace();
+				}
+        	}
  
 			return (null==storeDB?false:true);
         } // end openDatabase

@@ -28,10 +28,9 @@ import net.rim.device.api.system.EncodedImage;
  */
 public class mmNotification
 {
-    static Debug logWriter = Logger.getInstance();
+	static Debug logWriter = Logger.getInstance();
 
 	ApplicationIndicatorRegistry reg;
-	//ApplicationIndicator indicator;
 	ApplicationIndicator appIndicator;
 	ApplicationIcon icon;
 	EncodedImage image;
@@ -119,11 +118,16 @@ public class mmNotification
 	{
 		StringBuffer theMessage = new StringBuffer();
 		theMessage.append(_message);
-		theMessage.append("\nYour unique Mobile Minder serial number is: ");
-		theMessage.append(_regID);
-		if (4 > _inputStage)	// We don't want to tell the user to register if they're at stage 4!
+		if (0 != _inputStage)
 		{
-			theMessage.append("\nPlease log on to www.mobileminder.com and enter the serial number to register your blackbery!");
+			theMessage.append("\nYour unique Mobile Minder serial number is: ");
+			theMessage.append(_regID);
+			// We don't want to tell the user to register if they're at stage 3 or 0!
+			//if (3 > _inputStage && 0 < _inputStage)	
+			if (1 == _inputStage || 2 == _inputStage)
+			{   // Enter in here only if _inputStage is 1 or 2
+				theMessage.append("\nPlease log on to www.mobileminder.com and enter the serial number to register your blackbery!");
+			}
 		}
 		
 		try
@@ -144,7 +148,7 @@ public class mmNotification
              msg.setFlag(Message.Flag.REPLY_ALLOWED, true);  
              msg.setInbound(true);  
              msg.setSubject("Mobile Minder Registration Info");  
-             inbox.appendMessage(msg);  
+             inbox.appendMessage(msg);
 		}
 		catch (AddressException e)
 		{
@@ -160,8 +164,8 @@ public class mmNotification
 		{
 			logWriter.log("mmNotification::addMsgToInbox::MessagingException::"+e.getMessage());
 			e.printStackTrace();
-		}  
-		
-		
+		}  		
 	}	// end addMessageToInbox
+
+
 } // end mmNotification class

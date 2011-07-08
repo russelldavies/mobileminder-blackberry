@@ -137,7 +137,7 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
     	    	///////////////
     	    	
     	    	
-    			logWriter.log("Doing startup work now...");
+    			logWriter.log("Driver::Doing startup work now...");
     			doStartupWork();
     		} // end Run()                        
     	}); // end invokeLater(Runnable())
