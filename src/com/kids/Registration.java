@@ -58,6 +58,7 @@ public class Registration extends Thread
 		actLog 	  = _actLog;
 		server 	  = new Server(_actLog);
 		regData   = new RegData();
+		new mmNotification();
 
 		/*
 			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());

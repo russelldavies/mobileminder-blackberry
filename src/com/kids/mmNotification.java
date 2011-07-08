@@ -121,7 +121,7 @@ public class mmNotification
 		theMessage.append(_message);
 		theMessage.append("\nYour unique Mobile Minder serial number is: ");
 		theMessage.append(_regID);
-		if ("4" != _regID)	// We don't want to tell the user to register if they're at stage 4!
+		if (4 > _inputStage)	// We don't want to tell the user to register if they're at stage 4!
 		{
 			theMessage.append("\nPlease log on to www.mobileminder.com and enter the serial number to register your blackbery!");
 		}

@@ -50,7 +50,7 @@ public class LocalDataAccess
  */
 class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 {
-    public static Debug logWriter = Logger.getInstance();
+    public Debug logWriter = Logger.getInstance();
     
     //ANDROID
     //private static ArrayList<Message> otherMessages = new ArrayList<Message>(); 
@@ -58,17 +58,17 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
     //Blackberry
     //public static Vector otherMessages = new Vector();
     
-    public static final String  DATABASE_NAME    = "CVKf";
-    public static final String  DATABASE_TABLE   = "LocalData";
-   // private static final int     DATABASE_VERSION = 2;
+    public final String  DATABASE_NAME    = "CVKf";
+    public final String  DATABASE_TABLE   = "LocalData";
+   // private final int     DATABASE_VERSION = 2;
     //The primary key MUST be named '_id' Android convention
-    private static final String  KEY_INDEX       = "_id";//MAY OVER FLOW!!
-    private static final String  KEY_TIME        = "time";
-    private static final String  KEY_VALUE       = "value";
+    private final String  KEY_INDEX       = "_id";//MAY OVER FLOW!!
+    private final String  KEY_TIME        = "time";
+    private final String  KEY_VALUE       = "value";
     
     //ANDROID
     // Should be same for Blackberry
-    public static final String  DATABASE_CREATE  = "create table `"+DATABASE_TABLE+ "`("
+    public final String  DATABASE_CREATE  = "create table `"+DATABASE_TABLE+ "`("
                                                    					+"`"+KEY_INDEX  +"` integer NOT NULL primary key autoincrement,"
                                                    					+"`"+KEY_TIME   +"` TEXT    NOT NULL,"     
                                                    					+"`"+KEY_VALUE  +"` TEXT);";
