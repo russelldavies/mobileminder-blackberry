@@ -491,6 +491,7 @@ public class Server extends Thread implements MMServer
 		logger.log("Server CRC: "+Long.parseLong(replyArray[1]));
 		logger.log("Clinet VAL: "+text);
 		logger.log("Clinet CRC: "+crc.getValue());
+		
 		if(Long.parseLong(replyArray[1]) == crc.getValue())//check CRC
 		{	
 			

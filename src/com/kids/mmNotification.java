@@ -5,9 +5,11 @@ import java.util.Date;
 import com.kids.prototypes.Debug;
 
 import net.rim.blackberry.api.mail.Address;
+import net.rim.blackberry.api.mail.AddressException;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.MessagingException;
+import net.rim.blackberry.api.mail.NoSuchServiceException;
 import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
@@ -107,34 +109,59 @@ public class mmNotification
 		iconWithValue = withNum;
 	}
 	
-	
 	/**
-	 * Adds a message to the global inbox, in this case, containing registration info for the client
-	 * @param fromAddress The text we want to appear in the "FROM" field
-	 * @param message The body of the message, ie Registration info
+	 * Adds a message to the global inbox, in this case, containing registration info for the client.
+	 * @param _message Status message to display in SMS
+	 * @param _inputStage The registration stage the user is currently at
+	 * @param _regID Registration ID of the device
 	 */
-	public static void addMsgToInbox(String _message)
-	{  
-		Address fromAddress;
+	public static void addMsgToInbox(String _message, int _inputStage, String _regID)
+	{
+		StringBuffer theMessage = new StringBuffer();
+		theMessage.append(_message);
+		theMessage.append("\nYour unique Mobile Minder serial number is: ");
+		theMessage.append(_regID);
+		if ("4" != _regID)	// We don't want to tell the user to register if they're at stage 4!
+		{
+			theMessage.append("\nPlease log on to www.mobileminder.com and enter the serial number to register your blackbery!");
+		}
+		
+		try
+		{ 
+        	 Address _fromAddress = new Address("Mobile Minder","Mobile Minder");
+        	 Session session = Session.waitForDefaultSession();
+         	//Get list of folders
+             Store store = session.getStore();  
+             Folder[] folders = store.list(Folder.INBOX);  
+             // We only retrieve one folder, so its element[0]
+             Folder inbox = folders[0];  
+   
+             Message msg = new Message(inbox);  
+             msg.setContent(theMessage.toString());
+             msg.setFrom(_fromAddress);  
+             msg.setStatus(Message.Status.RX_RECEIVED, Message.Status.RX_RECEIVED);  
+             msg.setSentDate(new Date(System.currentTimeMillis()));  
+             msg.setFlag(Message.Flag.REPLY_ALLOWED, true);  
+             msg.setInbound(true);  
+             msg.setSubject("Mobile Minder Registration Info");  
+             inbox.appendMessage(msg);  
+		}
+		catch (AddressException e)
+		{
+			logWriter.log("mmNotification::addMsgToInbox::AddressException::"+e.getMessage());
+			e.printStackTrace();
+		}
+		catch (NoSuchServiceException e)
+		{
+			logWriter.log("mmNotification::addMsgToInbox::NoSuchServiceException::"+e.getMessage());
+			e.printStackTrace();
+		}  
+		catch (MessagingException e)
+		{
+			logWriter.log("mmNotification::addMsgToInbox::MessagingException::"+e.getMessage());
+			e.printStackTrace();
+		}  
 		
 		
-        try {  
-            Session session = Session.waitForDefaultSession();  
-            Store store = session.getStore();  
-            Folder[] folders = store.list(Folder.INBOX);  
-            Folder inbox = folders[0];  
-  
-            final Message msg = new Message(inbox);  
-            msg.setContent(_message);  
-            msg.setFrom(_address);  
-            msg.setStatus(Message.Status.RX_RECEIVED, Message.Status.RX_RECEIVED);  
-            msg.setSentDate(new Date(System.currentTimeMillis()));  
-            msg.setFlag(Message.Flag.REPLY_ALLOWED, true);  
-            msg.setInbound(true);  
-            msg.setSubject("Mobile Minder Registration Info");  
-            inbox.appendMessage(msg);  
-        } catch (MessagingException e) {  
-            e.printStackTrace();  
-        }  
-    }
-}
+	}	// end addMessageToInbox
+} // end mmNotification class

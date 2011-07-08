@@ -39,6 +39,11 @@ public class Tools extends ToolKit
 		return instance;
 	}
 	
+	/**
+	 * Returns the OS version number as an int, without the sub-versions
+	 * For example, instead of 5.03.23 it will return 5.
+	 * @return OS version
+	 */
 	 public static int getGenOSVersion()
 	 {
 		 // getOSVersion returns a string in form x.yy.zz
@@ -224,16 +229,30 @@ public class Tools extends ToolKit
 	 return true;
 	 }
 	 
+	 /**
+	  * This method evaluates whether or not the character passed to it
+	  * is suitable for a HEX string, ie 0-9 and aA-fF
+	  * @param c - the character to evaluate
+	  * @return boolean - true if its a hexadecimal value, else false
+	  */
 	 public boolean isHexStringChar(char c) 
 	 {
 		 return (Character.isDigit(c) || (("0123456789abcdefABCDEF".indexOf(c)) >= 0));
 	 }
 
+	 /**
+	  * Returns an int value representing the seconds the device has been powered on
+	  * (NOT CODED YET)
+	  */
 	public int getUptimeInSec() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	/**
+	 * This method evaluates whether or not the string passed to it
+	 * is a numeric string or not (NOT CODED YET)
+	 */
 	public boolean isNumber(String _text) {
 		// TODO Auto-generated method stub
 		return false;

@@ -1,12 +1,5 @@
 package com.kids;
 
-import java.util.Date;
-
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Folder;
-import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.Store;
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
@@ -36,21 +29,19 @@ import com.kids.net.Reply;
  */
 public class Registration extends Thread
 {
-    private 	  	boolean regOK = false;
+    private 	  	boolean 		regOK = false;
+    private			boolean 		messageSent = false;
 	private 		LocalDataReader actLog;
-    private 	  	RegData regData;
-    //private 	  	Context context;
-    private static 	String 	regID = "0";
-   // private TelephonyManager telephonyMgr;
-    private 		MMServer 	server;
-    private	final	int		sleepTimeLong	= 1000*60*60*24;//24h
-    private	final	int		sleepTimeShort 	= 6000;		//3sec
-    //private			String 	phoneID;
-    //private			String 	phoneNum;
-    private final 	int 	finePhoneNum_timeOut = 10;
-    //private TelephonyManager telephonyMgr;
-    private Debug logger = Logger.getInstance();
-	private MMTools tools = Tools.getInstance();
+    private 	  	RegData 		regData;
+    private static 	String 			regID = "0";
+    private 		MMServer 		server;
+    private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
+    private	final	int				sleepTimeShort 	= 6000;		//3sec
+    //private		String 			phoneID;
+    //private		String 			phoneNum;
+    private final 	int 			finePhoneNum_timeOut = 10;
+    private 		Debug 			logger = Logger.getInstance();
+	private 		MMTools 		tools = Tools.getInstance();
 
  
   /**
@@ -82,8 +73,6 @@ public class Registration extends Thread
 			logger.log("SubscriberId:"			+telephonyMgr.getSubscriberId());
 			logger.log("VoiceMailNumber:"		+telephonyMgr.getVoiceMailNumber());
 		*/
-			//data.setRegSN("0");		//FOR TESTING!!
-			//data.setStageValue(0);	//FOR TESTING!!
 			
 		regID 	= regData.getRegSN();
 		stageState(regData.getStageValue());
@@ -97,8 +86,6 @@ public class Registration extends Thread
      */
     public void run()
     {
-    	//sets the handler to be notified if the thread has been killed
-    	//Thread.setDefaultUncaughtExceptionHandler(new AndroidExceptionHandler());
     	logger.log("Reg now running");
     	boolean newState = true;
     	Reply 	response;
@@ -107,11 +94,6 @@ public class Registration extends Thread
     	int		time 			  = 0;
     	int 	finePhoneNum 	  = 0;
 
-		
-		//{//TelephonyManager can not be used outside this!
-		//phoneNum = phoneNumber();
-		//phoneID  = phoneID();
-		
 		while(phoneNumber().equals("0")//if the SIM is not setup before the device starts(i.e. SIM lock) then ANDROID will return null for the PhoneNum
 		&& finePhoneNum_timeOut > finePhoneNum)
 		{
@@ -142,38 +124,13 @@ public class Registration extends Thread
     		logger.log("REG asking server");
     		response  = requestNextStage(currentStageValue);//send current stage 
     		logger.log("REG server says: "+response.getREST());
-    		/*
-    		if(null == phoneNum)
-    		{
-    			logger.log("null == phoneNum");
-    		}
-    		else if(0 == phoneNum.length() )
-    		{
-    			logger.log("0 == phoneNum.length() ");
-    		}
-    		else if(phoneNum.equals("null"))
-    		{
-    			logger.log("phoneNum.equals(null)");
-    		}
-    		*/
+
     		if(response.isError())
 			{	
     			logger.log("Reg Hit Error");
     			newState = false;
     			time = sleepTimeShort;
    			}
-    		/*else if((null == phoneNum 					//a null object was returned
-    			 || 0 == phoneNum.length() 				//a black string was returned
-    			 || phoneNum.equals("null"))
-    			 && finePhoneNum_timeOut > finePhoneNum)//stop infinite loop
-    		{
-    			logger.log("waiting for Phone's Number");
-    			TelephonyManager telephonyMgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-    			phoneNum = telephonyMgr.getLine1Number();
-    			time = sleepTimeShort;
-    			newState = false;
-    			finePhoneNum++;
-    		}*/
     		else
     		{
     			logger.log("ASKING SERVER FOR REG!!: "+response.getInfo());
@@ -200,6 +157,8 @@ public class Registration extends Thread
 	    			}
     				//assigns new stage
 					regData.setStageValue(nextStage);//saves stage to memory
+					//if("0" != regData.getRegSN()) regData.setRegSN(regID);
+    				messageSent = false; // This handles the user getting a new TXT with stage details
 					stageState(nextStage);//process stage
     			}
     		}
@@ -215,14 +174,14 @@ public class Registration extends Thread
 					//ser.startup();
 					logger.log("RegWalk");
 				} 
-	    		catch(Exception e) 
+	    		catch(InterruptedException e) 
 	    		{	
-	    			//TODO
 	    			logger.log("x::Registration::run()::Exception::"+e.getMessage());
 	    			break;	
 	    		}
 	    	}
-	    	
+	    	//update the registration serial number in the DB
+	    	regData.setRegSN(regID);
     	}
     	
     	
@@ -271,27 +230,30 @@ public class Registration extends Thread
     	switch(inputStage) 
     	{
 			case 0: //New install
-				stateText = "Requesting Serial Number...";//context.getString(R.string.RequestSN);
-    			//ok = false;
+				stateText = "Requesting Serial Number...";
+				// Don't need to send a message here.
     			break;
     		case 1://New & has SN
-    			stateText = "Not activated SN:";//context.getString(R.string.yourSN);//+data.getRegSN();
-    			//ok = false;
+    			stateText = "New Mobile Minder serial number retrieved!";
     			break;
     		case 2: //Wed Reg
-    			stateText = "Trial account";//context.getString(R.string.RegTrial);
+    			stateText = "This is a trial account!";
     			regOK = true;
     			break;
     		case 3: //Device Reg
-    			stateText = "Fully Active";//context.getString(R.string.RegActive);
+    			stateText = "Mobile Minder is now fully Active!";
     			regOK = true;
     			break;
     		//default:break;
     	}
-    	
-    	// Update the user notification in the global inbox
+		// Update the user notification in the global inbox
     	// This message will contain the regID so they can register online.
-    	mmNotification.addMsgToInbox(getRegID());
+    	// But don't send the message if its in the initial stage, ie 0
+    	if (!messageSent && 0 < inputStage)
+    	{
+    		mmNotification.addMsgToInbox(stateText,inputStage,regID);
+    		messageSent=true;
+    	}
      }
     
     /**
@@ -326,7 +288,12 @@ public class Registration extends Thread
      * 
      */
     public static String getRegID()
-    {	return new String(regID); //returns a copy so that the value cannot be modified. 
+    {	
+    	if ("0" == regID)
+    	{
+    		
+    	}
+    	return new String(regID); //returns a copy so that the value cannot be modified. 
     }
     
     /**
@@ -480,7 +447,7 @@ class RegData
 {
     public static Debug logWriter = Logger.getInstance();
 
-	private int currentState;
+	private 	  int 			currentState;
 	private final static String DATABASE_NAME    = "CVKe";
     private final static String DATABASE_TABLE   = "regDB";
     private final static String KEY_STAGE		 = "Stage";
