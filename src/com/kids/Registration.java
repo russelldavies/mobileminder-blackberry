@@ -33,7 +33,7 @@ public class Registration extends Thread
     private			boolean 		messageSent = false;
 	private 		LocalDataReader actLog;
     public static 	RegData 		regData;
-    public static 	String 			regID = "0";
+    public static 	String 			regID = "999";
     private 		MMServer 		server;
     private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
     private	final	int				sleepTimeShort 	= 6000;		//3sec
@@ -120,6 +120,8 @@ public class Registration extends Thread
     			{	
     				logger.log("REG: currentStageValue == nextStage"+currentStageValue+"=="+nextStage);
     				newState = false; 
+    				//Added this line in cause regID was staying at 0 when app icon is clicked
+    				//regData.setRegSN(response.getRegID());
     				if(currentStageValue < 2)//Just waiting to reg online
     				{	time = sleepTimeShort;	}
     				else
@@ -427,7 +429,7 @@ class RegData
 {
     public static Debug logWriter = Logger.getInstance();
 
-	private static 	  int 			currentState;
+	private static 	  	 int 			currentState;
 	public  final static String DATABASE_NAME    = "CVKe";
     public  final static String DATABASE_TABLE   = "regDB";
     private final static String KEY_STAGE		 = "Stage";
@@ -459,7 +461,7 @@ class RegData
     /**
      * Method that sets the URI of the database, so it can be used with DatabaseFactory
      */
-	private static void getdbURI()
+	private void getdbURI()
 	{
 		logWriter.log("In RegData getdbURI method");
 		try {
@@ -628,6 +630,7 @@ class RegData
     public void setRegSN(String inputVal)//KEY_NUMBER
     {
     	update(KEY_NUMBER,inputVal);
+    	//regID=inputVal;
     }
     
 		/**
@@ -750,9 +753,9 @@ class RegData
 				Statement st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
 				
 	            st.prepare();
-	            Cursor cursor = st.getCursor();
-				
+	            Cursor cursor = st.getCursor();				
 				cursor.first();
+				
 				Row row = cursor.getRow();
 				// Here's the only line thats changed from querySTRINGfirst
 				column_value = row.getString(1);

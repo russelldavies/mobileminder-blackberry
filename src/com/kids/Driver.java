@@ -110,11 +110,13 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 	
     private void doStartupWorkLater()
     {
+		actLog = LocalDataAccess.getLocalDataAccessRef();
+
     	invokeLater(new Runnable()
     	{
     		public void run()
     		{
-    			actLog = LocalDataAccess.getLocalDataAccessRef();
+    			
     			
     			///////////////    			
     			// Wait for SD Card to be mounted
