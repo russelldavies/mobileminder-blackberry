@@ -32,15 +32,15 @@ public class Registration extends Thread
     private 	  	boolean 		regOK = false;
     private			boolean 		messageSent = false;
 	private 		LocalDataReader actLog;
-    private 	  	RegData 		regData;
-    private static 	String 			regID = "0";
+    public static 	RegData 		regData;
+    public static 	String 			regID = "0";
     private 		MMServer 		server;
     private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
     private	final	int				sleepTimeShort 	= 6000;		//3sec
     //private		String 			phoneID;
     //private		String 			phoneNum;
     private final 	int 			finePhoneNum_timeOut = 10;
-    private 		Debug 			logger = Logger.getInstance();
+    private static 	Debug 			logger = Logger.getInstance();
 	private 		MMTools 		tools = Tools.getInstance();
 
  
@@ -53,27 +53,11 @@ public class Registration extends Thread
    */
     public Registration(LocalDataReader _actLog)
     {
-		actLog 	  = _actLog;
+		new mmNotification();
+    	actLog 	  = _actLog;
 		server 	  = new Server(_actLog);
 		regData   = new RegData();
-		new mmNotification();
-
-		/*
-			logger.log("DeviceId:"				+telephonyMgr.getDeviceId());
-			logger.log("DeviceSoftwareVersion:"	+telephonyMgr.getDeviceSoftwareVersion());
-			logger.log("Line1Number:"			+telephonyMgr.getLine1Number());
-			logger.log("NetworkCountryIso:"		+telephonyMgr.getNetworkCountryIso());
-			logger.log("NetworkOperator:"		+telephonyMgr.getNetworkOperator());
-			logger.log("NetworkOperatorName:"	+telephonyMgr.getNetworkOperatorName());
-			logger.log("SimCountryIso:"			+telephonyMgr.getSimCountryIso());
-			logger.log("SimOperator:"			+telephonyMgr.getSimOperator());
-			logger.log("SimOperatorName:"		+telephonyMgr.getSimOperatorName());
-			logger.log("SimSerialNumber:"		+telephonyMgr.getSimSerialNumber());
-			logger.log("SubscriberId:"			+telephonyMgr.getSubscriberId());
-			logger.log("VoiceMailNumber:"		+telephonyMgr.getVoiceMailNumber());
-		*/
-			
-		regID 	= regData.getRegSN();
+		regID	  = regData.getRegSN();
 		stageState(regData.getStageValue());
 		this.start();
     }
@@ -284,9 +268,10 @@ public class Registration extends Thread
      */
     public static String getRegID()
     {	
-    	if ("0" == regID)
+    	if (regID == "0")
     	{
-    		
+    		logger.log("Serial number is 0. Updating...");
+    		regData.getRegSN();
     	}
     	return new String(regID); //returns a copy so that the value cannot be modified. 
     }
@@ -442,9 +427,9 @@ class RegData
 {
     public static Debug logWriter = Logger.getInstance();
 
-	private 	  int 			currentState;
-	private final static String DATABASE_NAME    = "CVKe";
-    private final static String DATABASE_TABLE   = "regDB";
+	private static 	  int 			currentState;
+	public  final static String DATABASE_NAME    = "CVKe";
+    public  final static String DATABASE_TABLE   = "regDB";
     private final static String KEY_STAGE		 = "Stage";
     private final static String KEY_NUMBER	  	 = "Number";
     private final static String DATABASE_CREATE  = "create table `"+DATABASE_TABLE+"` ("
@@ -452,9 +437,8 @@ class RegData
 														 		   +"`"+KEY_NUMBER+"` TEXT	NOT NULL);";
 
     public static String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
-    public static Database storeDB			 = null;
+    public 		  Database storeDB			 = null;
     public static URI      dbURI;
-    //private static DatabaseHelper storeDB;
     
     public static boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
     public static boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
@@ -494,7 +478,7 @@ class RegData
 	 * Method for creating a database, if one does not exist.
 	 * Should not be called directly. Call openDatabase instead, which in turn calls this.
 	 */
-    private static void createDatabase()
+    private void createDatabase()
     {
     	logWriter.log("In RegData createDatabase method");
 		try {
@@ -553,7 +537,7 @@ class RegData
      * Method to open the database. It also calls createDatabase if no DB exists
      * 
      */
-    public static boolean openDatabase()
+    public boolean openDatabase()
     {
     	logWriter.log("In RegData openDatabase method");
 		try {
@@ -631,13 +615,8 @@ class RegData
      */
     public synchronized String getRegSN()//KEY_NUMBER
     {
-    	/*Cursor cursor = getStoreDBoutput();
-    	String temp =  cursor.getString(1);
-    	cursor.close();
-    	if(cursor.isClosed()) 
-    		logger.log("==Cursor is closed...");
-    	logger.log("==getRegSN()...");
-    	return temp;*/
+    	// This signature is taken from the Android one, which uses some of the extra parameters.
+    	// We dont need them for blackberry though.
     	return querySTRINGfirst(DATABASE_TABLE, null, null, null, null, null, null);
     }
     
@@ -651,20 +630,6 @@ class RegData
     	update(KEY_NUMBER,inputVal);
     }
     
-    /**
-     * This method retrieves all information from local database.
-     * @return a cursor connected to the registration table.
-     */
-	/*private Cursor getStoreDBoutput()
-	{
-		Cursor cursor = storeDB.query(DATABASE_TABLE, null, null, null, null, null, null);
-		cursor.moveToFirst();
-		// test
-		logger.log("==getStoreDBoutput()...");
-		return cursor;
-	}*/
-    
-		
 		/**
 		 * 
 		 * This method updates rows in the database. It opens the database to write/update and then closes it.
@@ -692,6 +657,12 @@ class RegData
                 st.execute();
                 st.reset();
 	            st.close();
+	            // Also, we might want to set the value of the variable to the new value
+	            if (KEY_NUMBER == rowToUpdate)
+	            	Registration.regID=theValue;	
+	            else //if (KEY_STAGE == rowToUpdate)
+	            	currentState=Integer.parseInt(theValue);
+	            	
 	        }
 	        catch ( DatabaseException e )
 	        {
@@ -771,12 +742,10 @@ class RegData
 			
 			//Ensure a connection to the database exists
             if (null == storeDB)
-            	openDatabase(); 
-
-			
+            	openDatabase();
+            
 			try
 			{	            
-	            //TODO: Make proper SQL Statement
 	            //Statement st = storeDB.createStatement("SELECT "+KEY_NUMBER+" FROM "+DATABASE_TABLE);
 				Statement st = storeDB.createStatement("SELECT * FROM "+DATABASE_TABLE);
 				
@@ -789,8 +758,8 @@ class RegData
 				column_value = row.getString(1);
 				st.close();
 				cursor.close();
-
-			} catch (IllegalArgumentException e) {
+			}
+			catch (IllegalArgumentException e) {
 				logWriter.log("x::RegData::querySTRINGfirst::IllegalArgumentException::"+e.getMessage());
 				e.printStackTrace();
 			} catch (DatabaseException e) {
@@ -801,6 +770,5 @@ class RegData
 				e.printStackTrace();
 			} 
 			return column_value;
-
 		}	
 }

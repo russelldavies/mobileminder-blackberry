@@ -471,16 +471,17 @@ public class Server extends Thread implements MMServer
 		//logger.log("DECRYPT: 386");		//Reverse top&tail -> convert to String -> decrypt REST
 		String[]replyArray = Reply.stringToArray(security.cryptFull(hexToString(tools.reverseTopAndTail(inputText)),false));//.split(Server.RestElementSeparator);
 		//for debugging
-		/*for(int counts = 0; counts<replyArray.length; counts++)
+		for(int counts = 0; counts<replyArray.length; counts++)
 		{
 			logger.log("ReplyArray elements: "+replyArray[counts]);
-		}*/
-		//logger.log("DECRYPT: 389");
+		}
+		
+		//Element 2 is the serial number/device unique serial
+		logger.log("setting SN: "+replyArray[2]);
+		Registration.regData.setRegSN(replyArray[2]);
 		//rebuild message
 		for(int count = 2; count<replyArray.length; count++)
-		{
-			
-			//logger.log("DECRYPT: 394");
+		{			
 			text += replyArray[count];
 			if((replyArray.length-1) > count)
 			{	text += Tools.RestElementSeparator; }

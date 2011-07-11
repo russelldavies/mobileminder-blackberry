@@ -12,9 +12,9 @@ import javax.microedition.io.file.FileSystemListener;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
-import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.SystemListener2;
+import net.rim.device.api.ui.UiApplication;
  
 /**
  * 
@@ -24,14 +24,14 @@ import net.rim.device.api.system.SystemListener2;
  *
  */
 
-//class Controller extends Application
-public class Driver extends Application implements SystemListener2, FileSystemListener
+public class Driver extends UiApplication implements SystemListener2, FileSystemListener
 {
 	// Enable logging
     static  Debug 			logWriter     = Logger.getInstance();
 	public  boolean			sdCardMounted = false;
 	private Registration 	Reg;
 			LocalDataReader actLog ;
+	public 	boolean			isAutoStart	  = false;
             
     /**
      * After calling to enterEventDispatcher() the application enters the event-processing loop.
@@ -42,32 +42,49 @@ public class Driver extends Application implements SystemListener2, FileSystemLi
     {
         //How to create proper startup apps:
         //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
-        Driver appInstance = new Driver();            
-            
-        // If system startup is still in progress when this
-        // application is run.
-        if (ApplicationManager.getApplicationManager().inStartup())
-        {
-            logWriter.log("Still starting up");
-            appInstance.addSystemListener(appInstance);
-        }
-        else
-        {
-            logWriter.log("Fully booted up");
-            appInstance.doStartupWorkLater();
-        }
-        //The event thread processes incoming messages and sends them to the listeners.
-            //new Controller().enterEventDispatcher();
-        appInstance.enterEventDispatcher();
+    	Driver theApp;
+      //Check for the argument defined in the project properties.
+        if (args != null && args.length > 0 && args[0].equals("icon"))
+        { // Started from icon click
+        	logWriter.log("Icon clicked");
+        	theApp = new Driver(false);
+        } 
+        else 
+        {   //Started at boot
+        	theApp = new Driver(true);
+            // If system startup is still in progress when this
+            // application is run.
+            if (ApplicationManager.getApplicationManager().inStartup())
+            {
+                logWriter.log("Still starting up");
+                theApp.addSystemListener(theApp);
+            }
+            else
+            {
+                logWriter.log("Fully booted up");
+                theApp.doStartupWorkLater();
+            }
+
+        }      
+        theApp.enterEventDispatcher();
+        
     }
        
 /**
  * Initialises the objects that will register themselves with the appropriate event listeners
  */
     //public Controller()
-    Driver()
-        { }
-
+    Driver(boolean _isAutoStart)
+    {	
+    	// Now we know if the app is started at boot or by clicking the icon
+    	if (!_isAutoStart)
+    	{
+    		requestForeground();
+    		pushScreen( new serialScreen() ); 
+    		
+    	}
+    }
+    
     /**
      * Listens for a change in the root list, eg if a new volume is mounted
      * We're only interested in the SD card here
