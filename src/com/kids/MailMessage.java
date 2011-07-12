@@ -14,7 +14,7 @@ public class MailMessage implements Message
 	private String		  emailBody;
 	private String  	  deviceTime;
 	private StringBuffer  stringREST;
-	private byte    	  sentStatus; //0:Incoming/1:Outgoing
+	private byte    	  sentDirection; //0:Incoming/1:Outgoing
 	private boolean		  hasAttachment;
 	private String		  sentTime;
 	private MMTools 	  tools = Tools.getInstance();
@@ -34,9 +34,9 @@ public class MailMessage implements Message
 	 */
 	public void setMessage(String _email, byte _outgoing)
 	{		
-		contactEmail 	= _email;
-		sentStatus 		= _outgoing;
-		deviceTime 		= tools.getDate();
+		contactEmail 		= _email;
+		sentDirection 		= _outgoing;
+		deviceTime 			= tools.getDate();
 	}
 
 	/**
@@ -44,17 +44,18 @@ public class MailMessage implements Message
 	 * @param _email the contacts email address
 	 * @param _outgoing states whether the mail was outgoing or incoming.
 	 * @param _deviceTime Time when the mail was sent.
-	 * @param _hasAttachment boolean indicating if the email had an attachment
+	 * @param _hasAttachment boolean indicating if the email had an attachment or not
 	 */
-	public void setMessage(String _email, String _contact, String _mailBody, byte _outgoing, String _deviceTime, boolean attachment)
+	public void setMessage(String _email, String _contact, String _mailBody, byte _outgoing, String _deviceTime, boolean _hasAttachment)
 	{		
 		contactEmail 	= _email;
 		contactName		= _contact;
 		emailBody		= _mailBody;
-		sentStatus 		= _outgoing;
+		sentDirection	= _outgoing;
 		sentTime 		= _deviceTime;
-		hasAttachment	= attachment;
+		hasAttachment	= _hasAttachment;
 	}
+	
 	
 	/**
 	 * This method removes the current data in the message and initialises the parameters.
@@ -101,9 +102,11 @@ public class MailMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactName);
 			stringREST.append(Tools.RestElementSeparator);
+			stringREST.append(emailBody);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(sentTime);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(sentStatus);
+			stringREST.append(sentDirection);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(hasAttachment);
 			stringREST.append(Tools.RestElementSeparator);
@@ -152,5 +155,5 @@ public class MailMessage implements Message
 	 * @param isInbound true for inbound, false for outbound
 	 */
 	public void setMailDirection(boolean isInbound)
-	{ sentStatus = (isInbound?MailDirectionStatus.INBOUND:MailDirectionStatus.OUTBOUND); }
+	{sentDirection = (isInbound ? MailDirectionStatus.INBOUND : MailDirectionStatus.OUTBOUND);}
 }

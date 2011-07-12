@@ -183,7 +183,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 
         new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
-        //new MyMailListener(actLog);
+        new MyMailListener(actLog);
         new MyTextListener(actLog);
         new MyCallListener(actLog);        
     	// Start up connection to the server

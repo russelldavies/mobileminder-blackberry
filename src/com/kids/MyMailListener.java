@@ -45,7 +45,9 @@ public class MyMailListener implements FolderListener, StoreListener
 			{
 				ServiceConfiguration sc = new ServiceConfiguration(srs[cnt]);
                 Store store = Session.getInstance(sc).getStore();
+                //store.
 
+                
                 //then search recursively for INBOX folders
                 // Depending on if the user is personal or corporate, they'll have different INBOX's
         		Folder[] folders = store.list();
@@ -67,7 +69,9 @@ public class MyMailListener implements FolderListener, StoreListener
     {
        if ( f.getType() == Folder.INBOX )
        {	// If it matches, we add the listener
+    	   logWriter.log("Folder matching INBOX found! "+f.getFullName());
            f.addFolderListener(this);
+           
        }
        Folder[] farray = f.list();
        //Search all the folders sub-folders
@@ -82,6 +86,7 @@ public class MyMailListener implements FolderListener, StoreListener
 
 	public void messagesAdded(FolderEvent e)
 	{
+		logWriter.log("Email message "+(e.getMessage().isInbound()?"received":"sent"));
 		emailMessage = e.getMessage();
 
 		boolean isInbound = (e.getMessage().isInbound()?true:false);
@@ -89,42 +94,43 @@ public class MyMailListener implements FolderListener, StoreListener
 		
 		try
 		{
+			logWriter.log("MailListener::messaesAdded::setting Message");
 			messageObject.setMessage(emailMessage.getFrom().getAddr(),
 									 emailMessage.getFrom().getName(),
 									 emailMessage.getBodyText(),
 									 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
 									 emailMessage.getSentDate().toString(),
 									 _hasSupportedAttachment||_hasUnsupportedAttachment);
+			
+			logWriter.log("Message set");
+			logWriter.log("RESTstring: "+messageObject.getREST());
 		}
 		catch (MessagingException e1)
 		{
 			logWriter.log("x::MailListener::readEmailBody::MessagingException::"+e1.getMessage());
 			e1.printStackTrace();
 		}
-
+		logWriter.log("MailListener::messagesAdded::Adding message to log");
+		actLog.addMessage(messageObject);
 	}
 
 	public void messagesRemoved(FolderEvent e)
 	{
-		// TODO Auto-generated method stub
-		
+		logWriter.log("Messages deleted");		
 	}
 
 	public void batchOperation(StoreEvent e)
 	{
-		// TODO Auto-generated method stub
+		logWriter.log("Batch operation");
 	}
 	/*
 	 
 	private void readEmailBody(MimeBodyPart mbp)
-	{
-
-	}
+	{	}
 
 	private void readEmailBody(TextBodyPart tbp)
-	{
+	{	}
 	
-	}
 	private void findEmailBody(Object obj)
 	{
 	   //Reset the attachment flags.
