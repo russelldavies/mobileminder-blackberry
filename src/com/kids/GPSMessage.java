@@ -1,23 +1,17 @@
 package com.kids;
 
-import java.util.Date;
-
 import com.kids.prototypes.Message;
 
 /**
- * This class implements the message interface to hold SMS event messages.
+ * This class implements the message interface to hold GPS event messages.
  */
 public class GPSMessage implements Message
 {
 	private final 	String 			type;
-	private 		String 			number;
-	private			String			contactName;
-	private			String			messageBody;
 	private 		String 			deviceTime;
-	private 		boolean 		startStatus;//0:Incoming/1:Outgoing
-	private 		boolean 		endStatus;	//0:bounced /1:delivered
 	private 		StringBuffer 	stringREST;
-	
+	public  static  double			latitude  = 0.0;
+	public  static  double			longitude = 0.0;
 	//private MMTools tools = Tools.getInstance();
 	
 /**
@@ -37,32 +31,20 @@ public class GPSMessage implements Message
 		{	type = "02";	}
 		clearData();	
 	}
-	
-/**
- * Adds the SMS event information to the SMS message object
- * 
- * @param _number the phone number of the incoming or outgoing message
- * @param _outgoing states whether the SMS was outgoing or incoming
- * @param _date 
- * @param _inputBody The body of the SMS message
- */
-	public void setMessage(String _number, boolean _outgoing, Date _date, String _inputBody)
-	{setMessage(_number, _outgoing,_date ,_inputBody);}
-	
-/**
- * Adds the SMS event information to the SMS message object
- * @param _number the phone number of the incoming or outgoing message
- * @param _outgoing states whether the SMS was outgoing or incoming
- * @param _deviceTime Time when the SMS is being made.
- * @param inputBody The body of the SMS message
- */
-	public void setMessage(String _number, boolean _outgoing, String _deviceTime, String inputBody)
+
+
+	/**
+	 * Adds details of the GPS event to the GPS object
+	 * @param _latitude The latitude
+	 * @param _longitude The longitude
+	 * @param _deviceTime The Device time
+	 */
+	public void setMessage(double _latitude, double _longitude, String _deviceTime)
 	{
 		clearData();
-		startStatus = _outgoing;//0:Incoming/1:Outgoing
-		number 		= _number;
-		deviceTime	= _deviceTime;
-		messageBody	= inputBody;
+		latitude   = _latitude;
+		longitude  = _longitude;
+		deviceTime = _deviceTime;
 	}
 	
 /**
@@ -70,19 +52,18 @@ public class GPSMessage implements Message
  */
 	public void clearData()
 	{
-		startStatus = false;//Incoming
-		endStatus 	= true; //delivered
-		stringREST 	= null;
-		messageBody	= "";
-		contactName = "";
+		stringREST = null;
+		latitude   = 0.0;
+		longitude  = 0.0;
+		deviceTime = null;
 	}
 
 /**
- * This method retrieves the information in the body of the message
- * @return the message body
+ * This method retrieves the GPS coordinates in String form, seperated by a comma
+ * @return the GPS coordinates seperated by a comma
  */
-	public String getMessageBody() 
-	{	return messageBody;	}
+	public String getLocation() 
+	{	return latitude+Tools.RestElementSeparator+longitude;	}
 	
 /**
  * This method retrieves the message formatted in to a single string value.
@@ -112,15 +93,7 @@ public class GPSMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(deviceTime);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(number);
-			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(contactName);
-			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(startStatus);
-			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(endStatus);
-			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(messageBody);
+			stringREST.append(getLocation());	// getLocation() returns "lat,lon", already comma seperated
 		}
 		return stringREST.toString();
 	}
@@ -143,7 +116,10 @@ public class GPSMessage implements Message
 	public int getType() 
 	{	return Integer.parseInt(type);	}
 	
-	public void setContactName(String theName)
-	{	contactName=theName;	}
+	public void setLocation(double _latitude, double _longitude)
+	{
+		latitude = _latitude;
+		longitude = _longitude;
+	}
 	
 }
