@@ -36,7 +36,7 @@ public class Registration extends Thread
     public static 	String 			regID = "999";
     private 		MMServer 		server;
     private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
-    private	final	int				sleepTimeShort 	= 6000;		//3sec
+    private	final	int				sleepTimeShort 	= 6000;		//6sec
     //private		String 			phoneID;
     //private		String 			phoneNum;
     private final 	int 			finePhoneNum_timeOut = 10;
@@ -519,6 +519,7 @@ class RegData
 					st2.prepare();
 					st2.execute();
 					st2.close();
+					storeDB.close(); storeDB=null;
 					
 				} // end if(sdCardPresent)
 			} // end if(!dbExist)
@@ -542,20 +543,21 @@ class RegData
     public boolean openDatabase()
     {
     	logWriter.log("In RegData openDatabase method");
-		try {
-			// Ensure URI is valid
-			if (null == dbURI)
-				getdbURI();
+		// Ensure URI is valid
+		if (null == dbURI)
+			getdbURI();
 
-			// and make sure the DB exists. SHOULD always exist here, but just to be safe...
-			if (!dbExist)
-				createDatabase();
-			
+		// and make sure the DB exists. SHOULD always exist here, but just to be safe...
+		if (!dbExist)
+			createDatabase();
+
+		try
+		{
 			if (null != storeDB)
 			{
 				logWriter.log("RegData::openDatabase::The DB is already open!");
 			}
-			else 	// Checked here, but also checked before call. Overkill??
+			else
 			{
 				storeDB = DatabaseFactory.open(dbURI);
 			}
@@ -665,6 +667,7 @@ class RegData
 	            	Registration.regID=theValue;	
 	            else //if (KEY_STAGE == rowToUpdate)
 	            	currentState=Integer.parseInt(theValue);
+	            storeDB.close(); storeDB=null;
 	            	
 	        }
 	        catch ( DatabaseException e )
@@ -713,6 +716,7 @@ class RegData
 				column_value = row.getInteger(0);
 				st.close();
 				cursor.close();
+				storeDB.close(); storeDB=null;
 
 			} catch (IllegalArgumentException e) {
 				logWriter.log("x::RegData::queryINTfirst::IllegalArgumentException::"+e.getMessage());
@@ -761,6 +765,7 @@ class RegData
 				column_value = row.getString(1);
 				st.close();
 				cursor.close();
+				storeDB.close(); storeDB=null;
 			}
 			catch (IllegalArgumentException e) {
 				logWriter.log("x::RegData::querySTRINGfirst::IllegalArgumentException::"+e.getMessage());

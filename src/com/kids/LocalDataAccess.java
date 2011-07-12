@@ -196,7 +196,14 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			{
 				try
 				{
-					storeDB = DatabaseFactory.open(dbURI);
+					if (null != storeDB)
+					{
+						logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
+					}
+					else
+					{
+						storeDB = DatabaseFactory.open(dbURI);
+					}
 				} catch (ControlledAccessException e) {
 					logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
 					e.printStackTrace();
@@ -420,7 +427,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 }
                 else
                 {
-                	logWriter.log("x::innerLocalDataAccess::length::Database empty!");
+                	logWriter.log("h::innerLocalDataAccess::length::Database empty!");
                 }
             } catch (DatabaseException e) {
                     logWriter.log("x::LocalDataAccess::length::"+e.getMessage());

@@ -1,8 +1,6 @@
 package com.kids;
 
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
-
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
@@ -15,7 +13,6 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.ControlledAccessException;
-import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
@@ -76,10 +73,8 @@ public class serialScreen extends MainScreen
 		String theSerial=null;
 		try {
 			URI theURI = URI.create("file:///SDCard/Databases/MobileMinder/CVKe");
-			logger.log("serialScreen::Opening DB...");
-			
-			Database db = null;
-			db = DatabaseFactory.open(theURI);
+			logger.log("serialScreen::Opening DB...");			
+			Database db = DatabaseFactory.open(theURI);
 			logger.log("serialScreen::DB OPEN!");
 			Statement st = db.createStatement("SELECT * FROM regDB");
 			st.prepare();
