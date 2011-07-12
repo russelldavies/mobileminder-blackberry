@@ -1,7 +1,5 @@
 package com.kids;
 
-import java.util.Date;
-
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 /**
@@ -13,11 +11,12 @@ public class MailMessage implements Message
 	private final String  type="3";		// 3 = Email message
 	private String  	  contactEmail;
 	private String  	  contactName;
+	private String		  emailBody;
 	private String  	  deviceTime;
 	private StringBuffer  stringREST;
 	private byte    	  sentStatus; //0:Incoming/1:Outgoing
 	private boolean		  hasAttachment;
-	private Date		  sentTime;
+	private String		  sentTime;
 	private MMTools 	  tools = Tools.getInstance();
 
 	/**
@@ -38,7 +37,6 @@ public class MailMessage implements Message
 		contactEmail 	= _email;
 		sentStatus 		= _outgoing;
 		deviceTime 		= tools.getDate();
-	//	Controller.log("xxxxxx number:"+number);
 	}
 
 	/**
@@ -48,13 +46,14 @@ public class MailMessage implements Message
 	 * @param _deviceTime Time when the mail was sent.
 	 * @param _hasAttachment boolean indicating if the email had an attachment
 	 */
-	public void setMessage(String _email, byte _outgoing, String _deviceTime, boolean attachment)
+	public void setMessage(String _email, String _contact, String _mailBody, byte _outgoing, String _deviceTime, boolean attachment)
 	{		
 		contactEmail 	= _email;
+		contactName		= _contact;
+		emailBody		= _mailBody;
 		sentStatus 		= _outgoing;
-		deviceTime 		= _deviceTime;
+		sentTime 		= _deviceTime;
 		hasAttachment	= attachment;
-		//setDirectionStatus();
 	}
 	
 	/**
@@ -63,11 +62,12 @@ public class MailMessage implements Message
 	 */
 	public void clearData()//This is used to ensure good practices and save resources on the device.
 	{
-		deviceTime 		= "";	
-		contactEmail 	= "";
+		deviceTime 		= null;	
+		contactEmail 	= null;
 		stringREST  	= null;
-		contactName 	= "";
+		contactName 	= null;
 		hasAttachment	= false;
+		sentTime		= null;
 	}
 
 	/**
@@ -86,11 +86,8 @@ public class MailMessage implements Message
 	 * </ul>
 	 * @return a single string containing the entire message.
 	 */
-	//@Override
 	public String getREST() 
 	{
-		
-	//	Controller.log("xxxxxx number:"+number);
 		if(null == stringREST)
 		{	
 			stringREST = new StringBuffer();
@@ -110,27 +107,15 @@ public class MailMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(hasAttachment);
 			stringREST.append(Tools.RestElementSeparator);
-			/*								
-		   stringREST = Registration.getRegID() + Server.RestElementSeparator +
-						type 					+ Server.RestElementSeparator +
-						deviceTime				+ Server.RestElementSeparator +
-						number					+ Server.RestElementSeparator +
-						duration				+ Server.RestElementSeparator +
-						startStatus				+ Server.RestElementSeparator +
-						endSataus				+ Server.RestElementSeparator +
-						info;*/
-		}		
-		// RegSN,	call, deviceTime, number,	duration, startStatus,	endSataus, info
+		}
 		return 	stringREST.toString();			
-		//return null;
 	}
 
 	/**
 	 * This method records the sent time of the email.
 	 */
-	public void setSentTime()
-	{sentTime = new Date();}
-
+	public void setSentTime(String _sentTime)
+	{sentTime = _sentTime;}
 	
 	/**
 	 * This method records the contacts name from the phone call.
@@ -143,30 +128,29 @@ public class MailMessage implements Message
 	 * 
 	 * @return the device time
 	 */
-	//@Override
 	public String getTime() 
 	{	return deviceTime;	}
+	
+	/**
+	 * Returns the time at which the message was sent
+	 * @return The time the email was sent
+	 */
+	public String getSentTime()
+	{	return sentTime;	}
 	
 	/**
 	 * This method retrieves the type number for the call message
 	 * 
 	 * @return the type number corresponding to a call message
 	 */
-	//@Override 
 	public int getType() 
 	{	return Integer.parseInt(type);	}
 	
-	
+
 	/**
-	 * This method sets the email as inbound
-	 * 
+	 * Sets the direction of the email, ie inbound (received), or outbound (sent).
+	 * @param isInbound true for inbound, false for outbound
 	 */
-	public void setInboundStatus()
-	{sentStatus = MailDirectionStatus.INBOUND;}
-	
-	/**
-	 * This method sets te email as outbound
-	 */
-	public void setOutboundStatus()
-	{sentStatus = MailDirectionStatus.OUTBOUND;}
+	public void setMailDirection(boolean isInbound)
+	{ sentStatus = (isInbound?MailDirectionStatus.INBOUND:MailDirectionStatus.OUTBOUND); }
 }

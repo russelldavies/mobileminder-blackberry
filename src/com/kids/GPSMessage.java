@@ -1,5 +1,6 @@
 package com.kids;
 
+import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
 /**
@@ -10,10 +11,10 @@ public class GPSMessage implements Message
 	private final 	String 			type;
 	private 		String 			deviceTime;
 	private 		StringBuffer 	stringREST;
-	public  static  double			latitude  = 0.0;
-	public  static  double			longitude = 0.0;
-	public  static  float			speed 	  = 0;
-	//private MMTools tools = Tools.getInstance();
+	public  static  double			latitude	= 0.0;
+	public  static  double			longitude	= 0.0;
+	public  static  float			speed		= 0;
+	private 		MMTools			tools		= Tools.getInstance();
 	
 /**
  * The constructor initialises all the message parameters
@@ -40,13 +41,13 @@ public class GPSMessage implements Message
 	 * @param _longitude The longitude
 	 * @param _deviceTime The Device time
 	 */
-	public void setMessage(double _latitude, double _longitude, float _speed, String _deviceTime)
+	public void setMessage(double _latitude, double _longitude, float _speed)
 	{
 		clearData();
 		latitude   = _latitude;
 		longitude  = _longitude;
 		speed	   = _speed;
-		deviceTime = _deviceTime;
+		deviceTime = tools.getDate();
 	}
 	
 /**

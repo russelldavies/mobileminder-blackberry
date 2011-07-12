@@ -24,8 +24,9 @@ public class MyGPSListener extends Thread
 {
 	private LocalDataWriter actLog;
 	private int 			timer;
-			Debug     		logWriter		= Logger.getInstance();
+			Debug     		logWriter	= Logger.getInstance();
 			GPSMessage 		gpsMessage;
+
 
 /**
  * The GPSListener constructor initialise the action store location and the interval value.
@@ -76,7 +77,7 @@ public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 		            //float  altitude  = mylocation.getQualifiedCoordinates().getAltitude();
 					//float  heading   = mylocation.getCourse();
 					
-		            gpsMessage.setMessage(latitude, longitude, speed, String.valueOf(System.currentTimeMillis()));
+		            gpsMessage.setMessage(latitude, longitude, speed);
 		            
 		            actLog.addMessage(gpsMessage);
 				} // end if

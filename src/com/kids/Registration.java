@@ -37,12 +37,9 @@ public class Registration extends Thread
     private 		MMServer 		server;
     private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
     private	final	int				sleepTimeShort 	= 6000;		//6sec
-    //private		String 			phoneID;
-    //private		String 			phoneNum;
     private final 	int 			finePhoneNum_timeOut = 10;
     private static 	Debug 			logger = Logger.getInstance();
 	private 		MMTools 		tools = Tools.getInstance();
-
  
   /**
    * This constructor initialises the context parameter, creates its own instance of Server and regData.
@@ -252,17 +249,6 @@ public class Registration extends Thread
     	//server.shutdown();
     	return result;
     }
-    /*
-    private String getPhoneNumber()
-    { 
-        return telephonyMgr.getLine1Number();  
-    }  
-    
-    private String getPhoneID()
-    {
-    	return telephonyMgr.getDeviceId();
-    }
-    */
     
     /**
      * This method is used to retrieve the device registration id, it can be used from anywhere in the system.

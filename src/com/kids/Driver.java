@@ -173,15 +173,15 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         //int deviceID    = 2;
         
         //Create variables
-      //  int oneSec        = 1000;
+        int oneSec        = 1000;
         //int uploadTimer =  1*oneSec;//send update every
-      //  int GPSTimer    = 15*oneSec;//check GPS every
+        int GPSTimer    = 15*oneSec;//check GPS every
       //  int AppTimer    =  2*oneSec;//check running app every
         
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
-        //new MyGPSListener (actLog, GPSTimer);
+        new MyGPSListener (actLog, GPSTimer);
         //new MyAppListener (actLog, AppTimer);            
         //new MyMailListener(actLog);
         new MyTextListener(actLog);

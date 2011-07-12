@@ -1,108 +1,175 @@
 package com.kids;
 
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataReader;
+import com.kids.prototypes.LocalDataWriter;
 
+import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
-import net.rim.blackberry.api.mail.Store;
-import net.rim.blackberry.api.mail.Address;
-import net.rim.blackberry.api.mail.Session;
-import net.rim.blackberry.api.mail.SendListener;
 import net.rim.blackberry.api.mail.MessagingException;
-import net.rim.blackberry.api.mail.NoSuchServiceException;
+import net.rim.blackberry.api.mail.ServiceConfiguration;
+import net.rim.blackberry.api.mail.Session;
+import net.rim.blackberry.api.mail.Store;
+import net.rim.blackberry.api.mail.event.FolderEvent;
+import net.rim.blackberry.api.mail.event.FolderListener;
+import net.rim.blackberry.api.mail.event.StoreEvent;
+import net.rim.blackberry.api.mail.event.StoreListener;
+import net.rim.device.api.servicebook.ServiceBook;
+import net.rim.device.api.servicebook.ServiceRecord;
 
-
-/**
- * 
- * MyMailListener monitors and registers e-mail based events.
- *
- */
-public class MyMailListener implements SendListener
+public class MyMailListener implements FolderListener, StoreListener
 {
-	private LocalDataReader actLog;
-	Debug log = Logger.getInstance();
+	private 	LocalDataWriter actLog;
+	Debug   	logWriter				  = Logger.getInstance();
 
-/**
- * The constructor initialises the action store location 
- * and registers a SendListener for the device.
- * 
- * @param inputAccess log of actions
- */
-	public MyMailListener(LocalDataReader inputAccess)
+	boolean 	_hasSupportedAttachment	  = false; 
+	boolean 	_hasUnsupportedAttachment = false;
+	MailMessage messageObject;
+	Message		emailMessage;
+
+    public MyMailListener(LocalDataWriter inputAccess)
+    {
+    	logWriter.log("Start MyCallListener");
+        actLog = inputAccess;
+        
+        // The following is a recursive method to search all folders on the device
+        // Since corporate users will have different locations than personal users, we need
+        // to search for their INBOX, instead of specifiying.
+        // BONUS: This code can be used on Mobile Minder, and the corporate equivalent later on!
+        ServiceBook sb = ServiceBook.getSB();
+        ServiceRecord[] srs = sb.getRecords();
+
+        for(int cnt = srs.length - 1; cnt >= 0; --cnt)
+        {
+        	//identify the service record associated with a mail message service via a CID of 'CMIME'
+			if( srs[cnt].getCid().equals( "CMIME" ))
+			{
+				ServiceConfiguration sc = new ServiceConfiguration(srs[cnt]);
+                Store store = Session.getInstance(sc).getStore();
+
+                //then search recursively for INBOX folders
+                // Depending on if the user is personal or corporate, they'll have different INBOX's
+        		Folder[] folders = store.list();
+        		for( int foldercnt = folders.length - 1; foldercnt >= 0; --foldercnt)
+        		{
+        			Folder f = folders[foldercnt];
+        			recurse(f);
+        		} // end for()
+			} // end if()
+        }  // end for()
+    }  
+
+    /**
+     * Recursive method to search a folder, and its sub-folders on
+     * the device to see if it matches "Folder.INBOX"
+     * @param f The folder which we want to compare with "Folder.INBOX"
+     */
+    public void recurse(Folder f)
+    {
+       if ( f.getType() == Folder.INBOX )
+       {	// If it matches, we add the listener
+           f.addFolderListener(this);
+       }
+       Folder[] farray = f.list();
+       //Search all the folders sub-folders
+       for (int fcnt = farray.length - 1; fcnt >= 0; --fcnt)
+       {
+           recurse(farray[fcnt]);
+       }
+    }
+    
+// Folders and listeners should all be taken care of at this stage
+// Now we get onto handling the incoming message
+
+	public void messagesAdded(FolderEvent e)
 	{
-		log.log("MyMailListener begin...");
-		actLog = inputAccess;
-		//MailSendListener mailSL = new mailSendListener();
+		emailMessage = e.getMessage();
 
-		try
-		{
-			Store mailStore = Session.waitForDefaultSession().getStore();
-			mailStore.addSendListener(this);
-		}
-		catch(NoSuchServiceException e) 
-		{
-			log.log("MyMailListener::NoSuchServiceException");
-			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
-		}
-		catch(Exception e) 
-		{
-			log.log("MyMailListener::Exception");
-			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
-		}
-	}
-
-/**
- * Retrieves and formats e-mail data and adds it to the action log
- * 
- * @param arg0 device e-mail data
- * @return boolean error value
- */
-	
-	
-	//public boolean sendMessage(net.rim.blackberry.api.mail.Message arg0)
-	public boolean addToLog(net.rim.blackberry.api.mail.Message arg0)
-	{
-		StringBuffer DestinationAddress = new StringBuffer();
-		MailMessage mailMessage = new MailMessage();
+		boolean isInbound = (e.getMessage().isInbound()?true:false);
+		messageObject.setMailDirection(isInbound);
 		
 		try
 		{
-			DestinationAddress.append(arg0.getFolder().getStore().getServiceConfiguration().getEmailAddress());
-			
-			Address DestinationAddressArray[] = arg0.getRecipients(arg0.getMessageType());
-			
-			for(int count = 0; count<DestinationAddressArray.length; count++)
-			{	//Format e-mail addresses: place comma between each address
-				DestinationAddress.append(", ");
-				DestinationAddress.append(DestinationAddressArray[count].getAddr());
-			}
-		} 
-		catch (MessagingException e)
-		{
-			actLog.addMessage(mailMessage);	//TODO: Double check this is what we want to do, log instead?
-			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+			messageObject.setMessage(emailMessage.getFrom().getAddr(),
+									 emailMessage.getFrom().getName(),
+									 emailMessage.getBodyText(),
+									 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
+									 emailMessage.getSentDate().toString(),
+									 _hasSupportedAttachment||_hasUnsupportedAttachment);
 		}
-		catch (Exception e)
+		catch (MessagingException e1)
 		{
-			actLog.addMessage(mailMessage);	//TODO: Double check this is what we want to do, log instead?
-			//actLog.addMessage(true,action.TYPE_MAIL,e.toString());
+			logWriter.log("x::MailListener::readEmailBody::MessagingException::"+e1.getMessage());
+			e1.printStackTrace();
 		}
 
-		//actLog.addMessage(action.TYPE_MAIL, arg0.getSubject(),DestinationAddress.toString());
-	
-		return false;
 	}
-	
-	public boolean sendMessage(Message message) {
+
+	public void messagesRemoved(FolderEvent e)
+	{
 		// TODO Auto-generated method stub
-		return false;
+		
 	}
-}
 
-class MailDirectionStatus
-{
-	private MailDirectionStatus(){}
+	public void batchOperation(StoreEvent e)
+	{
+		// TODO Auto-generated method stub
+	}
+	/*
+	 
+	private void readEmailBody(MimeBodyPart mbp)
+	{
+
+	}
+
+	private void readEmailBody(TextBodyPart tbp)
+	{
 	
-	public static final byte INBOUND  = 0;
-	public static final byte OUTBOUND = 1;
+	}
+	private void findEmailBody(Object obj)
+	{
+	   //Reset the attachment flags.
+	   _hasSupportedAttachment = false;
+	   _hasUnsupportedAttachment = false;
+	   MimeBodyPart mbp = (MimeBodyPart)obj;
+
+	   if(obj instanceof Multipart)
+	   {
+		   Multipart mp = (Multipart)obj;
+	    
+	       for(int count=0; count < mp.getCount(); ++count)
+	       {
+	    	   findEmailBody(mp.getBodyPart(count));
+	       }
+	   }
+	    
+	   else if (obj instanceof TextBodyPart)
+	   {
+		   TextBodyPart tbp = (TextBodyPart) obj;
+	       readEmailBody(tbp);
+	   }
+	   else if (obj instanceof MimeBodyPart)
+	   {
+	       if (mbp.getContentType().indexOf(ContentType.TYPE_TEXT_HTML_STRING) != -1)
+	       {
+	    	   readEmailBody(mbp);
+	       }
+	   }
+	   else if (mbp.getContentType().equals(ContentType.TYPE_MULTIPART_MIXED_STRING) ||
+	   mbp.getContentType().equals(ContentType.TYPE_MULTIPART_ALTERNATIVE_STRING))
+	   {
+		   //The message has attachments or we are at the top level of the message.
+	       //Extract all of the parts within the MimeBodyPart message.
+	       findEmailBody(mbp.getContent());
+	   }
+	   
+	   else if (obj instanceof SupportedAttachmentPart)  
+	   {
+		   _hasSupportedAttachment = true;
+	   }
+
+	   else if (obj instanceof UnsupportedAttachmentPart) 
+	   {
+		   _hasUnsupportedAttachment = true;
+	   }
+	}*/
 }

@@ -176,21 +176,14 @@ public class Commander extends Thread
  * Returns the type of the command message.
  * @return type of the command message
  */
-		//@Override
-		public int getType() {
-			// TODO Auto-generated method stub
-			return type;
-		}
+		public int getType()
+		{  return type;  }
 		
 /**
  * Retrieves the time when command processing starts.
  */
-		//@Override
 		public String getTime() 
-		{
-			// TODO Auto-generated method stub
-			return startTime;
-		}
+		{	return startTime; }
 			
 /**
  * Retrieves the message formatted in to a single string value.
@@ -205,7 +198,6 @@ public class Commander extends Thread
  * </ul>
  * @return a single string containing the entire message.
  */
-		//@Override
 		public String getREST() 
 		{		
 			if(null == stringREST)
@@ -225,7 +217,6 @@ public class Commander extends Thread
 			}		
 			
 			return 	stringREST.toString();				
-			//return null;
 		}
 		
 /**
@@ -251,8 +242,6 @@ public class Commander extends Thread
  * @return Time when the command finished processing
  */
 		public String getEndTime()
-		{return endTime;}
-		  
-	}
-	
+		{return endTime;}	  
+	}	
 }
