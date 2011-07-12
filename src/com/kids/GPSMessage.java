@@ -12,6 +12,7 @@ public class GPSMessage implements Message
 	private 		StringBuffer 	stringREST;
 	public  static  double			latitude  = 0.0;
 	public  static  double			longitude = 0.0;
+	public  static  float			speed 	  = 0;
 	//private MMTools tools = Tools.getInstance();
 	
 /**
@@ -39,11 +40,12 @@ public class GPSMessage implements Message
 	 * @param _longitude The longitude
 	 * @param _deviceTime The Device time
 	 */
-	public void setMessage(double _latitude, double _longitude, String _deviceTime)
+	public void setMessage(double _latitude, double _longitude, float _speed, String _deviceTime)
 	{
 		clearData();
 		latitude   = _latitude;
 		longitude  = _longitude;
+		speed	   = _speed;
 		deviceTime = _deviceTime;
 	}
 	
@@ -55,6 +57,7 @@ public class GPSMessage implements Message
 		stringREST = null;
 		latitude   = 0.0;
 		longitude  = 0.0;
+		speed	   = 0;
 		deviceTime = null;
 	}
 
@@ -80,10 +83,8 @@ public class GPSMessage implements Message
  * </ul>
  * @return a single string containing the entire message.
  */
-	//@Override
 	public String getREST() 
 	{
-		//RegSN,	text, 	error, deviceTime, number,	startStatus,	endSataus,	info
 		if(null == stringREST)
 		{
 			stringREST = new StringBuffer();
@@ -94,16 +95,24 @@ public class GPSMessage implements Message
 			stringREST.append(deviceTime);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(getLocation());	// getLocation() returns "lat,lon", already comma seperated
+			stringREST.append(Tools.RestElementSeparator);
+			stringREST.append(getSpeed());			
 		}
 		return stringREST.toString();
 	}
 	
+	/**
+	 * This method retrieves the speed at which the handset is travelling, as a float
+	 * @return The speed
+	 */
+	private float getSpeed()
+	{	return speed;}
+
 /**
  * This method retrieves the time that is set on the device.
  * 
  * @return the device time
  */
-	//@Override
 	public String getTime() 
 	{	return deviceTime;	}
 	
@@ -112,7 +121,6 @@ public class GPSMessage implements Message
  * 
  * @return the type number corresponding to a SMS message
  */
-	//@Override
 	public int getType() 
 	{	return Integer.parseInt(type);	}
 	
