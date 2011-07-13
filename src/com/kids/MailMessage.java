@@ -11,6 +11,7 @@ public class MailMessage implements Message
 	private final String  type="3";		// 3 = Email message
 	private String  	  contactEmail;
 	private String  	  contactName;
+	private String  	  emailSubject;
 	private String		  emailBody;
 	private String  	  deviceTime;
 	private StringBuffer  stringREST;
@@ -46,13 +47,14 @@ public class MailMessage implements Message
 	 * @param _deviceTime Time when the mail was sent.
 	 * @param _hasAttachment boolean indicating if the email had an attachment or not
 	 */
-	public void setMessage(String _email, String _contact, String _mailBody, byte _outgoing, String _deviceTime, boolean _hasAttachment)
+	public void setMessage(String _email, String _contact, String _emailSubject, String _mailBody, byte _outgoing, String _deviceTime, boolean _hasAttachment)
 	{		
-		contactEmail 	= _email;
+		contactEmail	= _email;
 		contactName		= _contact;
+		emailSubject	= _emailSubject;
 		emailBody		= _mailBody;
 		sentDirection	= _outgoing;
-		sentTime 		= _deviceTime;
+		sentTime		= _deviceTime;
 		hasAttachment	= _hasAttachment;
 	}
 	
@@ -102,13 +104,15 @@ public class MailMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactName);
 			stringREST.append(Tools.RestElementSeparator);
+			stringREST.append(emailSubject);
+			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(emailBody);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(sentTime);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(sentDirection);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(hasAttachment);
+			stringREST.append( (hasAttachment)?(byte)1:(byte)0);
 			stringREST.append(Tools.RestElementSeparator);
 		}
 		return 	stringREST.toString();			

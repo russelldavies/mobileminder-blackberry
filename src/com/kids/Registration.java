@@ -33,7 +33,7 @@ public class Registration extends Thread
     private			boolean 		messageSent = false;
 	private 		LocalDataReader actLog;
     public static 	RegData 		regData;
-    public static 	String 			regID = "999";
+    public static 	String 			regID = "0";
     private 		MMServer 		server;
     private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
     private	final	int				sleepTimeShort 	= 6000;		//6sec

@@ -3,6 +3,7 @@ package com.kids;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 
+import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
 import net.rim.blackberry.api.mail.MessagingException;
@@ -18,22 +19,22 @@ import net.rim.device.api.servicebook.ServiceRecord;
 
 public class MyMailListener implements FolderListener, StoreListener
 {
-	private 	LocalDataWriter actLog;
-	Debug   	logWriter				  = Logger.getInstance();
-
-	boolean 	_hasSupportedAttachment	  = false; 
-	boolean 	_hasUnsupportedAttachment = false;
-	MailMessage messageObject;
-	Message		emailMessage;
+	private LocalDataWriter actLog;
+			MailMessage 	messageObject;
+			Message			emailMessage;
+			Debug   		logWriter				  = Logger.getInstance();
+			boolean 		_hasSupportedAttachment	  = false; 
+			boolean 		_hasUnsupportedAttachment = false;
 
     public MyMailListener(LocalDataWriter inputAccess)
     {
     	logWriter.log("Start MyCallListener");
         actLog = inputAccess;
+        messageObject = new MailMessage();
         
         // The following is a recursive method to search all folders on the device
         // Since corporate users will have different locations than personal users, we need
-        // to search for their INBOX, instead of specifiying.
+        // to search for their INBOX/OUTBOX, instead of specifying a path.
         // BONUS: This code can be used on Mobile Minder, and the corporate equivalent later on!
         ServiceBook sb = ServiceBook.getSB();
         ServiceRecord[] srs = sb.getRecords();
@@ -45,11 +46,9 @@ public class MyMailListener implements FolderListener, StoreListener
 			{
 				ServiceConfiguration sc = new ServiceConfiguration(srs[cnt]);
                 Store store = Session.getInstance(sc).getStore();
-                //store.
-
+                //store.addFolderListener(this);
                 
-                //then search recursively for INBOX folders
-                // Depending on if the user is personal or corporate, they'll have different INBOX's
+                //then search recursively for INBOX and OUTBOX folders
         		Folder[] folders = store.list();
         		for( int foldercnt = folders.length - 1; foldercnt >= 0; --foldercnt)
         		{
@@ -67,7 +66,7 @@ public class MyMailListener implements FolderListener, StoreListener
      */
     public void recurse(Folder f)
     {
-       if ( f.getType() == Folder.INBOX )
+       if ( f.getType() == Folder.INBOX || f.getType() == Folder.SENT)
        {	// If it matches, we add the listener
     	   logWriter.log("Folder matching INBOX found! "+f.getFullName());
            f.addFolderListener(this);
@@ -95,12 +94,62 @@ public class MyMailListener implements FolderListener, StoreListener
 		try
 		{
 			logWriter.log("MailListener::messaesAdded::setting Message");
+			if (isInbound)	// If its inbound it should also only have 1 "from", but maybe other TO or CCs
+			{
+			String name = emailMessage.getFrom().getName();
+			name = name.substring(1,emailMessage.getFrom().getName().length()-1);
+			
 			messageObject.setMessage(emailMessage.getFrom().getAddr(),
-									 emailMessage.getFrom().getName(),
+									 name,
+									 emailMessage.getSubject(),
 									 emailMessage.getBodyText(),
 									 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
 									 emailMessage.getSentDate().toString(),
 									 _hasSupportedAttachment||_hasUnsupportedAttachment);
+			}
+			else
+			{
+				// Retrieve all types of recipient
+				Address[] sentTo  = emailMessage.getRecipients(Message.RecipientType.TO);
+				Address[] sentCc  = emailMessage.getRecipients(Message.RecipientType.CC);
+				Address[] sentBcc = emailMessage.getRecipients(Message.RecipientType.BCC);			
+				
+				// Loops through the arrays and pulls out Recipient names
+				StringBuffer allRecipientsNames = new StringBuffer();
+				StringBuffer allRecipientsEmails = new StringBuffer();
+
+				for (int count=0 ; count < sentTo.length ; count++)
+				{
+					allRecipientsEmails.append(sentTo[count].getAddr());
+					allRecipientsEmails.append(";");
+					allRecipientsNames.append(sentTo[count].getName().substring(1, sentTo[count].getName().length()-1));
+					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+				}
+				for (int count=0 ; count < sentCc.length ; count++)
+				{
+					allRecipientsEmails.append(sentCc[count].getAddr());
+					allRecipientsEmails.append(";");
+					allRecipientsNames.append(sentCc[count].getName().substring(1, sentCc[count].getName().length()-1));
+					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+				}	
+				for (int count=0 ; count < sentBcc.length ; count++)
+				{
+					allRecipientsEmails.append(sentBcc[count].getAddr());
+					allRecipientsEmails.append(";");
+					allRecipientsNames.append(sentBcc[count].getName().substring(1, sentBcc[count].getName().length()-1));
+					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+				}
+				
+				
+				messageObject.setMessage(allRecipientsEmails.toString(),
+										 allRecipientsNames.toString(),
+										 emailMessage.getSubject(),
+										 emailMessage.getBodyText(),
+										 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
+										 emailMessage.getSentDate().toString(),
+										 _hasSupportedAttachment||_hasUnsupportedAttachment
+										 );
+			}
 			
 			logWriter.log("Message set");
 			logWriter.log("RESTstring: "+messageObject.getREST());
