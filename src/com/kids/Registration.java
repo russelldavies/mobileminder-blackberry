@@ -254,10 +254,13 @@ public class Registration extends Thread
      * This method is used to retrieve the device registration id, it can be used from anywhere in the system.
      * 
      */
+   // public static String getRegID()
     public static String getRegID()
     {	
     	if (regID == "0")
     	{
+    		if (null == regData)
+    			regData   = new RegData();
     		logger.log("Serial number is 0. Updating...");
     		regData.getRegSN();
     	}
@@ -415,7 +418,8 @@ class RegData
 {
     public static Debug logWriter = Logger.getInstance();
 
-	private static 	  	 int 			currentState;
+	private static 	  	 int 	currentState;
+	private static 	  	 String	currentSerial;
 	public  final static String DATABASE_NAME    = "CVKe";
     public  final static String DATABASE_TABLE   = "regDB";
     private final static String KEY_STAGE		 = "Stage";
@@ -441,7 +445,8 @@ class RegData
     	logWriter.log("RegData constructor");
     	//storeDB  = new Database();//new DatabaseHelper();
     	currentState = getStageValueDB();
-    	
+    	currentSerial = getRegSN();
+    	Registration.regID = currentSerial;
     }
     
     /**

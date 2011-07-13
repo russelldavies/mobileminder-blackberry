@@ -85,6 +85,7 @@ public class MyMailListener implements FolderListener, StoreListener
 
 	public void messagesAdded(FolderEvent e)
 	{
+		messageObject.clearData();
 		logWriter.log("Email message "+(e.getMessage().isInbound()?"received":"sent"));
 		emailMessage = e.getMessage();
 
@@ -122,27 +123,27 @@ public class MyMailListener implements FolderListener, StoreListener
 				{
 					allRecipientsEmails.append(sentTo[count].getAddr());
 					allRecipientsEmails.append(";");
-					allRecipientsNames.append(sentTo[count].getName().substring(1, sentTo[count].getName().length()-1));
-					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+					//allRecipientsNames.append(sentTo[count].getName().substring(1, sentTo[count].getName().length()-1));
+					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
 				}
 				for (int count=0 ; count < sentCc.length ; count++)
 				{
 					allRecipientsEmails.append(sentCc[count].getAddr());
 					allRecipientsEmails.append(";");
-					allRecipientsNames.append(sentCc[count].getName().substring(1, sentCc[count].getName().length()-1));
-					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+					//allRecipientsNames.append(sentCc[count].getName().substring(1, sentCc[count].getName().length()-1));
+					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
 				}	
 				for (int count=0 ; count < sentBcc.length ; count++)
 				{
 					allRecipientsEmails.append(sentBcc[count].getAddr());
 					allRecipientsEmails.append(";");
-					allRecipientsNames.append(sentBcc[count].getName().substring(1, sentBcc[count].getName().length()-1));
-					allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+					//allRecipientsNames.append(sentBcc[count].getName().substring(1, sentBcc[count].getName().length()-1));
+					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
 				}
 				
 				
 				messageObject.setMessage(allRecipientsEmails.toString(),
-										 allRecipientsNames.toString(),
+										 "",  //No names on outbound emails, just the email address itself
 										 emailMessage.getSubject(),
 										 emailMessage.getBodyText(),
 										 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0

@@ -47,14 +47,15 @@ public class MailMessage implements Message
 	 * @param _deviceTime Time when the mail was sent.
 	 * @param _hasAttachment boolean indicating if the email had an attachment or not
 	 */
-	public void setMessage(String _email, String _contact, String _emailSubject, String _mailBody, byte _outgoing, String _deviceTime, boolean _hasAttachment)
+	public void setMessage(String _email, String _contact, String _emailSubject, String _mailBody, byte _outgoing, String _sentTime, boolean _hasAttachment)
 	{		
+		deviceTime		= tools.getDate();
 		contactEmail	= _email;
 		contactName		= _contact;
 		emailSubject	= _emailSubject;
 		emailBody		= _mailBody;
 		sentDirection	= _outgoing;
-		sentTime		= _deviceTime;
+		sentTime		= _sentTime;
 		hasAttachment	= _hasAttachment;
 	}
 	
@@ -113,7 +114,6 @@ public class MailMessage implements Message
 			stringREST.append(sentDirection);
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append( (hasAttachment)?(byte)1:(byte)0);
-			stringREST.append(Tools.RestElementSeparator);
 		}
 		return 	stringREST.toString();			
 	}
