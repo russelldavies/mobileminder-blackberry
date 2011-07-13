@@ -1,7 +1,10 @@
-package com.kids;
+package com.kids.Monitor;
 
 import java.util.Date;
 
+import com.kids.Logger;
+import com.kids.Registration;
+import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 import com.kids.prototypes.MMTools;

@@ -40,7 +40,7 @@ public class Reply
 				replyArray[3] = "";
 			}
 			else*/
-			{	replyArray = com.kids.Tools.split(restString, com.kids.Tools.RestElementSeparator);}
+			{	replyArray = com.kids.Data.Tools.split(restString, com.kids.Data.Tools.RestElementSeparator);}
 			
 			logger.log("rest messsage: "+restMessage);
 			
@@ -204,7 +204,7 @@ public class Reply
 		//59
 		String command = args.substring(temp+1, args.length() - offSet);//2,65-59-1=5
 		//_del
-		String [] commandArray = com.kids.Tools.split(command, "_");
+		String [] commandArray = com.kids.Data.Tools.split(command, "_");
 		//[0][1]del
 		String data = args.substring(args.length() - offSet ,args.length());
 		//59-65 <-error

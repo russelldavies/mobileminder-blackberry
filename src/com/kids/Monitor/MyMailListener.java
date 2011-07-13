@@ -1,5 +1,6 @@
-package com.kids;
+package com.kids.Monitor;
 
+import com.kids.Logger;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 

@@ -1,4 +1,4 @@
-package com.kids;
+package com.kids.Data;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -6,7 +6,6 @@ import java.util.Vector;
 
 import javax.microedition.io.file.FileSystemRegistry;
 
-import com.kids.Data.ToolKit;
 import com.kids.prototypes.MMTools;
 
 import net.rim.device.api.i18n.SimpleDateFormat;

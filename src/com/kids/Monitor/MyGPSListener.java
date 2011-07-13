@@ -1,4 +1,4 @@
-package com.kids;
+package com.kids.Monitor;
 
 /**
  * Class handles getting the GPS coordinates, and the frequency it updates
@@ -10,6 +10,7 @@ import javax.microedition.location.Location;
 import javax.microedition.location.LocationException;
 import javax.microedition.location.LocationProvider;
 
+import com.kids.Logger;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 

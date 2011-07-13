@@ -1,4 +1,4 @@
-package com.kids;
+package com.kids.Monitor;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -7,6 +7,8 @@ import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
 
+import com.kids.Logger;
+import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMTools;

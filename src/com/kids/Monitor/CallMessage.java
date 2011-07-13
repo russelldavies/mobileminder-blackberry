@@ -1,7 +1,9 @@
-package com.kids;
+package com.kids.Monitor;
 
 import java.util.Date;
 
+import com.kids.Registration;
+import com.kids.Data.Tools;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
@@ -81,7 +83,7 @@ public class CallMessage implements Message
 		number 		= "";
 		duration 	= 0;
 		startStatus = false;//Incoming
-		endStatus	= (byte)CallEndStatus.OTHER;//.ordinal();
+		endStatus	= (byte)com.kids.Monitor.CallEndStatus.OTHER;//.ordinal();
 		startTime	= null;
 		stringREST  = null;
 		contactName = "";
@@ -171,7 +173,7 @@ public class CallMessage implements Message
  * This method is used to record "finished" as the way in which the call was ended. 
  */
 	public void setEndStatus()
-	{setEndStatus(CallEndStatus.FINISHED);}
+	{setEndStatus(com.kids.Monitor.CallEndStatus.FINISHED);}
 	
 /**
  * This method records the status in which the call was ended.

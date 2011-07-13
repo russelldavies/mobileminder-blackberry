@@ -1,4 +1,4 @@
-package com.kids;
+package com.kids.net;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -9,9 +9,9 @@ import javax.microedition.io.HttpConnection;
 
 import net.rim.device.api.system.DeviceInfo;
 
+import com.kids.CRC32;
 import com.kids.Logger;
-import com.kids.net.Reply;
-import com.kids.net.Security;
+import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMServer;
@@ -478,7 +478,7 @@ public class Server extends Thread implements MMServer
 		
 		//Element 2 is the serial number/device unique serial
 		logger.log("setting SN: "+replyArray[2]);
-		Registration.regData.setRegSN(replyArray[2]);
+		//regData.setRegSN(replyArray[2]);
 		//rebuild message
 		for(int count = 2; count<replyArray.length; count++)
 		{			

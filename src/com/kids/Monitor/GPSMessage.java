@@ -1,5 +1,7 @@
-package com.kids;
+package com.kids.Monitor;
 
+import com.kids.Registration;
+import com.kids.Data.Tools;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 

@@ -22,7 +22,9 @@ import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMServer;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
+import com.kids.Data.Tools;
 import com.kids.net.Reply;
+import com.kids.net.Server;
 
 /**
  * This class checks the registration stage that currently the device is in.
