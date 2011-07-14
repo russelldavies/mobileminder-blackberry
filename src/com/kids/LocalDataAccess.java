@@ -164,6 +164,10 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 						storeDB.close(); storeDB=null;
 					}
 				}
+				else
+				{
+					logWriter.log("DB already exists!");
+				}
 
 			} catch (DatabaseIOException e) {
 				logWriter.log("x::LocalDataAccess::createDatabase::DatabaseIOException::"+e.getMessage());
@@ -192,30 +196,28 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			// and make sure the DB exists.
 			if (!dbExist)
 				createDatabase();
-			
-			if (null == storeDB)
+		
+			try
 			{
-				try
+				if (null != storeDB)
 				{
-					if (null != storeDB)
-					{
-						logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
-					}
-					else
-					{
-						storeDB = DatabaseFactory.open(dbURI);
-					}
-				} catch (ControlledAccessException e) {
-					logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabaseIOException e) {
-					logWriter.log("x::innerLocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
-					e.printStackTrace();
-				} catch (DatabasePathException e) {
-					logWriter.log("x::innerLocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
-					e.printStackTrace();
+					logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
 				}
-        	}
+				else
+				{
+					storeDB = DatabaseFactory.open(dbURI);
+				}
+			} catch (ControlledAccessException e) {
+				logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabaseIOException e) {
+				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabaseIOException::"+e.getMessage());
+				e.printStackTrace();
+			} catch (DatabasePathException e) {
+				logWriter.log("x::innerLocalDataAccess::openDatabase::DatabasePathException::"+e.getMessage());
+				e.printStackTrace();
+			}
+    	
  
 			return (null==storeDB?false:true);
         } // end openDatabase

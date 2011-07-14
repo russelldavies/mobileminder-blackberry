@@ -1,9 +1,10 @@
 package com.kids.net;
 
-import com.kids.prototypes.Debug;
 import com.kids.COMMAND_TARGETS;
 import com.kids.Logger;
 import com.kids.Data.MMLinkedList;
+import com.kids.Data.Tools;
+import com.kids.prototypes.Debug;
 /**
  * This class transforms the data into easier accessible form.
  */
@@ -15,7 +16,6 @@ public class Reply
 	private String  callingCODE;
 	private String  info;
 	private Debug logger = Logger.getInstance();
-//	private MMTools tools = Tools.getInstance();;
 	
 	//Command Reply Class Variables
 	private int index;
@@ -39,9 +39,11 @@ public class Reply
 				replyArray = restString.split(Tools.RestElementSeparator);
 				replyArray[3] = "";
 			}
-			else*/
-			{	replyArray = com.kids.Data.Tools.split(restString, com.kids.Data.Tools.RestElementSeparator);}
-			
+			else
+			{
+				replyArray = Tools.split(restString, Tools.RestElementSeparator);
+			}*/			
+			replyArray = Tools.split(restString, Tools.RestElementSeparator);
 			logger.log("rest messsage: "+restMessage);
 			
 		//	if(replyArray[3].equals("00"))
@@ -105,10 +107,11 @@ public class Reply
  */
 	private void inishlise(String inputRegID, String inputCallingCode, boolean inputError, String inputInfo)
 	{
+		logger.log("ReplyInfo: "+inputInfo);
+
 		regID		= inputRegID;
 		error 		= inputError;
 		callingCODE = inputCallingCode;
-		logger.log("ReplyInfo: "+inputInfo);
 		info 		= inputInfo;
 	}
 	
@@ -204,7 +207,7 @@ public class Reply
 		//59
 		String command = args.substring(temp+1, args.length() - offSet);//2,65-59-1=5
 		//_del
-		String [] commandArray = com.kids.Data.Tools.split(command, "_");
+		String [] commandArray = Tools.split(command, "_");
 		//[0][1]del
 		String data = args.substring(args.length() - offSet ,args.length());
 		//59-65 <-error

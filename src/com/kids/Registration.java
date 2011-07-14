@@ -516,6 +516,10 @@ class RegData
 					
 				} // end if(sdCardPresent)
 			} // end if(!dbExist)
+			else
+			{
+				logWriter.log("DB already exists!");
+			}
 		}  // end try
 		catch (DatabaseIOException e) {
 			logWriter.log("x::RegData::createDatabase::DatabaseIOException::"+e.getMessage());
