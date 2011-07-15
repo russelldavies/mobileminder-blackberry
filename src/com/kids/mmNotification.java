@@ -167,5 +167,4 @@ public class mmNotification
 		}  		
 	}	// end addMessageToInbox
 
-
 } // end mmNotification class

@@ -51,35 +51,27 @@ public class LocalDataAccess
  */
 class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 {
-    public Debug logWriter = Logger.getInstance();
+    public		  Debug	   logWriter		 = Logger.getInstance();
     
-    //ANDROID
-    //private static ArrayList<Message> otherMessages = new ArrayList<Message>(); 
-    
-    //Blackberry
-    //public static Vector otherMessages = new Vector();
-    
-    public final String  DATABASE_NAME    = "CVKf";
-    public final String  DATABASE_TABLE   = "LocalData";
-   // private final int     DATABASE_VERSION = 2;
+    public  final String   DATABASE_NAME	 = "CVKf";
+    public  final String   DATABASE_TABLE	 = "LocalData";
+  //private final int      DATABASE_VERSION  = 2;
     //The primary key MUST be named '_id' Android convention
-    private final String  KEY_INDEX       = "_id";//MAY OVER FLOW!!
-    private final String  KEY_TIME        = "time";
-    private final String  KEY_VALUE       = "value";
+    private final String   KEY_INDEX		 = "_id";//MAY OVER FLOW!!
+    private final String   KEY_TIME			 = "time";
+    private final String   KEY_VALUE		 = "value";
     
-    //ANDROID
-    // Should be same for Blackberry
-    public final String  DATABASE_CREATE  = "create table `"+DATABASE_TABLE+ "`("
+    public final  String   DATABASE_CREATE	 = "create table `"+DATABASE_TABLE+ "`("
                                                    					+"`"+KEY_INDEX  +"` integer NOT NULL primary key autoincrement,"
                                                    					+"`"+KEY_TIME   +"` TEXT    NOT NULL,"     
                                                    					+"`"+KEY_VALUE  +"` TEXT);";
     
-    public String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
-    public Database storeDB			 = null;
-    public URI      dbURI			 = null;
+    public		  String   DATABASE_LOCATION = "file:///SDCard/Databases/MobileMinder/";
+    public 		  Database storeDB			 = null;
+    public 		  URI      dbURI			 = null;
     
-    public boolean sdCardPresent	= false;	// Bool to keep track of when SD Card is mounted
-    public boolean dbExist		= false;	// For checking to see if the DB already exists before each DB call
+    public 		  boolean  sdCardPresent	 = false;	// Bool to keep track of when SD Card is mounted
+    public 		  boolean  dbExist			 = false;	// For checking to see if the DB already exists before each DB call
     
     /**
      * This is the constructor of LocalDataAccess. It creates the environment for the table in the local database used to store phone actions..
@@ -96,7 +88,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	        if (Tools.hasSDCard())
 	        {
 	        	sdCardPresent=true;
-	        	openDatabase();
+	        	//openDatabase();
 	        }
 	        else
 	        {
@@ -197,8 +189,12 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			if (!dbExist)
 				createDatabase();
 		
+			
 			try
 			{
+				storeDB=null;
+				storeDB = DatabaseFactory.open(dbURI);
+				/*
 				if (null != storeDB)
 				{
 					logWriter.log("LocalDataAccess::openDatabase::The DB is already open!");
@@ -206,7 +202,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				else
 				{
 					storeDB = DatabaseFactory.open(dbURI);
-				}
+				}*/
 			} catch (ControlledAccessException e) {
 				logWriter.log("x::innerLocalDataAccess::openDatabase::ControlledAccessException::"+e.getMessage());
 				e.printStackTrace();
@@ -260,14 +256,13 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         	sqlInsert.append(_value);
         	sqlInsert.append("\")");
         	 
-            
             Statement st;
             try {
             	logWriter.log("addValue::Try INSERT");
 
             	// Check if database is open. storeDB=null should mean it hasnt been opened yet
-     //       	if (null == storeDB )
-     //       		openDatabase();
+            	if (null == storeDB )
+            		openDatabase();
       	            	
             	// storeDB should, hopefully, never be NULL at this point, as it should be opened
             	
@@ -275,7 +270,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 st.prepare();
                 st.execute();
                 st.close();  
-               // storeDB.close(); storeDB=null;
+                storeDB.close(); storeDB=null;
             } catch (DatabaseException e) {
             	logWriter.log("x::LocalDataAccess::addValue::DatabaseException:"+e.getMessage());
                 e.printStackTrace();
@@ -283,7 +278,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             	logWriter.log("x::LocalDataAccess::addValue::IllegalArgumentException:URI:"+e.getMessage());
 				e.printStackTrace();
 			}
-
         }
         /**
          * This method retrieves first row's value in the table used to store phone actions.
@@ -385,7 +379,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 st.prepare();
                 st.execute();
                 st.close();
-                //storeDB.close(); storeDB=null;
+                storeDB.close(); storeDB=null;
             } catch (ControlledAccessException e) {
                 logWriter.log("x::LocalDataAccess::removeValue::ControlledAccessException:"+e.getMessage());
                 e.printStackTrace();
@@ -426,7 +420,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                     size = result.getPosition();
                     logWriter.log("Closing result");
                     result.close();
-                    //storeDB.close(); storeDB=null;
+                    storeDB.close(); storeDB=null;
                 }
                 else
                 {
@@ -461,7 +455,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 st.prepare();
                 st.execute();
                 c = st.getCursor();
-                //st.close(); //TODO: We're returning a cursor to the DB. Do we need to close the statement?
 			} 
             catch (DatabaseException e) 
 			{
@@ -473,7 +466,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             return c;
         }
 }
-       
 
 
 

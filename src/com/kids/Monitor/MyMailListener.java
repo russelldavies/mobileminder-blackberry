@@ -117,7 +117,7 @@ public class MyMailListener implements FolderListener, StoreListener
 				Address[] sentBcc = emailMessage.getRecipients(Message.RecipientType.BCC);			
 				
 				// Loops through the arrays and pulls out Recipient names
-				StringBuffer allRecipientsNames = new StringBuffer();
+				//StringBuffer allRecipientsNames = new StringBuffer();
 				StringBuffer allRecipientsEmails = new StringBuffer();
 
 				for (int count=0 ; count < sentTo.length ; count++)

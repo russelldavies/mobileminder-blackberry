@@ -231,6 +231,7 @@ public class Registration extends Thread
     	}
     	
     	logger.log("After switch. Value was: "+inputStage);
+    	logger.log(stateText);
 		// Update the user notification in the global inbox
     	// This message will contain the regID so they can register online.
 		//mmNotification.addMsgToInbox(stateText,inputStage,regID);
@@ -550,6 +551,10 @@ class RegData
 
 		try
 		{
+			storeDB=null;	// Set the DB to null so we know for definite its not already open
+			storeDB = DatabaseFactory.open(dbURI);
+			
+			/*
 			if (null != storeDB)
 			{
 				logWriter.log("RegData::openDatabase::The DB is already open!");
@@ -557,7 +562,7 @@ class RegData
 			else
 			{
 				storeDB = DatabaseFactory.open(dbURI);
-			}
+			}*/
 			
 			// From now on, we can check if the DB is open by comparing it to null	
 			//logWriter.log("openDatabase::DB is"+(null==storeDB?"NULL!":"OPEN!"));

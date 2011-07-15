@@ -2,6 +2,9 @@ package com.kids.Monitor;
 
 import java.util.Date;
 
+import net.rim.device.api.system.ApplicationDescriptor;
+import net.rim.device.api.system.ApplicationManager;
+
 import com.kids.Logger;
 import com.kids.Registration;
 import com.kids.Data.Tools;
@@ -18,10 +21,9 @@ import com.kids.prototypes.Message;
 
 public class MyAppListener extends Thread
 {
-	private LocalDataWriter actLog;
-	private int AppTimer;
-	Debug log = Logger.getInstance();
-	//AppMessage appMessage;
+	private static final Debug				logger		= Logger.getInstance();;
+	private 			 LocalDataWriter	actLog;
+	private 			 int				AppTimer;
 	
 /**
  * The AppListener constructor initialise the action store location and the interval value.
@@ -32,8 +34,8 @@ public class MyAppListener extends Thread
  */
 	public MyAppListener(LocalDataWriter inputAccess, int inputAppTimer)
 	{
-		actLog = inputAccess;
-		AppTimer = inputAppTimer;
+		actLog 		= inputAccess;
+		AppTimer 	= inputAppTimer;
 		this.start();
 	}
 
@@ -51,34 +53,34 @@ public class MyAppListener extends Thread
 */
 	
 	public void run()
-	{/*
-		log.log("MyAppListener begin...");
+	{
+		logger.log("MyAppListener begin...");
 		try
 	    {
 			int lastProcessId = 0;
 			ApplicationManager manager = ApplicationManager.getApplicationManager();
-			Date StartTimer  = new Date();
+			//Date StartTimer  = new Date();
 			String lastAppName = "BootUp Device";
 			AppMessage appMessage=new AppMessage();
 			
 			while(true)
 			{
-				this.sleep(AppTimer);
-				ApplicationDescriptor visibleApplications[] = manager.getVisibleApplications();
+				sleep(AppTimer);
+				ApplicationDescriptor runningApps[] = manager.getVisibleApplications();
 				
 				if(manager.getForegroundProcessId() != lastProcessId)
 				{
 					lastProcessId = manager.getForegroundProcessId();					
-					for(int count = 0; visibleApplications.length > count; count++)
+					for(int count = 0; runningApps.length > count; count++)
 					{ 
-						if(manager.getProcessId(visibleApplications[count]) == lastProcessId)
-						{ 
-							//actLog.addMessage(action.TYPE_APP,lastAppName+
-							//		":"+(int)(new Date().getTime()-StartTimer.getTime())/1000);
-							appMessage.setMessage(lastAppName,visibleApplications[count].getModuleName());							
+						if(manager.getProcessId(runningApps[count]) == lastProcessId)
+						{
+							logger.log("App found. Adding to log...");
+							appMessage.setEndDuration();
+							appMessage.setMessage(lastAppName,runningApps[count].getModuleName());							
 							actLog.addMessage(appMessage);
-							StartTimer = new Date();
-							lastAppName = visibleApplications[count].getName();
+							//StartTimer = new Date();
+							lastAppName = runningApps[count].getName();
 							break;
 						}  // End if()
 					} // End for()
@@ -86,16 +88,14 @@ public class MyAppListener extends Thread
 			}  // End while()
 	    } // try
 		catch (InterruptedException e)
-        // In Legacy, its (overloaded )addAction(bool,int,String,String)
-        // In Local its addMessage(Message)
 		{
-        	actLog.addMessage(myMessage);//(true,action.TYPE_APP,e.toString());}
+			logger.log("x::ApplListener::run::InterruptedException::"+e.getMessage());
 		}
-        catch (Exception e)
+       /* catch (Exception e)
 		{
-        	actLog.addMessage(true,action.TYPE_APP,e.toString());
-        }
-	*/}
+        	logger.log("x::ApplListener::run::Exception::"+e.getMessage());
+        }*/
+	}
 }
 
 
@@ -146,12 +146,12 @@ class AppMessage implements Message
  */
 		public void clearData()//This is used to ensure good practices and save resources on the device.
 		{
-			upTime		= 0;
-			appName		= "";
+			upTime			= 0;
+			appName			= "";
 			fullPackageName = "";
-			launchTime = "";
-			startTime = null;
-			stringREST = null;
+			launchTime 		= "";
+			startTime 		= null;
+			stringREST 		= null;
 		}
 			
 /**
@@ -194,11 +194,11 @@ class AppMessage implements Message
 			stringREST = new StringBuffer();
 			stringREST.append(Registration.getRegID());
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append('0');stringREST.append(type);
+			stringREST.append('0');stringREST.append(getType());
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(appName);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(launchTime);
+			stringREST.append(getTime());
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(upTime);
 			stringREST.append(Tools.RestElementSeparator);

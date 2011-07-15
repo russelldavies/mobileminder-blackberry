@@ -10,6 +10,7 @@ package com.kids;
 import javax.microedition.io.file.FileSystemListener;
 
 import com.kids.Data.Tools;
+import com.kids.Monitor.MyAppListener;
 import com.kids.Monitor.MyCallListener;
 import com.kids.Monitor.MyGPSListener;
 import com.kids.Monitor.MyMailListener;
@@ -18,9 +19,12 @@ import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.ApplicationManagerException;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
  
 /**
  * 
@@ -49,7 +53,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         //How to create proper startup apps:
         //http://www.blackberry.com/knowledgecenterpublic/livelink.exe/fetch/2000/348583/800332/832062/How_To_-_Write_safe_initialization_code.html?nodeid=1487426&vernum=0
     	Driver theApp;
-      //Check for the argument defined in the project properties.
+        //Check for the argument defined in the project properties.
         if (args != null && args.length > 0 && args[0].equals("icon"))
         { // Started from icon click
         	logWriter.log("Icon clicked");
@@ -58,8 +62,8 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         else 
         {   //Started at boot
         	theApp = new Driver(true);
-            // If system startup is still in progress when this
-            // application is run.
+            // If system startup is still in progress when
+            // this application is run.
             if (ApplicationManager.getApplicationManager().inStartup())
             {
                 logWriter.log("Still starting up");
@@ -70,10 +74,8 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
                 logWriter.log("Fully booted up");
                 theApp.doStartupWorkLater();
             }
-
         }      
-        theApp.enterEventDispatcher();
-        
+        theApp.enterEventDispatcher();        
     }
        
 /**
@@ -180,15 +182,15 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         
         //Create variables
         int oneSec        = 1000;
-        //int uploadTimer =  1*oneSec;//send update every
-        int GPSTimer    = 15*oneSec;//check GPS every
-      //  int AppTimer    =  2*oneSec;//check running app every
+        int GPSTimer      = 15*oneSec;//check GPS every
+        int AppTimer      = 30*oneSec;//check running app every
+        //int uploadTimer = 1*oneSec;//send update every
         
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
         new MyGPSListener (actLog, GPSTimer);
-        //new MyAppListener (actLog, AppTimer);            
+        new MyAppListener (actLog, AppTimer);            
         new MyMailListener(actLog);
         new MyTextListener(actLog);
         new MyCallListener(actLog);        
@@ -199,7 +201,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 	public void powerUp()
     {
 	    logWriter.log("Power up...");
-	    removeSystemListener(this);
+	    //removeSystemListener(this);
 	    doStartupWorkLater();
     }
 
@@ -215,7 +217,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
     
     public void batteryStatusChange(int arg0)
     {
-    	logWriter.log("BatteryStatusChange...");
+    	logWriter.log("BatteryStatusChange..."+arg0);
     }
     
     public void powerOff()
@@ -227,11 +229,14 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 	{
 		logWriter.log("BacklightStageChange");
 		logWriter.log("Backlight "+(on?"ON.":"OFF."));
+			
+		if (!on)
+			launchApplication();
 	}
 
 	public void cradleMismatch(boolean arg0)
 	{
-    	logWriter.log("cradleMismatch...");
+		logWriter.log((arg0?"Device and cradle don't match":"Device removed from wrong cradle"));
 	}
 
 	public void fastReset()
@@ -241,12 +246,52 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 
 	public void powerOffRequested(int arg0)
 	{
-    	logWriter.log("powerOffRequested...");
+    	logWriter.log("powerOffRequested..."+arg0);
 	}
 
 	public void usbConnectionStateChange(int arg0)
 	{
-    	logWriter.log("usbConnectionStateChanged...");
+    	logWriter.log("usbConnectionStateChanged..."+arg0);
+	}
+	
+	private void launchApplication()
+	{
+		logWriter.log("In launchApplication");
+		String appName = null;
+		ApplicationManager appManager = ApplicationManager.getApplicationManager();
+
+		try
+		{
+			ApplicationDescriptor[] apps = appManager.getVisibleApplications();
+			int processId = -1;
+
+			for (int i = 0; i < apps.length; i++)
+			{
+				if (apps[i].getName().equals("MobileMinder"))
+				{
+					processId = appManager.getProcessId(apps[i]);
+					appName = apps[i].getName();
+					break;
+				}
+			}
+
+			logWriter.log("Attempting to launch app...");
+			if (processId > 0)
+			{
+				logWriter.log("App already started. Bringing to foreground...");
+				appManager.requestForeground(processId);
+			}
+			else
+			{
+				logWriter.log("Launching app...");
+				appManager.launch(appName);
+				logWriter.log("App launched");
+			}
+		}
+		catch (ApplicationManagerException ame)
+		{
+			Dialog.alert("Error: " + ame.getMessage());
+		}
 	}
 }
 
