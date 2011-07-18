@@ -154,39 +154,7 @@ public class Tools extends ToolKit
 		//http://www.blackberry.com/developers/docs/4.7.0api/net/rim/device/api/ui/text/NumericTextFilter.html
 		//matcher = pattern.matcher(_text);
 		//return matcher.matches();
-	}*/
-	 
-	/**
-	 * Method to split string by given seperator
-	 * @param original - Original string to be split
-	 * @param separator - character you want string to be split by
-	 * @return result - String [] with String split into elements
-	 */
-	public static String[] split(String original,String separator) {
-	    Vector nodes = new Vector();
-	    // Parse nodes into vector
-	    int index = original.indexOf(separator);
-	    while(index >= 0) 
-		{
-	        nodes.addElement( original.substring(0, index) );
-	        original = original.substring(index+separator.length());
-	        index = original.indexOf(separator);
-	    }
-	    // Get the last node
-	    nodes.addElement( original );
-
-	     // Create split string array
-	    String[] result = new String[ nodes.size() ];
-	    if( nodes.size() > 0 )
-		{
-	        for(int loop = 0; loop < nodes.size(); loop++)
-	        {
-	            result[loop] = (String)nodes.elementAt(loop);
-	            System.out.println(result[loop]);
-	        }
-	    }
-	   return result;
-	}	
+	}*/	
 	
     /**
      * Method checks to see if the device has an SD card present.

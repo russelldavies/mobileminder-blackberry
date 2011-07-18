@@ -9,6 +9,7 @@ package com.kids;
 
 import javax.microedition.io.file.FileSystemListener;
 
+import com.kids.Data.LocalDataAccess;
 import com.kids.Data.Tools;
 import com.kids.Monitor.MyAppListener;
 import com.kids.Monitor.MyCallListener;

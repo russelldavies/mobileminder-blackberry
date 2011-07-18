@@ -1,10 +1,10 @@
-package com.kids;
+package com.kids.Data;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
-import com.kids.Data.Tools;
+import com.kids.Logger;
 import com.kids.Monitor.action;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
