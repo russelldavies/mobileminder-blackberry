@@ -9,7 +9,7 @@ import com.kids.Logger;
 import com.kids.Registration;
 import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataWriter;
+import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.Message;
 
@@ -22,7 +22,7 @@ import com.kids.prototypes.Message;
 public class MyAppListener extends Thread
 {
 	private static final Debug				logger		= Logger.getInstance();;
-	private 			 LocalDataWriter	actLog;
+	private 			 LocalDataReader	actLog;
 	private 			 int				AppTimer;
 	
 /**
@@ -32,7 +32,7 @@ public class MyAppListener extends Thread
  * @param inputAccess log of actions
  * @param inputAppTimer interval value
  */
-	public MyAppListener(LocalDataWriter inputAccess, int inputAppTimer)
+	public MyAppListener(LocalDataReader inputAccess, int inputAppTimer)
 	{
 		actLog 		= inputAccess;
 		AppTimer 	= inputAppTimer;
@@ -62,25 +62,33 @@ public class MyAppListener extends Thread
 			//Date StartTimer  = new Date();
 			String lastAppName = "BootUp Device";
 			AppMessage appMessage=new AppMessage();
+			ApplicationDescriptor runningApps[];
 			
 			while(true)
 			{
 				sleep(AppTimer);
-				ApplicationDescriptor runningApps[] = manager.getVisibleApplications();
+				//Store a list of running apps
+				runningApps = manager.getVisibleApplications();
 				
+				//If a new app is detected (by comparing current processID with processID from last loop)
 				if(manager.getForegroundProcessId() != lastProcessId)
 				{
-					lastProcessId = manager.getForegroundProcessId();					
+					// Make this processID the current working ID
+					lastProcessId = manager.getForegroundProcessId();
+					// Search through the list of running apps for the app that matches this process ID
 					for(int count = 0; runningApps.length > count; count++)
-					{ 
+					{
+						// When we find a match....
 						if(manager.getProcessId(runningApps[count]) == lastProcessId)
 						{
-							logger.log("App found. Adding to log...");
-							appMessage.setEndDuration();
-							appMessage.setMessage(lastAppName,runningApps[count].getModuleName());							
-							actLog.addMessage(appMessage);
-							//StartTimer = new Date();
 							lastAppName = runningApps[count].getName();
+							logger.log("Current running app name is: "+lastAppName);
+							logger.log("App found. Adding to log...");
+							// ...add details of this app to the AppMessage object...
+							appMessage.clearData();
+							appMessage.setMessage(lastAppName,runningApps[count].getModuleName());	
+							// ...and then to the database
+							actLog.addMessage(appMessage);
 							break;
 						}  // End if()
 					} // End for()
@@ -89,7 +97,7 @@ public class MyAppListener extends Thread
 	    } // try
 		catch (InterruptedException e)
 		{
-			logger.log("x::ApplListener::run::InterruptedException::"+e.getMessage());
+			logger.log("x::AppListener::run::InterruptedException::"+e.getMessage());
 		}
        /* catch (Exception e)
 		{
