@@ -103,15 +103,14 @@ public MyGPSListener(LocalDataWriter inputAccess, int inputGPSTimer)
 			longitude = myLocation.getQualifiedCoordinates().getLongitude();
 	        latitude  = myLocation.getQualifiedCoordinates().getLatitude();
 		}
-        
+        gpsMessage.clearData();
         gpsMessage.setMessage(latitude, longitude, speed);
         actLog.addMessage(gpsMessage);		
 	}
 	
 	public void providerStateChanged(LocationProvider provider, int newState)
 	{
-		logWriter.log("GPS Provider changed");
-		
+		logWriter.log("GPS Provider changed");		
 	}
 	
 	/*

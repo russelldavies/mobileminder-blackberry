@@ -184,7 +184,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         //Create variables
         int oneSec        = 1000;
         int GPSTimer      = 15*oneSec;//check GPS every
-        int AppTimer      = 30*oneSec;//check running app every
+        int AppTimer      = 31*oneSec;//check running app every 31 secs. 31 is prime to try avoid DB race condition
         //int uploadTimer = 1*oneSec;//send update every
         
         // Load sub-components

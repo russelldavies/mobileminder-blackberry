@@ -28,15 +28,17 @@ public class MyCallListener extends AbstractPhoneListener
         //private final String    Dial_OUT  		= "Dial_OUT";
         //private final String    Dial_IN   		= "Dial_IN";
         //private final String    Dropped   		= "Dropped";
-        private final String    Finished  		= "Finished";
-        private       String    Prefix          = "";
-        private 	  String	contactName 	= "";
-        private		  String	contactNumber	= "";
-        private		  int 		callStartTime	= 0;
-        private		  int 		callEndTime		= 0;
-        private 	  boolean	isOutgoing		= false;
-        			  Debug     logWriter		= Logger.getInstance();
-		private 	  MMTools 	tools 			= Tools.getInstance();
+        private final String    	Finished  		= "Finished";
+        private       String    	Prefix          = "";
+        private 	  String		contactName 	= "";
+        private		  String		contactNumber	= "";
+        private		  int 			callStartTime	= 0;
+        private		  int 			callEndTime		= 0;
+        private 	  boolean		isOutgoing		= false;
+        			  Debug     	logWriter		= Logger.getInstance();
+		private 	  MMTools 		tools 			= Tools.getInstance();
+        private 	  CallMessage 	callMessage;
+
 
 
         /**
@@ -48,6 +50,7 @@ public class MyCallListener extends AbstractPhoneListener
         public MyCallListener(LocalDataWriter inputAccess)
         {
                 logWriter.log("Start MyCallListener");
+                callMessage = new CallMessage();
                 actLog = inputAccess;
                 Phone.addPhoneListener(this);//TODO look up addPhonelistener
         }     
@@ -67,8 +70,8 @@ public class MyCallListener extends AbstractPhoneListener
         private void addToLog(String ehandler, int callId)
         {
             logWriter.log("In MyCallListener.addToLog");
-            CallMessage callMessage=new CallMessage();
                         
+            callMessage.clearData();
             logWriter.log("Setting CallMessage...");
             callMessage.setMessage( contactNumber,
                                     isOutgoing,

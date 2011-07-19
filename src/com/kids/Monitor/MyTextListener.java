@@ -24,9 +24,11 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
 public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener 
 {
 	private LocalDataReader actLog;
-	public static Debug logWriter = Logger.getInstance();
-	MessageConnection _mc;
-	private MMTools tools = Tools.getInstance();
+	public static Debug 	logWriter = Logger.getInstance();
+	MessageConnection 		_mc;
+	private MMTools 		tools = Tools.getInstance();
+	private SMSMessage 		smsMessage;
+
 
 /**
  * The constructor initialises the action store location and registers a MessageListener for the device.
@@ -37,6 +39,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	{
 		logWriter.log("Starting MyTextListener...");
 		actLog = inputAccess;
+		smsMessage = new SMSMessage();
 		
 		try 
         {															
@@ -68,7 +71,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	  private void addToLog(String inputStatus, String contactNumber, String _date, String _txtBody)
 	  {
 		  logWriter.log("Adding to log:MyTextListener");
-		  SMSMessage smsMessage=new SMSMessage();
+		  smsMessage.clearData();
 		  boolean isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true : false;
 		  
 		  logWriter.log("inputStatus is: "+inputStatus);
