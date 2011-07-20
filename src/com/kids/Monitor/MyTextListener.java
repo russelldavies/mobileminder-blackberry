@@ -109,8 +109,13 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 		    txtBody = ((TextMessage) message).getPayloadText();
 		}
 		
-		// Add to log
-		addToLog(action.Outgoing +" Message",message.getAddress(), tools.getDate(), txtBody);
+		// Add to log, but get a proper formatted PH Number without sms:// at the start
+		String phNumber = message.getAddress();
+		addToLog( action.Outgoing +" Message",
+				  phNumber.substring(phNumber.lastIndexOf('/')),
+				  tools.getDate(),
+				  txtBody
+				);
 	}
 
 
@@ -137,67 +142,42 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 				logWriter.log("MyTextListener::notifyIncomingMessage::IOException::"+e1.getMessage());
 				e1.printStackTrace();
 			}
-			addToLog(action.Incoming +" Message",message.getAddress(), tools.getDate(),message.getPayloadText());
 			
+			String phNumber = message.getAddress();
+			addToLog( action.Incoming +" Message",
+					  phNumber.substring(phNumber.lastIndexOf('/')),
+					  tools.getDate(),message.getPayloadText()
+					);
 			
 			//http://myhowto.org/java/j2me/22-sending-and-receiving-gsm-sms-on-blackberry-using-rim-apis/
 			//http://www.blackberry.com/developers/docs/6.0.0api/Messaging-summary.html#MG_3
-			/*
-			Message m = null;
-			try {
-				m = _mc.receive();				
-			} catch (InterruptedIOException e) {
-				logWriter.log("MyTextListener::notifyIncomingMessage::InterruptedIOException::"+e.getMessage());
-				e.printStackTrace();
-			} catch (IOException e) {
-				logWriter.log("MyTextListener::notifyIncomingMessage::IOException::"+e.getMessage());
-				e.printStackTrace();
-			} 
-		    String address = m.getAddress(); 
-		    String msg = null; 
-		    if ( m instanceof TextMessage ) 
-		    { 
-		        TextMessage tm = (TextMessage)m; 
-		        msg = tm.getPayloadText(); 
-		    } 
-		    else  if (m instanceof BinaryMessage) 
-		    { 
-		        byte[] data = ((BinaryMessage) m).getPayloadData(); 
-		   
-		        // convert Binary Data to Text 
-		        try {
-					msg = new String(data, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					logWriter.log("MyTextListener::notifyIncomingMessage::UnsupportedEncodingException::"+e.getMessage());
-					e.printStackTrace();
-				} 
-		     } 
-		     else 
-		     {
-		         logWriter.log("Invalid Message Format"); 
-		         logWriter.log("Received SMS text from  " + address + " : " + msg); 
-		     }
-			*/
-
-
 		}
 
 
-	public boolean isTarget(COMMAND_TARGETS arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS)
+	{
+		logWriter.log("TextListener::isTarget::COMMAND_TARGETS.");
+		if(inputCOMMAND_TARGETS.toString() == COMMAND_TARGETS.TEXT)
+		{return true;} 
+		else 
+		{return false;}
 	}
 
 
-	public boolean isTarget(String arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isTarget(String inputCOMMAND_TARGETS)
+	{
+		logWriter.log("TextListener::isTarget::String.");
+		if(inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT)
+		{return true;} 
+		else 
+		{return false;}
 	}
 
 
-	public boolean processCommand(String[] arg0) {
+	public boolean processCommand(String[] arg0)
+	{
+		logWriter.log("TextListener::processCommand::String[].");
 		// TODO Auto-generated method stub
 		return false;
 	}	
-
 }

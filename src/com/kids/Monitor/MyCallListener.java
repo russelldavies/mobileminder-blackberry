@@ -246,17 +246,27 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
             }*/
         }
 
-		public boolean isTarget(COMMAND_TARGETS arg0) {
-			// TODO Auto-generated method stub
-			return false;
+		public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS)
+		{
+			logWriter.log("CallListener::isTarget::COMMAND_TARGETS");
+			if(inputCOMMAND_TARGETS.toString() == COMMAND_TARGETS.TEXT)
+			{return true;} 
+			else 
+			{return false;}
 		}
 
-		public boolean isTarget(String arg0) {
-			// TODO Auto-generated method stub
-			return false;
+		public boolean isTarget(String inputCOMMAND_TARGETS) 
+		{
+			logWriter.log("CallListener::isTarget::String");
+			if(inputCOMMAND_TARGETS == COMMAND_TARGETS.CALL)
+			{return true;} 
+			else 
+			{return false;}
 		}
 
-		public boolean processCommand(String[] arg0) {
+		public boolean processCommand(String[] arg0)
+		{
+			logWriter.log("CallListener::processCommand::String[]");
 			// TODO Auto-generated method stub
 			return false;
 		}

