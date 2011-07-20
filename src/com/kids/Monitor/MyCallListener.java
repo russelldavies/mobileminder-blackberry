@@ -2,11 +2,13 @@ package com.kids.Monitor;
 
 import java.util.Date;
 
+import com.kids.Controllable;
 import com.kids.Logger;
 import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataWriter;
 import com.kids.prototypes.MMTools;
+import com.kids.prototypes.enums.COMMAND_TARGETS;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneCall;
@@ -19,7 +21,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
  *
  */
 
-public class MyCallListener extends AbstractPhoneListener
+public class MyCallListener extends AbstractPhoneListener implements Controllable 
 {
         private LocalDataWriter actLog;
         //private final String    Connected 		= "Connected";
@@ -114,8 +116,6 @@ public class MyCallListener extends AbstractPhoneListener
          * 
          * @param callId call address
          */     
-
-        // Direct-connect call connected
         public void callDirectConnectConnected(int callId)
         { 
         	logWriter.log("MyCallListener::callDirectConnectConnected");
@@ -127,16 +127,14 @@ public class MyCallListener extends AbstractPhoneListener
          * 
          * @param callId call address
          */
-        
-        // Direct-connect call disconnected
         public void callDirectConnectDisconnected(int callId)
         { 
         	logWriter.log("MyCallListener::callDirectConnectDisconnected");
-                if(false == Prefix.equals(""))
-                {
-                        //addToLog(Prefix+Finished, callId); 
-                        Prefix = "";
-                }
+            if(false == Prefix.equals(""))
+            {
+            	//addToLog(Prefix+Finished, callId); 
+                Prefix = "";
+            }
         }
         
         /**
@@ -144,16 +142,15 @@ public class MyCallListener extends AbstractPhoneListener
          * 
          * @param callId call address
          */
-        // Call disconnected
         public void callDisconnected(int callId)
         { 
         	callEndTime=(int) new Date().getTime();
         	logWriter.log("MyCallListener::callDisconnected");
-                if(false == Prefix.equals(""))
-                {
-                        addToLog(Prefix+Finished, callId); 
-                        Prefix = "";
-                }
+            if(false == Prefix.equals(""))
+            {            
+            	addToLog(Prefix+Finished, callId); 
+                Prefix = "";
+            }
         }
         
         /**
@@ -161,42 +158,36 @@ public class MyCallListener extends AbstractPhoneListener
          * 
          * @param callId call address
          */
-        // Call has been placed on "hold"
         public void callHeld(int callId)
         { 
         	logWriter.log("MyCallListener::callHeld");
         	//addToLog(Prefix+Hold_ON, callId); 
-        }//{ addToLog("callHeld", callId); }
-
+        }
         
         /**
          * Adds action to log when the call has arrived
          * 
          * @param callId call address
          */
-        // New call has arrived
         public void callIncoming(int callId)
         {
         	logWriter.log("MyCallListener::callIncoming");
         	isOutgoing=false;
             Prefix = action.Incoming + " ";
             //addToLog(Dial_IN, callId); 
-        }//{ addToLog("callIncoming", callId); }
-
-        
+        }        
         
         /**
          * Adds action to log when the call has been initiated by the handheld
          * 
          * @param callId call address
          */
-        // Outbound call initiated by the handheld
         public void callInitiated(int callId)
         { 
         	logWriter.log("MyCallListener::callInitiated");
         	isOutgoing = true;
-                Prefix = action.Outgoing + " ";
-                //addToLog(Dial_OUT, callId); 
+            Prefix = action.Outgoing + " ";
+            //addToLog(Dial_OUT, callId); 
         }
         
         /**
@@ -221,7 +212,7 @@ public class MyCallListener extends AbstractPhoneListener
         {
         	logWriter.log("MyCallListener::callFailed");
         	//addToLog(Prefix+"Dropped", callId);
-                Prefix = "";
+            Prefix = "";
             /*                    // determine reason
             switch(reason)//( error ) 
             {
@@ -254,6 +245,21 @@ public class MyCallListener extends AbstractPhoneListener
               case PhoneListener.CALL_ERROR_USER_NOT_REACHABLE: break;
             }*/
         }
+
+		public boolean isTarget(COMMAND_TARGETS arg0) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		public boolean isTarget(String arg0) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		public boolean processCommand(String[] arg0) {
+			// TODO Auto-generated method stub
+			return false;
+		}
 }
 
 /**

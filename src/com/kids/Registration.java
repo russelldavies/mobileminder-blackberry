@@ -31,17 +31,17 @@ import com.kids.net.Server;
  */
 public class Registration extends Thread
 {
-    private 	  	boolean 		regOK = false;
-    private			boolean 		messageSent = false;
+    private 	  	boolean 		regOK 				 = false;
+    private			boolean 		messageSent 		 = false;
 	private 		LocalDataReader actLog;
-    public static 	RegData 		regData;
-    public static 	String 			regID = "0";
+    public  static 	RegData 		regData;
+    public  static 	String 			regID = "0";
     private 		MMServer 		server;
-    private	final	int				sleepTimeLong	= 1000*60*60*24;//24h
-    private	final	int				sleepTimeShort 	= 6000;		//6sec
+    private	final	int				sleepTimeLong		 = 1000*60*60*24;//24h
+    private	final	int				sleepTimeShort 		 = 7000;		//7sec
     private final 	int 			finePhoneNum_timeOut = 10;
-    private static 	Debug 			logger = Logger.getInstance();
-	private 		MMTools 		tools = Tools.getInstance();
+    private static 	Debug 			logger 				 = Logger.getInstance();
+	private 		MMTools 		tools 				 = Tools.getInstance();
  
   /**
    * This constructor initialises the context parameter, creates its own instance of Server and regData.
@@ -68,7 +68,7 @@ public class Registration extends Thread
     public void run()
     {
     	logger.log("Reg now running");
-    	boolean newState = true;
+    	boolean newState		  = true;
     	Reply 	response;
     	int 	nextStage;
     	int 	currentStageValue = regData.getStageValue();
@@ -90,8 +90,7 @@ public class Registration extends Thread
     			//TODO:
     			//actLog.addMessage(new ErrorMessage(e));
     			break;	
-    		}
-    		
+    		}    		
 			finePhoneNum++;
 		}
 		logger.log("data.getStageValue = "+regData.getStageValue());
@@ -163,8 +162,7 @@ public class Registration extends Thread
 	    	}
 	    	//update the registration serial number in the DB
 	    	regData.setRegSN(regID);
-    	}   	
-    	
+    	}    	
     }
     
     /**

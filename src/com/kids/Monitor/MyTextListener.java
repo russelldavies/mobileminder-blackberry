@@ -7,11 +7,13 @@ import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
 
+import com.kids.Controllable;
 import com.kids.Logger;
 import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMTools;
+import com.kids.prototypes.enums.COMMAND_TARGETS;
 
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.blackberry.api.sms.OutboundMessageListener;
@@ -21,7 +23,7 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
 * MyTextListener monitors and registers text message based events.
 * 
 */
-public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener 
+public class MyTextListener implements OutboundMessageListener, javax.wireless.messaging.MessageListener, Controllable 
 {
 	private LocalDataReader actLog;
 	public static Debug 	logWriter = Logger.getInstance();
@@ -178,6 +180,24 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 			*/
 
 
-		}	
+		}
+
+
+	public boolean isTarget(COMMAND_TARGETS arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean isTarget(String arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public boolean processCommand(String[] arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}	
 
 }

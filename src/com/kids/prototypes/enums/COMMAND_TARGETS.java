@@ -10,6 +10,7 @@ public class COMMAND_TARGETS {
 	public static final String WEB	    = "Web";
 	public static final String CONTACTS = "Conts";
 	public static final String FILES    = "files";
+	public static final String OWNER    = "owner";
 	
 	//private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
 	
