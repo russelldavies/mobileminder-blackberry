@@ -18,10 +18,8 @@ import com.kids.net.Reply;
 import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
-import com.kids.prototypes.LocalDataWriter;
 import com.kids.prototypes.enums.COMMAND_TARGETS;
 import com.kids.prototypes.enums.IMAGE_TYPES;
-
 
 /**
  * This class can be used to retrieve the contact picture stored on the device based on a specified phone number that is sent in a command.
@@ -40,14 +38,16 @@ public class ContactPic implements Controllable
  * 2. creates a server object
  * 3. Initialises a fly message to temporarily hold ContactPic messages
  * 
- * @param inputcontext Interface to global environment that the current application is running in.
  * @param inputLocalData Storage location for messages
  */
     
 	public ContactPic(LocalDataReader inputLocalData)
 	{
+		logWriter.log("ContactPic::constructor1");
 		actLog = inputLocalData;
+		logWriter.log("ContactPic::constructor2");
 		myServer = new Server(actLog);
+		logWriter.log("ContactPic::constructor3");
 		flyContactPicMessage = new ContactPicMessage();
 		logWriter.log("Starting.. ContactPic");		
 	}
@@ -313,7 +313,7 @@ public class ContactPic implements Controllable
     }
 
 
-	public void initialiseContactPic(LocalDataWriter inputLocalData)
+	public void initialiseContactPic(LocalDataReader inputLocalData)
 	{
 		// TODO Auto-generated method stub
 		
@@ -326,9 +326,10 @@ public class ContactPic implements Controllable
 	 * @param target passed to be checked.
 	 * @return true if this is the desired target.
 	 */
-		public boolean isTarget(COMMAND_TARGETS targets) 
+		public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS) 
 		{
-			if(targets.toString() == COMMAND_TARGETS.CONTACTS)
+			logWriter.log("ContactPic::isTarget::COMMAND_TARGETS");
+			if(inputCOMMAND_TARGETS == COMMAND_TARGETS.CONTACTS)
 			{return true;} 
 			else 
 			{return false;}
@@ -336,7 +337,8 @@ public class ContactPic implements Controllable
 		
 		public boolean isTarget(String targets)
 		{
-			if(targets.toString() == COMMAND_TARGETS.CONTACTS)
+			logWriter.log("ContactPic::isTarget::String");
+			if(targets == COMMAND_TARGETS.CONTACTS.toString())
 			{return true;} 
 			else 
 			{return false;}

@@ -52,7 +52,6 @@ class ContactPicMessage implements Message
 	
 	//@Override
 	public int getType() {
-		// TODO Auto-generated method stub
 		return type;
 	}
 

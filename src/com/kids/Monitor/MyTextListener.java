@@ -157,7 +157,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS)
 	{
 		logWriter.log("TextListener::isTarget::COMMAND_TARGETS.");
-		if(inputCOMMAND_TARGETS.toString() == COMMAND_TARGETS.TEXT)
+		if(inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT)
 		{return true;} 
 		else 
 		{return false;}
@@ -167,7 +167,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 	public boolean isTarget(String inputCOMMAND_TARGETS)
 	{
 		logWriter.log("TextListener::isTarget::String.");
-		if(inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT)
+		if(inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT.toString())
 		{return true;} 
 		else 
 		{return false;}

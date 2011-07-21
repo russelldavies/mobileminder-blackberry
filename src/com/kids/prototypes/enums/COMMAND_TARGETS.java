@@ -1,8 +1,27 @@
 package com.kids.prototypes.enums;
 
-public class COMMAND_TARGETS {
-	private COMMAND_TARGETS(){}
-
+public class COMMAND_TARGETS
+{
+	//private COMMAND_TARGETS(){}
+	/**
+	 * Sets the column name.
+	 * @param inputColumnName name of the column
+	 */
+	public COMMAND_TARGETS(String inputColumnName)
+	{	columnName = inputColumnName;	}
+	
+	
+	public static final COMMAND_TARGETS SHOW	    = new COMMAND_TARGETS("Show");
+	public static final COMMAND_TARGETS CALL	    = new COMMAND_TARGETS("Call");
+	public static final COMMAND_TARGETS TEXT	    = new COMMAND_TARGETS("SMS");
+	public static final COMMAND_TARGETS APP	    	= new COMMAND_TARGETS("App");
+	public static final COMMAND_TARGETS WEB	    	= new COMMAND_TARGETS("Web");
+	public static final COMMAND_TARGETS CONTACTS 	= new COMMAND_TARGETS("Conts");
+	public static final COMMAND_TARGETS FILES    	= new COMMAND_TARGETS("files");
+	public static final COMMAND_TARGETS OWNER    	= new COMMAND_TARGETS("owner");
+	
+	//private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
+	/*
 	public static final String SHOW	    = "Show";
 	public static final String CALL	    = "Call";
 	public static final String TEXT	    = "SMS";
@@ -11,17 +30,9 @@ public class COMMAND_TARGETS {
 	public static final String CONTACTS = "Conts";
 	public static final String FILES    = "files";
 	public static final String OWNER    = "owner";
-	
-	//private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
-	
+	*/
 	private String columnName			= "";
 	
-	/**
-	 * Sets the column name.
-	 * @param inputColumnName name of the column
-	 */
-	private COMMAND_TARGETS(String inputColumnName)
-	{	columnName = inputColumnName;	}
 	
 	/**
 	 * Converts column name to String type.

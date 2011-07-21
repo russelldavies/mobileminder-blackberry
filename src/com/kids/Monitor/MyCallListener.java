@@ -6,7 +6,7 @@ import com.kids.Controllable;
 import com.kids.Logger;
 import com.kids.Data.Tools;
 import com.kids.prototypes.Debug;
-import com.kids.prototypes.LocalDataWriter;
+import com.kids.prototypes.LocalDataReader;
 import com.kids.prototypes.MMTools;
 import com.kids.prototypes.enums.COMMAND_TARGETS;
 
@@ -23,7 +23,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 
 public class MyCallListener extends AbstractPhoneListener implements Controllable 
 {
-        private LocalDataWriter actLog;
+        private LocalDataReader actLog;
         //private final String    Connected 		= "Connected";
         //private final String    Hold_ON   		= "Hold_ON";
         //private final String    Hold_OFF  		= "Hold_OFF";
@@ -49,7 +49,7 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
          * @param inputAccess log of actions
          */
                 
-        public MyCallListener(LocalDataWriter inputAccess)
+        public MyCallListener(LocalDataReader inputAccess)
         {
                 logWriter.log("Start MyCallListener");
                 callMessage = new CallMessage();
@@ -249,7 +249,7 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
 		public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS)
 		{
 			logWriter.log("CallListener::isTarget::COMMAND_TARGETS");
-			if(inputCOMMAND_TARGETS.toString() == COMMAND_TARGETS.TEXT)
+			if(inputCOMMAND_TARGETS == COMMAND_TARGETS.CALL)
 			{return true;} 
 			else 
 			{return false;}
@@ -258,7 +258,7 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
 		public boolean isTarget(String inputCOMMAND_TARGETS) 
 		{
 			logWriter.log("CallListener::isTarget::String");
-			if(inputCOMMAND_TARGETS == COMMAND_TARGETS.CALL)
+			if(inputCOMMAND_TARGETS.toString() == COMMAND_TARGETS.CALL.toString())
 			{return true;} 
 			else 
 			{return false;}
