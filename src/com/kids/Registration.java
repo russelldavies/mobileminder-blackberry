@@ -32,7 +32,7 @@ import com.kids.net.Server;
 public class Registration extends Thread
 {
     private 	  	boolean 		regOK 				 = false;
-    private			boolean 		messageSent 		 = false;
+  //  private			boolean 		messageSent 		 = false;
 	private 		LocalDataReader actLog;
     public  static 	RegData 		regData;
     public  static 	String 			regID = "0";
@@ -54,7 +54,7 @@ public class Registration extends Thread
     {
 		new mmNotification();
     	actLog 	  = _actLog;
-		server 	  = new Server(_actLog);
+		server 	  = new Server(actLog);
 		regData   = new RegData();
 		regID	  = regData.getRegSN();
 		stageState(regData.getStageValue());
@@ -138,7 +138,7 @@ public class Registration extends Thread
     				//assigns new stage
 					regData.setStageValue(nextStage);//saves stage to memory
 					//if("0" != regData.getRegSN()) regData.setRegSN(regID);
-    				messageSent = false; // This handles the user getting a new TXT with stage details
+    				//messageSent = false; // This handles the user getting a new TXT with stage details
 					stageState(nextStage);//process stage
     			}
     		}

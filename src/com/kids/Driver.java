@@ -208,7 +208,9 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
     	//components[3] = new ContactPic(context, actLog);
         
         logWriter.log("Driver::Before contactPic");
+  
         components.addElement(new ContactPic(actLog));
+    
         logWriter.log("Driver::After contactPic");
 
     	//components[4] = new MediaSync(context, actLog);        

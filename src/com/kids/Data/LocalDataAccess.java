@@ -411,7 +411,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
         		 // TODO: Causing NullPointerException when DB cant be opened
         		
         		if(null == result)
-        		{	logWriter.log("x:length::cursor in NULL");}
+        		{	logWriter.log("x:length::cursor is NULL");}
                 if( null != result && result.last())
                 { 
                 	logWriter.log("inside result.last. setting size...");
@@ -458,7 +458,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 			} 
             catch (DatabaseException e) 
 			{
-				logWriter.log("x::innerLocalDataAccess::getStoreDBouput::DatabaseException::"+e.getMessage());
+				logWriter.log("x::innerLocalDataAccess::selectAllFromDB::DatabaseException::"+e.getMessage());
 				e.printStackTrace();
 			}
 

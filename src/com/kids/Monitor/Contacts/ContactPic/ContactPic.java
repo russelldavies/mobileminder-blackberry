@@ -1,15 +1,13 @@
 package com.kids.Monitor.Contacts.ContactPic;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Vector;
-
+import java.util.Enumeration;
 import javax.microedition.pim.Contact;
+import javax.microedition.pim.PIM;
+import javax.microedition.pim.PIMException;
 
-import net.rim.blackberry.api.phone.Phone;
-import net.rim.device.api.compress.GZIPOutputStream;
+import net.rim.blackberry.api.pdap.BlackBerryContact;
+import net.rim.blackberry.api.pdap.BlackBerryContactList;
 import net.rim.device.api.system.EncodedImage;
 
 import com.kids.Controllable;
@@ -61,50 +59,49 @@ public class ContactPic implements Controllable
 	public ContactPhotoContainer getContactPhotoFromNumber(String inputNumber)
 	{
 		logWriter.log("In-> getContactPhotoFromNumber");
-	    ContactPhotoContainer photoObject = new ContactPhotoContainer();
-
-		Vector contactList = Phone.getContactsByPhoneNumber(inputNumber);
-		Contact contact = null;
-		byte[] byteStream = null;
+		ContactPhotoContainer photoObject = new ContactPhotoContainer();
 		
-		if (!contactList.isEmpty())
-		{
-			contact = (Contact) contactList.elementAt(0);
-			byteStream = contact.getBinary(Contact.PHOTO, Contact.ATTR_NONE);
-			
-			EncodedImage contactPic = EncodedImage.createEncodedImage(byteStream, 0, byteStream.length); 
-			String picType = String.valueOf( contactPic.getImageType() );
-			
-			photoObject.setPhoto(byteArrayToHexString(byteStream));//(byteArrayToHexString(gzippedData));
-			photoObject.setPhotoType(getFileType(picType));//get+set the file type
-			photoObject.setEmail(contact.getString(Contact.EMAIL, 0));//findEmail(id));//get+set the email address
-			logWriter.log("Email=:"+photoObject.email);
-			logWriter.log("FileType=:"+photoObject.photoType);
-
-			//get the last line of the hex string
-			int length = photoObject.photoStream.length();
-			logWriter.log("Last values = Hex:"+photoObject.photoStream.substring((length - 100), length)+":");
-			
-			//get hex input stream string split into 100 character pieces
-			int len = photoObject.photoStream.length();
-			int count = 0, num = 100;
-			while(count < len)
+		try
+		{			
+			BlackBerryContactList contactList = (BlackBerryContactList) 
+			   PIM.getInstance().openPIMList(PIM.CONTACT_LIST, PIM.READ_WRITE);
+			Enumeration _enum = contactList.itemsByPhoneNumber(inputNumber);
+			while(_enum.hasMoreElements())
 			{
-				if (count == num)
+				BlackBerryContact c = (BlackBerryContact)_enum.nextElement();				
+				byte[] byteStream = c.getBinary(Contact.PHOTO, Contact.ATTR_NONE);
+				EncodedImage contactPic = EncodedImage.createEncodedImage(byteStream, 0, byteStream.length); 
+				String picType = String.valueOf( contactPic.getImageType() );
+				
+				photoObject.setPhoto(byteArrayToHexString(byteStream));//(byteArrayToHexString(gzippedData));
+				photoObject.setPhotoType(getFileType(picType));//get+set the file type
+				photoObject.setEmail(c.getString(Contact.EMAIL, 0));//findEmail(id));//get+set the email address
+				logWriter.log("Email=:"+photoObject.email);
+				logWriter.log("FileType=:"+photoObject.photoType);
+
+				//get the last line of the hex string
+				int length = photoObject.photoStream.length();
+				logWriter.log("Last values = Hex:"+photoObject.photoStream.substring((length - 100), length)+":");
+				
+				//get hex input stream string split into 100 character pieces
+				int len = photoObject.photoStream.length();
+				int count = 0, num = 100;
+				while(count < len)
 				{
-					logWriter.log("Contact Photo = Hex:"+photoObject.photoStream.substring((count - 100), count)+":");
-					num += 100;
+					if (count == num)
+					{
+						logWriter.log("Contact Photo = Hex:"+photoObject.photoStream.substring((count - 100), count)+":");
+						num += 100;
+					}
+					count++;
 				}
-				count++;
 			}
-		}			
-		
-		else
+		} catch (PIMException e)
 		{
-			photoObject.photoStream = null;
-			photoObject.photoType = null;
-			photoObject.email = null;
-		}		      
+			logWriter.log("x::ContactPic::getContactPhotoFromPhoneNumber::PIMException::"+e.getMessage());
+			e.printStackTrace();
+		}
+
 	 return photoObject;
 	}
 
@@ -114,7 +111,7 @@ public class ContactPic implements Controllable
  * @param input input stream
  * @return gzip byte array
  * @throws IOException
- */
+ *//*
 	public byte[] gzipData(InputStream input) throws IOException
 	{
 		
@@ -137,10 +134,10 @@ public class ContactPic implements Controllable
 	             os.write(buf, 0, len);  
 	         } 
 	         //TODO: Error on J2ME, but I don't think its needed anyway. Same for the 2 GZIP methods!
-/*	         if (os instanceof DeflaterOutputStream)
+	         if (os instanceof DeflaterOutputStream)
 	         {  
 	             ((DeflaterOutputStream) os).finish();  
-	         }*/  
+	         } 
 	     }
 	     finally
 	     {  
@@ -149,7 +146,7 @@ public class ContactPic implements Controllable
 	             is.close();  
 	         }  
 	     }  
-	 }
+	 }*/
 	
 /**
  * This method converts the byte stream from an input stream into a byte array
@@ -157,7 +154,7 @@ public class ContactPic implements Controllable
  * @param inputStream file input stream
  * @return input stream passed in the form of a byte array 
  * @throws IOException the thrown exceptions need to be caught when using this method
- */
+ *//*
 	public byte[] readBytes(InputStream inputStream) throws IOException 
 	{
 		
@@ -178,7 +175,7 @@ public class ContactPic implements Controllable
 		  
 		  // and then we can return your byte array.
 		  return byteBuffer.toByteArray();
-	}
+	}*/
 	
 	
 	 public String byteArrayToHexString(byte[] b) 
@@ -243,7 +240,7 @@ public class ContactPic implements Controllable
 	public boolean processCommand(String[] inputArgs) 
 	{
 		logWriter.log("Processing Contact Photo Command...");
-		
+
 		Reply resultREST;
 		boolean complete = false;
 		

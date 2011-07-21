@@ -21,7 +21,7 @@ public class COMMAND_TARGETS
 	public static final COMMAND_TARGETS OWNER    	= new COMMAND_TARGETS("owner");
 	
 	//private static final String values[]= {"Show","Call","SMS","App","Web","Conts","files"};
-	/*
+/*
 	public static final String SHOW	    = "Show";
 	public static final String CALL	    = "Call";
 	public static final String TEXT	    = "SMS";
@@ -46,24 +46,28 @@ public class COMMAND_TARGETS
 	 * @param inputText input string
 	 * @return enum of type COMMAND_TARGETS if it is found, null otherwise.
 	 */
-	public static String from(String inputText)//COMMAND_TARGETS from(String inputText)
+	public static COMMAND_TARGETS from(String inputText)
 	{
-		if(null!=inputText)
-		{
-			String tar;
-			for(int count=0;;count++)
-			{
-				tar = inputText;
-				if(inputText.equalsIgnoreCase(tar.toString()))
-				{ return tar;	}	
-			}
-			/* NO FOR:EACH IN BLACKBERRY
-			for(COMMAND_TARGETS tar : COMMAND_TARGETS.values())
-			{
-				if(inputText.equalsIgnoreCase(tar.toString()))
-				{ return tar;	}
-			}*/
-		}
-		return null;
+		COMMAND_TARGETS tar = null;
+					
+		
+		if (inputText.equalsIgnoreCase(SHOW.toString()))
+		{tar = new COMMAND_TARGETS("Show"); }
+		else if (inputText.equalsIgnoreCase(CALL.toString()))
+		{tar = new COMMAND_TARGETS("Call");	}
+		else if (inputText.equalsIgnoreCase(TEXT.toString()))
+		{tar = new COMMAND_TARGETS("Text"); }
+		else if (inputText.equalsIgnoreCase(APP.toString()))
+		{tar = new COMMAND_TARGETS("App");	}
+		else if (inputText.equalsIgnoreCase(WEB.toString()))
+		{tar = new COMMAND_TARGETS("Web");	}
+		else if (inputText.equalsIgnoreCase(CONTACTS.toString()))
+		{tar = new COMMAND_TARGETS("Conts"); }
+		else if (inputText.equalsIgnoreCase(FILES.toString()))
+		{tar = new COMMAND_TARGETS("files"); }
+		else if (inputText.equalsIgnoreCase(OWNER.toString()))
+		{tar = new COMMAND_TARGETS("owner"); }
+		
+		return tar;
 	}	
 }
