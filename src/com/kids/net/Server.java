@@ -277,6 +277,10 @@ public class Server extends Thread implements MMServer
 	        byte responseData[] = new byte[len];
 	        DataInputStream dis = null;
 			
+	    	
+			logger.log("Getting response message from server...");
+	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
+
 	        // I think GET is the default so dont need to set it
 	        // The check above will reset POST to GET if needed
 	    	/*if(getFlag)
@@ -290,6 +294,9 @@ public class Server extends Thread implements MMServer
 			else*/
 	        if (!getFlag)
 			{
+	        	// GUIDE FOR SWITCHING BETWEEN GET AND POST
+	        	//http://developerlife.com/tutorials/?p=884
+	        	
 				logger.log("Using POST");
 				httpclient.setRequestMethod(HttpConnection.POST);
 				httpclient.setRequestProperty("User-Agent", "BlackBerry");
@@ -301,10 +308,7 @@ public class Server extends Thread implements MMServer
 				httpclient.setRequestProperty("pic", pic);
 				logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
 			}  // end if/else to set POST
-			
-			logger.log("Getting response message from server...");
-	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
-
+		
 			int status = httpclient.getResponseCode();
 			// We can connect to the server with an invalid CRC and it'll give a HTTP_OK
 			// But, if its invalid, the length of the reply will be 0

@@ -2,12 +2,15 @@ package com.kids.Monitor.Contacts.ContactPic;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import javax.microedition.pim.Contact;
+import java.util.NoSuchElementException;
+
 import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
+import javax.microedition.pim.UnsupportedFieldException;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 import net.rim.blackberry.api.pdap.BlackBerryContactList;
+import net.rim.device.api.io.Base64InputStream;
 import net.rim.device.api.system.EncodedImage;
 
 import com.kids.Controllable;
@@ -64,21 +67,43 @@ public class ContactPic implements Controllable
 		try
 		{			
 			BlackBerryContactList contactList = (BlackBerryContactList) 
-			   PIM.getInstance().openPIMList(PIM.CONTACT_LIST, PIM.READ_WRITE);
-			Enumeration _enum = contactList.itemsByPhoneNumber(inputNumber);
+			   				PIM.getInstance().openPIMList(PIM.CONTACT_LIST, PIM.READ_WRITE);
+			
+			// Get a list of contacts that match the phone number (last 8 digits only)
+			Enumeration _enum = contactList.items(inputNumber.substring(inputNumber.length()-8),BlackBerryContact.TEL);
+			
+			logWriter.log("ContactPic::Checking if enum is empty...");
 			while(_enum.hasMoreElements())
 			{
+				logWriter.log("ContactPic::enum not empty");
+			
 				BlackBerryContact c = (BlackBerryContact)_enum.nextElement();				
-				byte[] byteStream = c.getBinary(Contact.PHOTO, Contact.ATTR_NONE);
-				EncodedImage contactPic = EncodedImage.createEncodedImage(byteStream, 0, byteStream.length); 
-				String picType = String.valueOf( contactPic.getImageType() );
+				//byte[] byteStream = c.getBinary(BlackBerryContact.PHOTO, BlackBerryContact.ATTR_NONE);
+				logWriter.log("ContactPic::Counting num of Contact.PHOTOs...");
+				if (c.countValues(BlackBerryContact.PHOTO) > 0)
+				{
+					logWriter.log("ContactPic amount > 0");
+					byte[] photoEncoded = c.getBinary(BlackBerryContact.PHOTO, 0);
+					logWriter.log("ContactPic::Decoding image...");
+					byte[] photoDecoded = Base64InputStream.decode(photoEncoded, 0, photoEncoded.length);
 				
-				photoObject.setPhoto(byteArrayToHexString(byteStream));//(byteArrayToHexString(gzippedData));
-				photoObject.setPhotoType(getFileType(picType));//get+set the file type
-				photoObject.setEmail(c.getString(Contact.EMAIL, 0));//findEmail(id));//get+set the email address
-				logWriter.log("Email=:"+photoObject.email);
-				logWriter.log("FileType=:"+photoObject.photoType);
-
+					logWriter.log("ContactPic::Creating pic to upload...");
+					EncodedImage contactPic = EncodedImage.createEncodedImage(photoDecoded,0,photoDecoded.length);
+					logWriter.log("ContactPic::Getting pic type, ie JPG, PNG etc...");
+					String picType = String.valueOf( contactPic.getImageType() );
+					
+					logWriter.log("ContactPic::Setting photo in ContactPhotoContainer object...");
+					photoObject.setPhoto(byteArrayToHexString(photoDecoded));	
+					logWriter.log("ContactPic::Setting photo type in ContactPhotoContainer object...");
+					photoObject.setPhotoType(getFileType(picType));//get+set the file type
+					logWriter.log("FileType=:"+photoObject.photoType);
+				}
+				if (c.countValues(BlackBerryContact.EMAIL) > 0)
+				{
+					logWriter.log("ContactPic::Setting email in ContactPhotoContainer object...");
+					photoObject.setEmail( c.getString(BlackBerryContact.EMAIL, 0) );
+					logWriter.log("Email=:"+photoObject.email);
+				}
 				//get the last line of the hex string
 				int length = photoObject.photoStream.length();
 				logWriter.log("Last values = Hex:"+photoObject.photoStream.substring((length - 100), length)+":");
@@ -96,9 +121,34 @@ public class ContactPic implements Controllable
 					count++;
 				}
 			}
-		} catch (PIMException e)
+			logWriter.log("ContactPic::After the while to check enum");
+		}
+		catch (PIMException e)
 		{
 			logWriter.log("x::ContactPic::getContactPhotoFromPhoneNumber::PIMException::"+e.getMessage());
+			e.printStackTrace();
+		}
+		catch(UnsupportedFieldException e)
+		{
+			logWriter.log("x::ContactPic::getContactPhotoFromNumber::UnsupportedFieldException::"+e.getMessage());
+		    e.printStackTrace();
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			logWriter.log("x::ContactPic::getContactPhotoFromNumber::IndexOutOfBoundsException::"+e.getMessage());
+		    e.printStackTrace();
+		}
+		catch(NoSuchElementException e)
+		{
+			logWriter.log("x::ContactPic::getContactPhotoFromNumber::NoSuchElementException::"+e.getMessage());
+		    e.printStackTrace();
+		}
+		catch (IllegalArgumentException e)
+		{
+		    logWriter.log("x::ContactPic::getContactPhotoFromNumber::Image format not recognized::"+e.getMessage());
+		    e.printStackTrace();
+		} catch (IOException e) {
+			logWriter.log("x::ContactPic::getContactPhotoFromNumber::IOException::"+e.getMessage());
 			e.printStackTrace();
 		}
 
