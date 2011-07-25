@@ -81,7 +81,7 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
                                     (callEndTime-callStartTime)/1000
                                   );
             
-            callMessage.setContactName(contactName);
+            callMessage.setContactName( (null==contactName?"":contactName) );
             
             logWriter.log("Adding message to log...");
             actLog.addMessage(callMessage);

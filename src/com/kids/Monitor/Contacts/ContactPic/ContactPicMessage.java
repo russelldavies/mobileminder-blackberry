@@ -92,7 +92,7 @@ class ContactPicMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactNumber);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append((null == contactEmail ? "NoEmail":contactEmail));
+			stringREST.append(contactEmail);
 		}		
 		return 	stringREST.toString();		
 	}

@@ -84,7 +84,8 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 		  
 		  smsMessage.setMessage(contactNumber, isOutgoing, _date, _txtBody);
 		  // set contact name seperately
-		  smsMessage.setContactName( new PhoneCallLogID(contactNumber).getName() );
+		  String contactName = new PhoneCallLogID(contactNumber).getName();
+		  smsMessage.setContactName( (null==contactName?"":contactName) );
 
           logWriter.log("Adding message to log...");
           actLog.addMessage(smsMessage);
@@ -112,7 +113,7 @@ public class MyTextListener implements OutboundMessageListener, javax.wireless.m
 		// Add to log, but get a proper formatted PH Number without sms:// at the start
 		String phNumber = message.getAddress();
 		addToLog( action.Outgoing +" Message",
-				  phNumber.substring(phNumber.lastIndexOf('/')),
+				  phNumber.substring(phNumber.lastIndexOf('/')+1),
 				  tools.getDate(),
 				  txtBody
 				);

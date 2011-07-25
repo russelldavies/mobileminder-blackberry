@@ -1,7 +1,7 @@
 package com.kids.net;
 
-import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
 
@@ -9,6 +9,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
 import net.rim.blackberry.api.browser.URLEncodedPostData;
+import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.system.DeviceInfo;
 
@@ -308,79 +309,50 @@ public class Server extends Thread implements MMServer
                 os.flush();
                 os.close();
                 os = null;
-				
-                /*
-				httpclient.setRequestProperty("User-Agent", "BlackBerry");
-				httpclient.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-				
-				// Not sure if this will work
-				int length = inputBody.length()+crc.length()+pic.length();
-				httpclient.setRequestProperty("Content-Length", ""+length);
-				httpclient.setRequestProperty("crc", crc);
-				httpclient.setRequestProperty("pic", pic);			
-				*/
-				
-				/*
-				OutputStream out = httpclient.openOutputStream();
-				byte[] postPic = pic.getBytes();
-				byte[] postCrc = crc.getBytes();
-				int length = pic.length()+crc.length();
-				
-				
-				httpclient.setRequestProperty(HttpProtocolConstants.HEADER_CONTENT_LENGTH,""+length);
-				httpclient.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-		        httpclient.setRequestProperty("User-Agent","Profile/MIDP-2.0 Configuration/CLDC-1.0");
-				
-		        out.write(postPic);
-		        out.write(postCrc);
-		        out.flush();*/
-				
-			}  // end if/else to set POST
+            }  // end if/else to set POST
 		
-			int status = httpclient.getResponseCode();
+	        
+	        InputStream is = httpclient.openInputStream();
+			//int status = httpclient.getResponseCode();
 	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
 
 	        int len = (int) httpclient.getLength();
-	        logger.log("length retrieved");
-	        byte responseData[] = new byte[len];
-	        DataInputStream dis = null;
-			
-	    	
+	        logger.log("length retrieved: "+len);
 			logger.log("Getting response message from server...");
-			// We can connect to the server with an invalid CRC and it'll give a HTTP_OK
-			// But, if its invalid, the length of the reply will be 0
-			if (status == HttpConnection.HTTP_OK && len > 0)
-			{
-				logger.log("Now getting length of reply from server...");
-		        logger.log("contactRESTsever::Length of reply is: "+len);
-
-		        logger.log("Opening data input stream...");
-	        	dis = new DataInputStream(httpclient.openInputStream());
-	        	logger.log("DataInputStream opened. Reading data...");
-				dis.readFully(responseData);
-
-		        result = new String(responseData);
-		        
-		        logger.log("Server-> "+result);
-		     	
-				if(null != result && tools.isHex(result))
-				{
-					result = decrypt(result);
-					logger.log("DecryptedResultSERVER->:"+result);
-				}
+				        
+	        // No length supplied - read until EOF
+			byte responseData[] = null;
+	        if (len <0)
+	        {
+				responseData = IOUtilities.streamToBytes(is);
+				if (null == responseData)
+					{len = -1;}
 				else
-		     	{
-		     		result = serverErrorReply+"Corrupted Message";
-		     	}
-		     	//logger.log("**OUT if**");
-			    live = true;
-			    //logger.log("**LIVE = TRUE**");
-			} // end if (HTTP_STATUS == OK)
-			else
+					{len = responseData.length;}
+	            logger.log("LENGTH: "+len);
+	        }
+	        else
+	        {
+		        responseData = new byte[len];
+		        logger.log("Opening data input stream...");
+	        	logger.log("DataInputStream opened. Reading data...");
+	        	is.read(responseData);
+	        }
+            result = new String(responseData);
+            logger.log("Response from server is: "+result);
+	        
+			if(null != result && tools.isHex(result))
 			{
-				logger.log("x::contactRESTServer::Reply from server::"+status);
-				logger.log("x::contactRESTServer::Reply length is: "+len);
-			}		     
+				result = decrypt(result);
+				logger.log("DecryptedResultSERVER->:"+result);
+			}				
+			else
+	     	{
+	     		result = serverErrorReply+"Corrupted Message";
+	     	}
+				  
+			if (len>0)
+			{live = true;}
 		 } // end try
 		 catch (IOException e)
 		 {
@@ -454,14 +426,13 @@ public class Server extends Thread implements MMServer
 	 */
 	public void shutdown()
 	{
-		/*
 		try {
 			logger.log("In shutdown!");
 			httpclient.close();
 		} catch (IOException e) {
 			logger.log("x::Error closing connection to HTTP server");
 			e.printStackTrace();
-		}*/
+		}
 	}
 	/**
 	 * This method checks the status of the server.
