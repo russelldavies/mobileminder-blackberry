@@ -76,8 +76,7 @@ class ContactPicMessage implements Message
 	 */
 	//@Override
 	public String getREST() 
-	{
-		
+	{		
 		if(null == stringREST)
 		{	
 			stringREST = new StringBuffer();
@@ -93,7 +92,7 @@ class ContactPicMessage implements Message
 			stringREST.append(Tools.RestElementSeparator);
 			stringREST.append(contactNumber);
 			stringREST.append(Tools.RestElementSeparator);
-			stringREST.append(contactEmail);
+			stringREST.append((null == contactEmail ? "NoEmail":contactEmail));
 		}		
 		return 	stringREST.toString();		
 	}
@@ -108,5 +107,4 @@ class ContactPicMessage implements Message
         }
 		return thePhoneNumber;
 	}
-
 }

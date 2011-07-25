@@ -2,11 +2,14 @@ package com.kids.net;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Random;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
+import net.rim.blackberry.api.browser.URLEncodedPostData;
+import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.system.DeviceInfo;
 
 import com.kids.CRC32;
@@ -271,15 +274,7 @@ public class Server extends Thread implements MMServer
 			
 			//httpclient = (HttpConnection) new ConnectionFactory().getConnection(fullURL).getConnection();
 			logger.log("Connection set up!");
-			
-	        int len = (int) httpclient.getLength();
-	        logger.log("length retrieved");
-	        byte responseData[] = new byte[len];
-	        DataInputStream dis = null;
-			
-	    	
-			logger.log("Getting response message from server...");
-	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
+
 
 	        // I think GET is the default so dont need to set it
 	        // The check above will reset POST to GET if needed
@@ -296,20 +291,62 @@ public class Server extends Thread implements MMServer
 			{
 	        	// GUIDE FOR SWITCHING BETWEEN GET AND POST
 	        	//http://developerlife.com/tutorials/?p=884
-	        	
-				logger.log("Using POST");
-				httpclient.setRequestMethod(HttpConnection.POST);
+				logger.log("Using POST. SERVER:CRC="+crc+" SERVERHEX="+pic);
+	        	httpclient.setRequestMethod(HttpConnection.POST);
+
+	        	URLEncodedPostData postData = new URLEncodedPostData("en-us", true);
+	        	postData.append("crc", crc);
+	        	postData.append("pic", pic);
+
+				httpclient.setRequestProperty(HttpProtocolConstants.HEADER_CONTENT_TYPE, postData.getContentType());
+				// No create post data to send in bytes
+				byte [] postBytes = postData.getBytes();
+				
+				httpclient.setRequestProperty(HttpProtocolConstants.HEADER_CONTENT_LENGTH, Integer.toString(postBytes.length));
+                OutputStream os = httpclient.openOutputStream();
+                os.write(postBytes);
+                os.flush();
+                os.close();
+                os = null;
+				
+                /*
 				httpclient.setRequestProperty("User-Agent", "BlackBerry");
 				httpclient.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+				
 				// Not sure if this will work
 				int length = inputBody.length()+crc.length()+pic.length();
 				httpclient.setRequestProperty("Content-Length", ""+length);
 				httpclient.setRequestProperty("crc", crc);
-				httpclient.setRequestProperty("pic", pic);
-				logger.log("In Send POST: SERVER:CRC="+crc+" SERVERHEX="+pic);
+				httpclient.setRequestProperty("pic", pic);			
+				*/
+				
+				/*
+				OutputStream out = httpclient.openOutputStream();
+				byte[] postPic = pic.getBytes();
+				byte[] postCrc = crc.getBytes();
+				int length = pic.length()+crc.length();
+				
+				
+				httpclient.setRequestProperty(HttpProtocolConstants.HEADER_CONTENT_LENGTH,""+length);
+				httpclient.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+		        httpclient.setRequestProperty("User-Agent","Profile/MIDP-2.0 Configuration/CLDC-1.0");
+				
+		        out.write(postPic);
+		        out.write(postCrc);
+		        out.flush();*/
+				
 			}  // end if/else to set POST
 		
 			int status = httpclient.getResponseCode();
+	        logger.log("HTTP Code returned: "+httpclient.getResponseMessage());
+
+	        int len = (int) httpclient.getLength();
+	        logger.log("length retrieved");
+	        byte responseData[] = new byte[len];
+	        DataInputStream dis = null;
+			
+	    	
+			logger.log("Getting response message from server...");
 			// We can connect to the server with an invalid CRC and it'll give a HTTP_OK
 			// But, if its invalid, the length of the reply will be 0
 			if (status == HttpConnection.HTTP_OK && len > 0)
