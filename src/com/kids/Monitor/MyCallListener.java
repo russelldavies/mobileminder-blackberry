@@ -54,7 +54,7 @@ public class MyCallListener extends AbstractPhoneListener implements Controllabl
                 logWriter.log("Start MyCallListener");
                 callMessage = new CallMessage();
                 actLog = inputAccess;
-                Phone.addPhoneListener(this);//TODO look up addPhonelistener
+                Phone.addPhoneListener(this);
         }     
         
         /**

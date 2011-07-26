@@ -86,12 +86,25 @@ public class Tools extends ToolKit
 	 * @return Date in milliseconds value in specified format.
 	 * @throws throws ParseException when input date format is not correct.
 	 */	
-	public long getDate(String _date)// throws ParseException
+	public long getDate(String _date)
 	{
 		if("0".equals(_date))
 		{	return 0;	}
 		else
-		{	return new Date().getTime(); }
+		{	
+			try
+			{
+			long returnTime = Long.parseLong(new SimpleDateFormat("yyMMddHHmmssZ").format(_date));//.parse(_date).getTime();
+			return returnTime;
+			}
+			catch(NumberFormatException nfe)
+			{
+				System.err.println("CVK::x::Tools::getDate(String)::NumberFormatException::"+nfe.getMessage());
+				nfe.printStackTrace();
+			}
+			//return new Date().getTime();
+		}
+		return -1;
 	}
 	
 	/**
@@ -218,8 +231,16 @@ public class Tools extends ToolKit
 	 * This method evaluates whether or not the string passed to it
 	 * is a numeric string or not (NOT CODED YET)
 	 */
-	public boolean isNumber(String _text) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isNumber(String _text)
+	{
+		try
+		{
+			Integer.parseInt(_text);
+			return true;
+		}
+		catch(NumberFormatException e)
+		{
+			return false;
+		}
 	}
 }

@@ -227,8 +227,6 @@ public class Server extends Thread implements MMServer
 	private String contactRESTServer(String inputBody, String crc, String pic)
 	//public String contactServer(String inputBody)
 	{
-		//DEBUG: Andrews REST String
-		//inputBody = "0,09,110701141039+01,0,15555215554,000000000000000,unknown,sdk,7,2,Android";
 		logger.log("contactRESTServer1");
 		boolean getFlag = true;
 		//boolean messageOk = false;

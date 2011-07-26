@@ -174,4 +174,12 @@ public class MyMailListener implements FolderListener, StoreListener
 	{
 		logWriter.log("Batch operation");
 	}
+}	// End MailListener Class
+
+class MailDirectionStatus
+{
+	private MailDirectionStatus(){}
+	
+	public static final byte INBOUND  = 0;
+	public static final byte OUTBOUND = 1;
 }

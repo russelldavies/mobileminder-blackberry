@@ -305,7 +305,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
             Cursor result = selectAllFromDB();
             
             try 
-            {//TODO: cleanup
+            {
                 result.position(_index);
                 row=result.getRow();
                 // String 2 in the DB is the REST string, eg (0:ID, 1:Time, 2:REST)
@@ -408,7 +408,6 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
                 //result.last returns FALSE is its empty (result=null if cant be opened)
                 // Otherwise, it moves to the last position
         		logWriter.log("if result.last");
-        		 // TODO: Causing NullPointerException when DB cant be opened
         		
         		if(null == result)
         		{	logWriter.log("x:length::cursor is NULL");}
