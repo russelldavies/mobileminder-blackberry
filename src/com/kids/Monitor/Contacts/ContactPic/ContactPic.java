@@ -44,13 +44,10 @@ public class ContactPic implements Controllable
     
 	public ContactPic(LocalDataReader inputLocalData)
 	{
-		logWriter.log("ContactPic::constructor1");
+		logWriter.log("ContactPic::constructor");
 		actLog = inputLocalData;
-		logWriter.log("ContactPic::constructor2");
 		myServer = new Server(actLog);
-		logWriter.log("ContactPic::constructor3");
 		flyContactPicMessage = new ContactPicMessage();
-		logWriter.log("Starting.. ContactPic");		
 	}
 	
 /**

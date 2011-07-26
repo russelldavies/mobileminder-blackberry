@@ -70,9 +70,9 @@ public class MyMailListener implements FolderListener, StoreListener
        if ( f.getType() == Folder.INBOX || f.getType() == Folder.SENT)
        {	// If it matches, we add the listener
     	   logWriter.log("Folder matching INBOX found! "+f.getFullName());
-           f.addFolderListener(this);
-           
+           f.addFolderListener(this);           
        }
+       
        Folder[] farray = f.list();
        //Search all the folders sub-folders
        for (int fcnt = farray.length - 1; fcnt >= 0; --fcnt)

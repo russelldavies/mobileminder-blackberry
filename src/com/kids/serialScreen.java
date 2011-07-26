@@ -1,5 +1,8 @@
 package com.kids;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.kids.prototypes.Debug;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
@@ -13,6 +16,8 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.ControlledAccessException;
+import net.rim.device.api.system.EncodedImage;
+import net.rim.device.api.system.PNGEncodedImage;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.container.MainScreen;
@@ -40,6 +45,23 @@ public class serialScreen extends MainScreen
 		
 		String serial = getSerial();
 		
+		//Get image from res folder and convert to PNGImage object
+		InputStream is = getClass().getResourceAsStream("mmman2.png");
+		byte[] imageBytes = null;
+		try {
+			is.read(imageBytes);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		PNGEncodedImage mmImage = (PNGEncodedImage) EncodedImage.createEncodedImage(imageBytes, 0, imageBytes.length);
+		// Image now created and stored in PNG Object
+		
+		// Now put it on screen
+		
+		
+		// Put the following text over the image (belly)
     	logger.log("Serial number is: "+serial);
         add(new LabelField("Please go to the Mobile Minder website and enter: "
 							+serial
