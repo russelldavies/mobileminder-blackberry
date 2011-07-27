@@ -37,12 +37,10 @@ public class LocalDataAccess
         if (5 > Tools.getGenOSVersion()) 
                 {
                 return new innerLegacyDataAccess();
-                //LegacyDataAccess actLog = legLog;
                 } 
         else //if (5<=ver)
                 {
                 return new innerLocalDataAccess();
-                //LocalDataAccess actLog = locLog;
                 }
         }
 }
@@ -85,7 +83,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 	
         	// This is never true in the simulator. Real phones might mount the SD card quicker,
         	// so this check is valid here, purely for those current/future faster devices.
-	        if (Tools.hasSDCard())
+	        if (Tools.isSdPresent())
 	        {
 	        	sdCardPresent=true;
 	        	//openDatabase();
@@ -135,7 +133,7 @@ class innerLocalDataAccess implements LocalDataReader//, LocalDataReader
 				if (!dbExist)
 				{
 					logWriter.log("createDatabase::Checking for SD card...");
-					sdCardPresent = Tools.hasSDCard();
+					sdCardPresent = Tools.isSdPresent();
 					if (sdCardPresent)
 					{
 						logWriter.log("createDatabase::SD card present");

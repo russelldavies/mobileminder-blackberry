@@ -131,7 +131,7 @@ public class Driver extends UiApplication implements SystemListener2, FileSystem
     			// Wait for SD Card to be mounted
 				try {
 	    			//while (!sdCardMounted)	// sdCardMounted will be changed to true by Listener above
-					while(!Tools.hasSDCard())
+					while(!Tools.isSdPresent())
 					{
 						logWriter.log("Driver::Waiting on SD card to be mounted...");
 						Thread.sleep(1000*6);//6 seconds

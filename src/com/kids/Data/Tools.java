@@ -172,7 +172,7 @@ public class Tools extends ToolKit
      * checking if there is a match for "SDCard/"
      * @return bool sdCardPresent
      */
-    public static boolean hasSDCard()
+    public static boolean isSdPresent()
     {
     	boolean sdCardPresent = false;
     	String root = null;   // root will hold the alias of the storage root, ie store/, sdcard/

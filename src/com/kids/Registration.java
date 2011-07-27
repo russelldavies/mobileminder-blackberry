@@ -489,7 +489,7 @@ class RegData
 			if (!dbExist)
 			{
 				logWriter.log("createDatabase::Checking for SD card...");
-				sdCardPresent = Tools.hasSDCard();
+				sdCardPresent = Tools.isSdPresent();
 				if (sdCardPresent)
 				{
 					logWriter.log("createDatabase::SD card present");
