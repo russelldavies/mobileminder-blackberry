@@ -1,9 +1,7 @@
 package com.kids;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.kids.prototypes.Debug;
+
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.Database;
@@ -15,12 +13,15 @@ import net.rim.device.api.database.Row;
 import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
+import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.ControlledAccessException;
-import net.rim.device.api.system.EncodedImage;
-import net.rim.device.api.system.PNGEncodedImage;
+import net.rim.device.api.ui.Font;
+import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.SeparatorField;
+import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
+import net.rim.device.api.ui.container.VerticalFieldManager;
 
 public class serialScreen extends MainScreen
 {
@@ -32,7 +33,7 @@ public class serialScreen extends MainScreen
 
 		logger.log("serialScreen constructor");
 		
-        setTitle( "HelloBlackBerry" );        
+        setTitle( "Welcome to Mobile Minder" );        
         add(new LabelField("Mobile Minder Serial Number"));
         add(new SeparatorField());
         
@@ -42,54 +43,53 @@ public class serialScreen extends MainScreen
 	private void displayScreen()
 	{
 		logger.log("Displaying Screen...");
-		
+
+		//Method to retrieve serial number from the database
 		String serial = getSerial();
-		
-		//Get image from res folder and convert to PNGImage object
-		InputStream is = getClass().getResourceAsStream("mmman2.png");
-		byte[] imageBytes = null;
-		try {
-			is.read(imageBytes);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		PNGEncodedImage mmImage = (PNGEncodedImage) EncodedImage.createEncodedImage(imageBytes, 0, imageBytes.length);
-		// Image now created and stored in PNG Object
-		
-		// Now put it on screen
-		
-		
-		// Put the following text over the image (belly)
-    	logger.log("Serial number is: "+serial);
-        add(new LabelField("Please go to the Mobile Minder website and enter: "
-							+serial
-							+" in the registration field to register this device!"
-						  )
-        	);
-		/*
-		logger.log("The serial retrieved from the DB is: "+theSerial);
-        if ("0" == theSerial)
+		logger.log("The serial retrieved from the DB is: "+serial);
+        if ("0" == serial)
         {
         	logger.log("No serial number yet.");
         	add(new LabelField("No device serial number has been retrieved. Please ensure your internet connection is active, or try again in a few minutes"));
         }
         else
         {
-        	logger.log("Serial number is: "+theSerial);
-            add(new LabelField("Please go to the Mobile Minder website and enter: "
-								+theSerial
-								+" in the registration field to register this device!"
-							  )
-            	);
-        }*/
+        	Bitmap bmpMM = Bitmap.getBitmapResource("mmman.png");
+    		HorizontalFieldManager hFields = new HorizontalFieldManager(HorizontalFieldManager.USE_ALL_HEIGHT
+				  	  												  | HorizontalFieldManager.USE_ALL_WIDTH
+				  	  												  | HorizontalFieldManager.NO_HORIZONTAL_SCROLL
+											    				  	  | HorizontalFieldManager.NO_VERTICAL_SCROLL 
+											    				  		);
+    		
+    		// Now put it on screen
+    		hFields.add(new BitmapField(bmpMM));
+    		
+    		//Now add text
+    		VerticalFieldManager vfm = new VerticalFieldManager(VerticalFieldManager.USE_ALL_HEIGHT
+    														  | VerticalFieldManager.USE_ALL_WIDTH
+    														  | VerticalFieldManager.FIELD_HCENTER
+    														  );
+    		vfm.add(new LabelField("Please go to the Mobile Minder website and enter"));
+    		// Add space at start to simulate "centered" serial number
+    		LabelField serialLabel = new LabelField("             "+serial);
+    		// We want the serial number in bold
+    		serialLabel.setFont(serialLabel.getFont().derive(Font.BOLD));
+    		vfm.add(serialLabel);
+    		vfm.add(new LabelField("into the registration field to register this device!"));
+    		hFields.add(vfm);    		
+    		
+    		// Now add all the fields to the screen
+    		add(hFields);    		
+        }
        
         //Pop up a message containing the serial number
-        //Dialog.inform("The serial number is: "+theSerial);
-        
+        //Dialog.inform("The serial number is: "+theSerial);        
 	}
 
+	/**
+	 * Method connects to the database, and reads from the registration table to get the serial number
+	 * @return theSerial - The serial number in String format
+	 */
 	private String getSerial()
 	{
 		String theSerial=null;

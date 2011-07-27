@@ -22,7 +22,7 @@ public class CallSync extends Thread
 	private boolean 			finishedSync;
 	private Server 				server;
 	//private ContentResolver 	resolver;
-	private LocalDataReader 	localData;
+	//private LocalDataReader 	localData;
 	private int 				type = 11;
 	private Debug logger = Logger.getInstance();
 	private MMTools tools = Tools.getInstance();
@@ -42,7 +42,7 @@ public class CallSync extends Thread
 		finishedSync = false;
 		server 		 = _server;
 		//resolver 	 = _resolver;
-		localData 	 = _localData;
+		//localData 	 = _localData;
 	}
 	
 	/**
@@ -94,7 +94,7 @@ public class CallSync extends Thread
 				
 				
 				// If there is a newer call in the log, than the last one the server has...
-				if(lastServerTime < tools.getDate( String.valueOf(callSystemTime) ) )
+				if(lastServerTime < Long.parseLong(tools.getDate( callSystemTime ) ))
 				{
 					logger.log("CallSync::Found new call entry");
 					logger.log("CALL lastServerTime:"+lastServerTime+" < "+callSystemTime+"callSystemTime");

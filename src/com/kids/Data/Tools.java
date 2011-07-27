@@ -94,8 +94,7 @@ public class Tools extends ToolKit
 		{	
 			try
 			{
-			long returnTime = Long.parseLong(new SimpleDateFormat("yyMMddHHmmssZ").format(_date));//.parse(_date).getTime();
-			return returnTime;
+				return Long.parseLong(new SimpleDateFormat("yyMMddHHmmssZ").format(_date));
 			}
 			catch(NumberFormatException nfe)
 			{
