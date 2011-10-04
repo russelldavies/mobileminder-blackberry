@@ -1,0 +1,258 @@
+package com.kids.Data;
+
+import java.util.Date;
+import java.util.Random;
+import java.util.Vector;
+
+
+import com.kids.Logger;
+import com.kids.prototypes.Debug;
+import com.kids.prototypes.MMTools;
+
+public abstract class ToolKit implements MMTools
+{
+	//private static Date deviceStartTime;
+	public static final String RestElementSeparator = ",";
+	private Debug logger = Logger.getInstance();
+
+	public static int stopWatchTime;
+
+	/**
+	 * This method get the time in second from when the device booted.
+	 * @return an integer representing the up-time in seconds.
+	 */	
+	abstract public int getUptimeInSec();
+/**
+ * This method converts a safely converts a long integer into a standard integer	
+ * @param l long integer
+ * @return standard version
+ */
+	public int safeLongToInt(long l) 
+	{
+	    if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) 
+	    {
+	        throw new IllegalArgumentException
+	            (l + " cannot be cast to int without changing its value.");
+	    }
+	    return (int) l;
+	}
+	
+	
+
+	/**
+	 * Gets the correct format of date in specified format.
+	 * @param _date milliseconds since the epoch.
+	 * @return Date in milliseconds value in specified format.
+	 * @throws throws ParseException when input date format is not correct.
+	 */	
+	abstract public long getDate(String _date);
+	
+	/**
+	 * Gets the string format of date in specified format.
+	 * @param _date milliseconds since the epoch.
+	 * @return
+	 */
+	abstract public String getDate(long _date);
+
+	
+	/**
+	 * Gets the String format of date.
+	 * @return string which contains the date.
+	 */
+	public String getDate()
+	{
+		//return new SimpleDateFormat("HH:mm:ss dd-MM-yy").format(new Date());
+		//return new SimpleDateFormat("yyMMddHHmmssZ").format(new Date()).substring(0, 15);//the GTM return time zone in xxxx hours we only need xx
+		return getDate(new Date().getTime());
+	}
+	
+
+   public String calcHM(long timeInSeconds) {
+      //long hours, minutes, seconds;
+      timeInSeconds = timeInSeconds / 1000;
+      
+     /* hours = timeInSeconds / 3600;
+      //timeInSeconds = timeInSeconds - (hours * 3600);
+      minutes = (timeInSeconds % 3600) / 60;
+      //timeInSeconds = timeInSeconds - (minutes * 60);
+      seconds = (minutes % 60) / 60;
+      
+      String time = hours + ":" + minutes + ":"+seconds;
+      
+      return time;
+      */
+      return Long.toString(timeInSeconds);
+   }
+         
+	
+	/**
+	 * Converts a number which in string format to integer format.
+	 * @param _text a number which in string format.
+	 * @return a number which in integer format.
+	 */
+	public int txt2num(String _text)
+	{
+		try
+		{
+			return Integer.parseInt(_text.trim());
+		}
+		catch(NumberFormatException e)
+		{
+			logger.log("x::txt2num::NumberFormatException::"+e.getMessage());
+			//return -1;
+			return 0;
+		}/*
+		catch (Exception e)
+		{
+			logger.log("x::txt2num::Exception::"+e..getMessage());
+			//return -1;
+			return 0;			
+		}*/
+	}
+	/**
+	 * Checks the inputNumber to check whether it matches the number pattern.
+	 * @param _text a number.
+	 * @return boolean true if number matches with the pattern false otherwise.
+	 */
+	abstract public boolean isNumber(String _text);
+	
+	 /**
+	 * Return true if the argument string seems to be a
+	 * Hex data string, like "a0 13 2f ". Whitespace is
+	 * ignored.
+	 */
+	abstract public boolean isHex(String _sampleData); 
+	 
+	/**
+	 * This method formats a string into a hex string
+	 * 
+	 * @param b string
+	 * @return hex string
+	 */
+	 public String stringToHex(String s)
+	 {
+		 logger.log("In stringToHex: "+s);
+		char[] b;
+		b = s.toCharArray();
+	//s	s.getBytes();
+		 
+	    StringBuffer sb = new StringBuffer(b.length * 2);
+	    for (int i = 0; i < b.length; i++) 
+	    {	int v = b[i] & 0xff;
+	    	if (v < 16){	sb.append('0');}
+	    	sb.append(Integer.toHexString(v));
+	    }
+	    //TODO: This is for debug
+	    logger.log("stringToHex returning: "+sb.toString().toUpperCase());
+	    return sb.toString().toUpperCase();
+	 }
+	 
+		/**
+		 * Method to split string by given seperator
+		 * @param original - Original string to be split
+		 * @param separator - character you want string to be split by
+		 * @return result - String [] with String split into elements
+		 */
+		public static String[] split(String original,String separator) {
+		    Vector nodes = new Vector();
+		    // Parse nodes into vector
+		    int index = original.indexOf(separator);
+		    while(index >= 0) 
+			{
+		        nodes.addElement( original.substring(0, index) );
+		        original = original.substring(index+separator.length());
+		        index = original.indexOf(separator);
+		    }
+		    // Get the last node
+		    nodes.addElement( original );
+
+		     // Create split string array
+		    String[] result = new String[ nodes.size() ];
+		    if( nodes.size() > 0 )
+			{
+		        for(int loop = 0; loop < nodes.size(); loop++)
+		        {
+		            result[loop] = (String)nodes.elementAt(loop);
+		            System.out.println(result[loop]);
+		        }
+		    }
+		   return result;
+		}
+	
+	/**
+	 * This method formats a HEX string, adding a random HEX value to the start and end of the string
+	 * 
+	 * @param _input HEX string
+	 * @return hex string
+	 */
+	public String topAndTail(String _input)
+	{
+		logger.log("In topAndTail: "+_input);
+		Random rand = new Random();
+		int top = rand.nextInt(16);
+		int tail = rand.nextInt(16);
+		String hexTop = Integer.toHexString(top).toUpperCase();
+		String hexTail = Integer.toHexString(tail).toUpperCase();
+		//Top=======Hex_string=======tail
+		hexTop = hexTop.concat(_input).concat(hexTail);
+		//logger.log("topAndTail:returns:"+hexTop);
+		logger.log("");
+		return hexTop;
+	}
+	
+	/**
+	 * This method formats a HEX string, removing a random HEX value from the start and end of the string
+	 * 
+	 * @param _input HEX string
+	 * @return hex string
+	 */
+	public String reverseTopAndTail(String _input)
+	{
+		String returnString = _input.substring(1, (_input.length() - 1));
+		//logger.log("reversetopAndTail:returns:"+returnString);
+		return returnString;
+	}
+	
+	public int charOccurence(String _str, char _char)
+	{		
+		int numOfChars = 0;
+		
+		for(int count = _str.length() ; count >=0 ; count--)
+		{
+			if (_char == _str.charAt(count))
+				numOfChars++;
+		}
+		
+		/* ANDROID
+		for(char ch: _str.toCharArray()) 
+		{ 
+			if( ch == _char ) 
+			{ 
+				++numOfChars; 
+			} 
+		}
+		*/
+		
+		return numOfChars;
+		
+		/*
+		logger.log("charOccurence");
+		int lastIndex = 0;
+		int count =0;
+
+		if(_str != null && 0 < _str.length())
+		{
+			logger.log("looping..");
+			//check for separator occurrence
+			while(lastIndex != -1)
+			{
+					lastIndex = _str.indexOf(_char,lastIndex);
+						if( lastIndex != -1)
+						{	count ++;}
+			}
+		}
+		logger.log("returning");
+		return count;
+		*/
+	}
+}
