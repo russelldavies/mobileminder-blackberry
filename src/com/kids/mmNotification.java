@@ -41,7 +41,7 @@ public class mmNotification
 	{
 		logWriter.log("mmNotification constructor");
 		reg   		 = ApplicationIndicatorRegistry.getInstance();
-		image 		 = EncodedImage.getEncodedImageResource("Notification.png" );
+		image 		 = EncodedImage.getEncodedImageResource("icon.png" );
 		icon  		 = new ApplicationIcon( image );
 		iconValue    = 0;
 		setupIcon();
