@@ -151,4 +151,6 @@ public interface MMTools {
 	public String getDeviceManufacturer();
 
 	public String[] split(String strString, String strDelimiter);
+	
+	public boolean isConnected();
 }

@@ -1,12 +1,14 @@
 package com.mmtechco.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Enumeration;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
 import javax.microedition.io.DatagramConnection;
+import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
@@ -18,10 +20,15 @@ import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Store;
 import net.rim.device.api.i18n.SimpleDateFormat;
+import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpDateParser;
+import net.rim.device.api.io.transport.ConnectionDescriptor;
+import net.rim.device.api.io.transport.ConnectionFactory;
+import net.rim.device.api.io.transport.TransportInfo;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.Branding;
+import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.system.RadioInfo;
 
@@ -256,5 +263,51 @@ public class ToolsBB extends Tools {
 				cdmaConnection.close();
 			}
 		}
+	}
+	
+	public HttpConnection setupConnection(String url) throws IOException {
+		if (DeviceInfo.isSimulator()) {
+			// If running the MDS simulator append ";deviceside=false"
+			return (HttpConnection) Connector.open(url + ";deviceside=true",
+					Connector.READ_WRITE);
+		}
+		ConnectionFactory cf = new ConnectionFactory();
+		// Ordered list of preferred transports
+		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
+				TransportInfo.TRANSPORT_TCP_CELLULAR,
+				TransportInfo.TRANSPORT_WAP2, TransportInfo.TRANSPORT_WAP,
+				TransportInfo.TRANSPORT_MDS, TransportInfo.TRANSPORT_BIS_B };
+		cf.setPreferredTransportTypes(transportPrefs);
+		ConnectionDescriptor cd = cf.getConnection(url);
+		return (HttpConnection) cd.getConnection();
+	}
+	
+	/**
+	 * Checks if there is a valid internet connection.
+	 * 
+	 * @return true if connected.
+	 */
+	public boolean isConnected() {
+		String url = "http://www.msftncsi.com/ncsi.txt";
+		String expectedResponse = "Microsoft NCSI";
+		
+		logger.log(TAG, "Checking connectivity");
+		
+		try {
+			HttpConnection connection = setupConnection(url);
+			connection.setRequestMethod(HttpConnection.GET);
+
+			int status = connection.getResponseCode();
+			if (status == HttpConnection.HTTP_OK) {
+				InputStream input = connection.openInputStream();
+				byte[] reply = IOUtilities.streamToBytes(input);
+				input.close();
+				connection.close();
+				return expectedResponse.equals(reply);
+			}
+		} catch (Exception e) {
+			logger.log(TAG, "Connectivity test failed");
+		}
+		return false;
 	}
 }

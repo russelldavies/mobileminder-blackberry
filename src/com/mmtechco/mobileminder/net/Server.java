@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.Random;
 
-import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 
@@ -15,18 +14,13 @@ import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
-import net.rim.device.api.io.transport.ConnectionDescriptor;
-import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
-import net.rim.device.api.system.DeviceInfo;
-
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.CRC32;
-import com.mmtechco.util.Constants;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
@@ -86,12 +80,12 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 		int counter = -1;
 
 		while (actLog != null) {
-			if (isConnected()) {
+			if (tools.isConnected()) {
 				logger.log(TAG,
 						"Checking for new messages to send. Message queue length: "
 								+ actLog.length());
 				// Check is a message is in the local storage
-				while (actLog.length() > 0) {
+				while (actLog.length() > 0 && tools.isConnected()) {
 					try {
 						// Send the first message from the queue to the server
 						// and parse reply
@@ -166,9 +160,6 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * @return the server reply.
 	 */
 	public String get(String queryString) {
-		if (!isConnected()) {
-			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-		}
 		logger.log(TAG, "GET query string: " + queryString);
 		try {
 			HttpConnection connection = setupConnection(URL
@@ -207,7 +198,7 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * @return the server reply.
 	 */
 	private String post(String queryString, String crc, String pic) {
-		if (!isConnected()) {
+		if (!tools.isConnected()) {
 			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 		logger.log(TAG, "POST query string: " + queryString);
@@ -264,7 +255,7 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 */
 	private String postMultiPart(String queryString, FileConnection pic) {
 		// Don't start if no connection or there is no WiFi
-		if (!isConnected()
+		if (!tools.isConnected()
 				&& TransportInfo
 						.hasSufficientCoverage(TransportInfo.TRANSPORT_TCP_WIFI)) {
 			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
@@ -373,7 +364,6 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 				text += Tools.ServerQueryStringSeparator;
 			}
 		}
-
 		crc.update(text.getBytes());
 		logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
 		logger.log(TAG, "Client CRC: " + crc.getValue());
@@ -385,32 +375,8 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			return null;
 		}
 	}
-
-	/**
-	 * Checks if we have a valid internet connection on the device.
-	 * 
-	 * @return true if connected.
-	 */
-	private boolean isConnected() {
-		// TODO: implement
-		// return (TransportInfo.getCoverageStatus()).length > 0;
-		return true;
-	}
-
+	
 	private HttpConnection setupConnection(String url) throws IOException {
-		if (DeviceInfo.isSimulator()) {
-			// If running the MDS simulator append ";deviceside=false"
-			return (HttpConnection) Connector.open(url + ";deviceside=true",
-					Connector.READ_WRITE);
-		}
-		ConnectionFactory cf = new ConnectionFactory();
-		// Ordered list of preferred transports
-		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
-				TransportInfo.TRANSPORT_TCP_CELLULAR,
-				TransportInfo.TRANSPORT_WAP2, TransportInfo.TRANSPORT_WAP,
-				TransportInfo.TRANSPORT_MDS, TransportInfo.TRANSPORT_BIS_B };
-		cf.setPreferredTransportTypes(transportPrefs);
-		ConnectionDescriptor cd = cf.getConnection(url);
-		return (HttpConnection) cd.getConnection();
+		return ((ToolsBB) ToolsBB.getInstance()).setupConnection(url);
 	}
 }
