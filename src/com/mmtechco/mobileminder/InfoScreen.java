@@ -1,14 +1,14 @@
 package com.mmtechco.mobileminder;
 
+import java.io.IOException;
+
 import com.mmtechco.util.Constants;
 import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
-import net.rim.device.api.command.Command;
-import net.rim.device.api.command.CommandHandler;
-import net.rim.device.api.command.ReadOnlyCommandMetadata;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EncodedImage;
@@ -28,7 +28,6 @@ import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
-import net.rim.device.api.util.StringProvider;
 
 public class InfoScreen extends MainScreen implements MobileMinderResource {
 	private static final String TAG = "InfoScreen";
@@ -36,11 +35,11 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 
 	private static Logger logger = Logger.getInstance();
 
-	//private StatusThread statusThread = new StatusThread();
-	
+	// private StatusThread statusThread = new StatusThread();
+
 	// GUI widgets
-	private MenuItem helpMenuItem = new MenuItem(new StringProvider("help Me"), 0x10000, 0);
-	private LabelField regStatusLabel = new LabelField(r.getString(i18n_RegRequesting));
+	private LabelField regStatusLabel = new LabelField(
+			r.getString(i18n_RegRequesting));
 	private LabelField regIDLabel = new LabelField();
 	private ButtonField helpButton;
 
@@ -50,15 +49,43 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 	ApplicationIcon icon_unreg = new ApplicationIcon(
 			EncodedImage.getEncodedImageResource(Constants.icon_notify_unreg));
 	ApplicationIcon notifyIcon = icon_unreg;
-	
+
+	// Menu items
+	private MenuItem helpMenuItem = new MenuItem(r.getString(i18n_MenuHelp), 0,
+			0) {
+		public void run() {
+			// TODO: make modalless
+			Dialog.inform(r.getString(i18n_HelpSending));
+			(new Thread() {
+				boolean sendStatus = false;
+				public void run() {
+					// TODO: implement location part
+					String[] emergNums = Registration.getEmergNums();
+					for (int i = 0; i < emergNums.length; i++) {
+						try {
+							((ToolsBB)ToolsBB.getInstance()).sendSMS(emergNums[i], "help me");
+							sendStatus = true;
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if (sendStatus) {
+						Dialog.inform(r.getString(i18n_HelpSent));
+					}
+					
+				}
+			}).start();
+			
+		}
+	};
 
 	public InfoScreen() {
 		// Allow elements to scroll off screen
 		super(MainScreen.VERTICAL_SCROLL | MainScreen.VERTICAL_SCROLLBAR);
-		
+
 		// Start helper thread
-		//statusThread.start();
-		
+		// statusThread.start();
 
 		// General layout manager
 		VerticalFieldManager vfm = new VerticalFieldManager(
@@ -74,14 +101,15 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 				HorizontalFieldManager.USE_ALL_WIDTH);
 		info_hfm.add(new BitmapField(Bitmap.getBitmapResource("icon_large.png")));
 		info_hfm.add(new LabelField(r.getString(i18n_Description)));
-        helpButton = new ButtonField("Help Me!", ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
-        helpButton.setChangeListener(new FieldChangeListener() {
-            public void fieldChanged(Field field, int context) {
-            	// TODO: implement
-                Dialog.inform("sending help");
-            }
-        });
-        info_hfm.add(helpButton);
+		helpButton = new ButtonField("Help Me!", ButtonField.FIELD_HCENTER
+				| ButtonField.CONSUME_CLICK);
+		helpButton.setChangeListener(new FieldChangeListener() {
+			public void fieldChanged(Field field, int context) {
+				// TODO: implement
+				Dialog.inform("sending help");
+			}
+		});
+		info_hfm.add(helpButton);
 		info_hfm.setPadding(20, 0, 0, 0);
 		vfm.add(info_hfm);
 
@@ -97,33 +125,25 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 
 		vfm.add(new SeparatorField());
 
-
 		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
 		add(vfm);
 	}
-	
+
 	public boolean onClose() {
 		UiApplication.getUiApplication().requestBackground();
 		return true;
 	}
-	
+
 	public void setRegStatus(String text) {
 		regStatusLabel.setText(text);
 	}
-	
+
 	public void setRegID(String text) {
 		regIDLabel.setText(text);
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
-		helpMenuItem.setCommand(new Command(new CommandHandler() {
-			public void execute(ReadOnlyCommandMetadata metadata, Object context) {
-				// TODO: send sos
-				Dialog.inform(r.getString(i18n_HelpSending));
-			}
-		}));
-
 		menu.add(helpMenuItem);
 		super.makeMenu(menu, instance);
 	}
@@ -170,8 +190,8 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 			logger.log(TAG, "Could not update notification icon");
 		}
 	}
-	
-	//private void updateContent(LabelField labelfield, final String text) {
+
+	// private void updateContent(LabelField labelfield, final String text) {
 	private void updateContent() {
 		UiApplication.getUiApplication().invokeLater(new Runnable() {
 			public void run() {
@@ -179,21 +199,11 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 			}
 		});
 	}
-	
+
 	/*
-	private class StatusThread extends Thread {
-		public void run() {
-			for (;;) {
-				//updateContent(new Date().toString());
-				updateContent();
-				try {
-					sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	*/
+	 * private class StatusThread extends Thread { public void run() { for (;;)
+	 * { //updateContent(new Date().toString()); updateContent(); try {
+	 * sleep(1000); } catch (InterruptedException e) { // TODO Auto-generated
+	 * catch block e.printStackTrace(); } } } }
+	 */
 }

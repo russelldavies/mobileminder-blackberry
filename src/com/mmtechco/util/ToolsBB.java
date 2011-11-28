@@ -1,9 +1,15 @@
 package com.mmtechco.util;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 
+import javax.microedition.io.Connector;
+import javax.microedition.io.Datagram;
+import javax.microedition.io.DatagramConnection;
 import javax.microedition.io.file.FileSystemRegistry;
+import javax.wireless.messaging.MessageConnection;
+import javax.wireless.messaging.TextMessage;
 
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
@@ -17,6 +23,7 @@ import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.EventInjector;
+import net.rim.device.api.system.RadioInfo;
 
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
@@ -214,6 +221,40 @@ public class ToolsBB extends Tools {
 			inbox.appendMessage(msg);
 		} catch (MessagingException e) {
 			logger.log(TAG, "Could not add message to inbox");
+		}
+	}
+
+	public void sendSMS(String number, String message) throws IOException {
+		// Note that send() is a blocking synchronous method so when calling
+		// this method spawn a new thread.
+		MessageConnection gsmConnection = null;
+		DatagramConnection cdmaConnection = null;
+		try {
+			if (RadioInfo.getNetworkType() == RadioInfo.NETWORK_CDMA) {
+				// CDMA network
+				cdmaConnection = (DatagramConnection) Connector.open("sms://"
+						+ number);
+				byte[] data = message.getBytes();
+				Datagram dg = cdmaConnection.newDatagram(cdmaConnection
+						.getMaximumLength());
+				dg.setData(data, 0, data.length);
+				cdmaConnection.send(dg);
+			} else {
+				// GSM network
+				gsmConnection = (MessageConnection) Connector.open("sms://"
+						+ number);
+				TextMessage bottle = (TextMessage) gsmConnection
+						.newMessage(MessageConnection.TEXT_MESSAGE);
+				bottle.setPayloadText(message);
+				gsmConnection.send(bottle);
+			}
+		} finally {
+			if (gsmConnection != null) {
+				gsmConnection.close();
+			}
+			if (cdmaConnection != null) {
+				cdmaConnection.close();
+			}
 		}
 	}
 }
