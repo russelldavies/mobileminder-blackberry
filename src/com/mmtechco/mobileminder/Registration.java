@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import net.rim.blackberry.api.phone.Phone;
+import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
@@ -25,8 +26,9 @@ import com.mmtechco.util.ToolsBB;
 /**
  * Checks the registration stage that currently the device is in.
  */
-public class Registration extends Thread implements Controllable {
+public class Registration extends Thread implements Controllable, MobileMinderResource {
 	private static final String TAG = "Registration";
+	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	public static String KEY_STAGE = "registration_stage";
 	public static String KEY_ID = "registration_id";
@@ -103,7 +105,7 @@ public class Registration extends Thread implements Controllable {
 		for (int tries = 0; Phone.getDevicePhoneNumber(false).equals("UNKNOWN NUMBER") && tries < 10; tries++) {
 			logger.log(TAG, "Waiting for phone number");
 			// set the registration notification text
-			switchStage(0, Constants.strNoSim);
+			switchStage(0, r.getString(i18n_ErrorNoSim));
 			try {
 				Thread.sleep(sleepTimeShort);
 			} catch (InterruptedException e) {
@@ -205,18 +207,18 @@ public class Registration extends Thread implements Controllable {
 
 		switch (inputStage) {
 		case 0: // New install
-			stateText = Constants.strRequestSN;
+			stateText = r.getString(i18n_RegRequesting);
 			break;
 		case 1:// New & has SN
-			stateText = Constants.strRegNotActivated;
-			tools.addMsgToInbox(Constants.strWelcomeMsg);
+			stateText = r.getString(i18n_RegNotActivated);
+			tools.addMsgToInbox(r.getString(i18n_WelcomeMsg));
 			break;
 		case 2: // Wed Reg
-			stateText = Constants.strRegTrial;
+			stateText = r.getString(i18n_RegTrial);
 			registered = true;
 			break;
 		case 3: // Device Reg
-			stateText = Constants.strRegActive;
+			stateText = r.getString(i18n_RegActive);
 			registered = true;
 			break;
 		}

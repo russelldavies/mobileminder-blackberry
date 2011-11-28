@@ -1,0 +1,20 @@
+package com.mmtechco.mobileminder;
+
+i18n_Description#0=0;
+i18n_AppName#0=1;
+i18n_Starting#0=2;
+i18n_RegRequesting#0=3;
+i18n_RegNotActivated#0=4;
+i18n_RegTrial#0=5;
+i18n_RegActive#0=6;
+i18n_Reg#0=7;
+i18n_ErrorServer#0=8;
+i18n_ErrorCorruptedMsg#0=9;
+i18n_WelcomeMsg#0=10;
+i18n_Uninstall#0=11;
+i18n_LearnMore#0=12;
+i18n_ErrorNoSim#0=13;
+i18n_MenuHelp#0=14;
+i18n_HelpSending#0=15;
+i18n_HelpSent#0=16;
+i18n_WaitMsg#0=17;

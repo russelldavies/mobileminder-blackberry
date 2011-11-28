@@ -12,6 +12,7 @@ import javax.microedition.io.file.FileConnection;
 
 import net.rim.blackberry.api.browser.MultipartPostData;
 import net.rim.blackberry.api.browser.URLEncodedPostData;
+import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.io.transport.ConnectionDescriptor;
@@ -19,6 +20,7 @@ import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
 import net.rim.device.api.system.DeviceInfo;
 
+import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
@@ -33,8 +35,9 @@ import com.mmtechco.util.ToolsBB;
  * Monitors for new actions stored in the local storage for recording actions
  * and sends them to the web server at specific intervals.
  */
-public class Server extends Thread implements MMServer {
+public class Server extends Thread implements MMServer, MobileMinderResource {
 	private static final String TAG = "Server";
+	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
@@ -164,7 +167,7 @@ public class Server extends Thread implements MMServer {
 	 */
 	public String get(String queryString) {
 		if (!isConnected()) {
-			return serverErrorReply + Constants.strErrorCorruptedMsg;
+			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 		logger.log(TAG, "GET query string: " + queryString);
 		try {
@@ -181,12 +184,12 @@ public class Server extends Thread implements MMServer {
 				connection.close();
 				return processReply(new String(reply));
 			} else {
-				return serverErrorReply + Constants.strErrorCorruptedMsg;
+				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(TAG, e.toString());
-			return serverErrorReply + Constants.strErrorSvrTimeout;
+			return serverErrorReply + r.getString(i18n_ErrorServer);
 		}
 	}
 
@@ -205,7 +208,7 @@ public class Server extends Thread implements MMServer {
 	 */
 	private String post(String queryString, String crc, String pic) {
 		if (!isConnected()) {
-			return serverErrorReply + Constants.strErrorCorruptedMsg;
+			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 		logger.log(TAG, "POST query string: " + queryString);
 		try {
@@ -239,12 +242,12 @@ public class Server extends Thread implements MMServer {
 				connection.close();
 				return processReply(new String(reply));
 			} else {
-				return serverErrorReply + Constants.strErrorCorruptedMsg;
+				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(TAG, e.toString());
-			return serverErrorReply + Constants.strErrorSvrTimeout;
+			return serverErrorReply + r.getString(i18n_ErrorServer);
 		}
 	}
 
@@ -264,7 +267,7 @@ public class Server extends Thread implements MMServer {
 		if (!isConnected()
 				&& TransportInfo
 						.hasSufficientCoverage(TransportInfo.TRANSPORT_TCP_WIFI)) {
-			return serverErrorReply + Constants.strErrorCorruptedMsg;
+			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 		logger.log(TAG, "POST multipart query string: " + queryString);
 		try {
@@ -296,12 +299,12 @@ public class Server extends Thread implements MMServer {
 				connection.close();
 				return processReply(new String(reply));
 			} else {
-				return serverErrorReply + Constants.strErrorCorruptedMsg;
+				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(TAG, e.toString());
-			return serverErrorReply + Constants.strErrorSvrTimeout;
+			return serverErrorReply + r.getString(i18n_ErrorServer);
 		}
 	}
 
@@ -316,7 +319,7 @@ public class Server extends Thread implements MMServer {
 		if (reply != null && tools.isHex(reply)) {
 			return decrypt(reply);
 		} else {
-			return serverErrorReply + Constants.strErrorCorruptedMsg;
+			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 	}
 

@@ -9,6 +9,7 @@ import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.device.api.command.Command;
 import net.rim.device.api.command.CommandHandler;
 import net.rim.device.api.command.ReadOnlyCommandMetadata;
+import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Color;
@@ -29,17 +30,17 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
 import net.rim.device.api.util.StringProvider;
 
-public class InfoScreen extends MainScreen {
+public class InfoScreen extends MainScreen implements MobileMinderResource {
 	private static final String TAG = "InfoScreen";
+	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	private static Logger logger = Logger.getInstance();
 
 	//private StatusThread statusThread = new StatusThread();
 	
 	// GUI widgets
-	private MenuItem helpMenuItem = new MenuItem(new StringProvider(
-			Constants.strHelp), 0x10000, 0);
-	private LabelField regStatusLabel = new LabelField(Constants.strRequestSN);
+	private MenuItem helpMenuItem = new MenuItem(new StringProvider("help Me"), 0x10000, 0);
+	private LabelField regStatusLabel = new LabelField(r.getString(i18n_RegRequesting));
 	private LabelField regIDLabel = new LabelField();
 	private ButtonField helpButton;
 
@@ -72,7 +73,7 @@ public class InfoScreen extends MainScreen {
 		HorizontalFieldManager info_hfm = new HorizontalFieldManager(
 				HorizontalFieldManager.USE_ALL_WIDTH);
 		info_hfm.add(new BitmapField(Bitmap.getBitmapResource("icon_large.png")));
-		info_hfm.add(new LabelField(Constants.strDescription));
+		info_hfm.add(new LabelField(r.getString(i18n_Description)));
         helpButton = new ButtonField("Help Me!", ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
         helpButton.setChangeListener(new FieldChangeListener() {
             public void fieldChanged(Field field, int context) {
@@ -102,6 +103,11 @@ public class InfoScreen extends MainScreen {
 		add(vfm);
 	}
 	
+	public boolean onClose() {
+		UiApplication.getUiApplication().requestBackground();
+		return true;
+	}
+	
 	public void setRegStatus(String text) {
 		regStatusLabel.setText(text);
 	}
@@ -114,7 +120,7 @@ public class InfoScreen extends MainScreen {
 		helpMenuItem.setCommand(new Command(new CommandHandler() {
 			public void execute(ReadOnlyCommandMetadata metadata, Object context) {
 				// TODO: send sos
-				Dialog.inform(Constants.strHelpSend);
+				Dialog.inform(r.getString(i18n_HelpSending));
 			}
 		}));
 
