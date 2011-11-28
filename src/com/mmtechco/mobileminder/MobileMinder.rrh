@@ -18,3 +18,5 @@ i18n_MenuHelp#0=14;
 i18n_HelpSending#0=15;
 i18n_HelpSent#0=16;
 i18n_WaitMsg#0=17;
+i18n_SMSError#0=18;
+i18n_SMSSuccess#0=19;
