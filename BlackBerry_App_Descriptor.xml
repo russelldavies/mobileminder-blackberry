@@ -20,10 +20,8 @@
     <PackageProtection/>
   </HiddenProperties>
   <AlternateEntryPoints>
-    <AlternateEntryPoint Title="MobileMinder_autostartup" MainMIDletName="" ArgumentsForMain="autostartup" HomeScreenPosition="0" StartupTier="7" IsSystemModule="false" IsAutostartup="false" hasTitleResource="false" TitleResourceBundleKey="" TitleResourceBundleName="" TitleResourceBundleClassName="" TitleResourceBundleRelativePath="">
-      <Icons>
-        <Icon CanonicalFileName="res/img/notify_unreg.png" IsFocus="false"/>
-      </Icons>
+    <AlternateEntryPoint Title="MobileMinder_autostartup" MainMIDletName="" ArgumentsForMain="autostartup" HomeScreenPosition="0" StartupTier="7" IsSystemModule="true" IsAutostartup="true" hasTitleResource="false" TitleResourceBundleKey="" TitleResourceBundleName="" TitleResourceBundleClassName="" TitleResourceBundleRelativePath="">
+      <Icons/>
       <KeywordResources KeywordResourceBundleName="" KeywordResourceBundleRelativePath="" KeywordResourceBundleClassName="" KeywordResourceBundleKey=""/>
     </AlternateEntryPoint>
   </AlternateEntryPoints>
