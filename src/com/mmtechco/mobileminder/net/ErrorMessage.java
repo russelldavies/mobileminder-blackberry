@@ -26,12 +26,6 @@ public class ErrorMessage implements Message {
 		clearData();
 	}
 
-	/**
-	 * initialises all the message parameters
-	 * 
-	 * @param inputE
-	 *            An exception
-	 */
 	public ErrorMessage(Exception inputE) {
 		clearData();
 		setMessage(inputE);
@@ -104,20 +98,23 @@ public class ErrorMessage implements Message {
 	 */
 	public String getREST() {
 		return
-				Registration.getRegID() +
-				Tools.ServerQueryStringSeparator + 
-				"0" +
-				type + 
-				Tools.ServerQueryStringSeparator + 
-				errorClass +
-				Tools.ServerQueryStringSeparator +
-				errorPackage +
-				Tools.ServerQueryStringSeparator +
-				errorLineNumber +
-				Tools.ServerQueryStringSeparator +
-				errorType +
-				Tools.ServerQueryStringSeparator +
-				deviceUpTime;
+			Registration.getRegID() +
+			Tools.ServerQueryStringSeparator + 
+			"0" +
+			type + 
+			Tools.ServerQueryStringSeparator + 
+			tools.getDate()+
+			Tools.ServerQueryStringSeparator + 
+			Tools.ServerQueryStringSeparator + 
+			errorClass +
+			Tools.ServerQueryStringSeparator +
+			errorPackage +
+			Tools.ServerQueryStringSeparator +
+			errorLineNumber +
+			Tools.ServerQueryStringSeparator +
+			errorType +
+			Tools.ServerQueryStringSeparator +
+			deviceUpTime;
 	}
 
 	/**
