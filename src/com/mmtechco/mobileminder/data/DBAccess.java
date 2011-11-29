@@ -16,8 +16,8 @@ import net.rim.device.api.io.URI;
 import net.rim.device.api.system.ControlledAccessException;
 
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 public abstract class DBAccess {
 	private static final String TAG = "DBAcccess";
@@ -79,12 +79,8 @@ public abstract class DBAccess {
 	 *         initialization call).
 	 */
 	public DBAccess open() {
-		/*
-		 * dbHelper = new DatabaseHelper(context); db =
-		 * dbHelper.getWritableDatabase(); return this;
-		 */
-
 		// Only one instance of storeDB desired
+		int opentries = 0;
 		if (db == null) {
 			try {
 				URI dbURI = URI.create(dbLocation);
@@ -106,7 +102,7 @@ public abstract class DBAccess {
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
-				for (int i = 0; i < 5; i++) {
+				for (; opentries < 5; opentries++) {
 					open();
 				}
 			} catch (ControlledAccessException e) {

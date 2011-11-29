@@ -1,4 +1,4 @@
-package com.mmtechco.util;
+package com.mmtechco.mobileminder.util;
 
 import java.util.Date;
 import java.util.Random;

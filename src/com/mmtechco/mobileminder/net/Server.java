@@ -20,10 +20,10 @@ import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.CRC32;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.CRC32;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Monitors for new actions stored in the local storage for recording actions

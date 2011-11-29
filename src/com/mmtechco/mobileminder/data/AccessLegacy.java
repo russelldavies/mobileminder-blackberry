@@ -2,8 +2,8 @@ package com.mmtechco.mobileminder.data;
 
 import java.util.Vector;
 
-import com.mmtechco.util.Constants;
-import com.mmtechco.util.Logger;
+import com.mmtechco.mobileminder.util.Constants;
+import com.mmtechco.mobileminder.util.Logger;
 
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;

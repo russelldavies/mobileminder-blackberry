@@ -2,7 +2,7 @@ package com.mmtechco.mobileminder;
 
 import com.mmtechco.mobileminder.data.DBAccess;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.SystemListener2;

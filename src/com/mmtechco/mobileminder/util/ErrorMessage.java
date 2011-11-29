@@ -1,10 +1,8 @@
-package com.mmtechco.mobileminder.net;
+package com.mmtechco.mobileminder.util;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
 
 public class ErrorMessage implements Message {
 	private static final String TAG = "ErrorMessage";

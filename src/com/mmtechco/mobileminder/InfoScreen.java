@@ -2,9 +2,9 @@ package com.mmtechco.mobileminder;
 
 import java.io.IOException;
 
-import com.mmtechco.util.Constants;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.Constants;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;

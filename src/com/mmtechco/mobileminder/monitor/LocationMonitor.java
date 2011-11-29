@@ -15,8 +15,8 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.Tools;
 
 /**
  * Monitors and registers location based events.

@@ -1,16 +1,16 @@
 package com.mmtechco.mobileminder.control;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.ErrorMessage;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Responsible for contacting the server and getting responses. It is also

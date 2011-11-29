@@ -2,10 +2,10 @@ package com.mmtechco.mobileminder.net;
 
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.MMLinkedList;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.MMLinkedList;
+import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Transforms the data into easier accessible form.

@@ -1,4 +1,4 @@
-package com.mmtechco.util;
+package com.mmtechco.mobileminder.util;
 
 public class Constants {
 	public static final String APP_NAME = "MobileMinder";

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.mmtechco.mobileminder.prototypes.FileDataWriter;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 public class DBFactory {
 	private static final int sdkLegacy = 4; // SQLite part of 5 and above.

@@ -9,7 +9,7 @@ import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.sync.CallSync;
-import com.mmtechco.util.Logger;
+import com.mmtechco.mobileminder.util.Logger;
 
 /**
  * Initializes event listeners for the system and starts server and

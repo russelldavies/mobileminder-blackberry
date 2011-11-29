@@ -1,4 +1,4 @@
-package com.mmtechco.util;
+package com.mmtechco.mobileminder.util;
 
 public class MMLinkedListIterator
 {

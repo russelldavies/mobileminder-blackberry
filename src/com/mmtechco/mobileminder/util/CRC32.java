@@ -1,4 +1,4 @@
-package com.mmtechco.util;
+package com.mmtechco.mobileminder.util;
 
 /* CRC32.java - Computes CRC32 data checksum of a data stream
  Copyright (C) 1999. 2000, 2001 Free Software Foundation, Inc.

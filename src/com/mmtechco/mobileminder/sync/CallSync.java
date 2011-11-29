@@ -6,9 +6,9 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.blackberry.api.phone.phonelogs.CallLog;
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLog;

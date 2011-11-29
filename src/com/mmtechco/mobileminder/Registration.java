@@ -11,17 +11,17 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.ui.UiApplication;
 
 import com.mmtechco.mobileminder.data.DBFactory;
-import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
-import com.mmtechco.util.Constants;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.util.Constants;
+import com.mmtechco.mobileminder.util.ErrorMessage;
+import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Checks the registration stage that currently the device is in.
