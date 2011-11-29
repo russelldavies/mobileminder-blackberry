@@ -8,10 +8,8 @@ import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
 
 /**
  * Initializes event listeners for the system and starts server and
@@ -23,7 +21,6 @@ public class Controller implements Runnable {
 
 	private LocalDataWriter actLog;
 	private Registration reg;
-	private MMTools tools = ToolsBB.getInstance();
 	private Logger logger = Logger.getInstance();
 	
 	// Timer values
@@ -65,7 +62,7 @@ public class Controller implements Runnable {
 		components[0] = new SMSMonitor(actLog);
 		components[1] = new CallMonitor(actLog);
 		components[2] = new ContactPic(actLog);
-		new Commander(actLog, this, components).start();
+		new Commander(actLog, components).start();
 		
 		// Monitor activity log
 		new Server(actLog).start();
