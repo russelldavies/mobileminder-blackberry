@@ -1,13 +1,11 @@
 package com.mmtechco.mobileminder.control;
 
-import com.mmtechco.mobileminder.Controller;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.LocalDataAccess;
 import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.Logger;
@@ -15,91 +13,81 @@ import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
- * Responsible for contacting server and getting response from server. It is
- * also responsible for processing response.
+ * Responsible for contacting the server and getting responses. It is also
+ * responsible for processing responses.
  */
 public class Commander extends Thread {
 	private static final String TAG = "Commander";
-	
-	private Server myServer;
+
+	private Server server;
 	private Controllable componentList[];
 	private final int time;
-	private LocalDataWriter actLog;
+	private LocalDataAccess actLog;
 	private final int commandSignal = 0;
 	private Logger logger = Logger.getInstance();
+	private MMTools tools = ToolsBB.getInstance();
 
 	/**
 	 * Used by Controller to initialises the {@link LocalDataAccess} object and
 	 * {@link Controllable} objects.
 	 */
-	public Commander(LocalDataWriter actlog,
-			Controller controller, Controllable[] components) {
-		myServer = new Server(actlog);
-		// myServer.start();
-		time = 1000 * 60 * 5;
-		componentList = components;
+	public Commander(LocalDataAccess actlog,
+			Controllable[] components) {
 		this.actLog = actlog;
+		server = new Server(actlog);
+		time = 1000 * 60 * 5; // 5mins
+		componentList = components;
 	}
 
 	/**
-	 * Contacts to server and gets reply from server. If reply is process-able
-	 * then process it.
+	 * Contacts to server and gets reply from server. Process reply if valid.
 	 */
 	public void run() {
 		while (true) {
 			boolean commandQueued = true;
-			while (commandQueued) {
+			while (commandQueued && tools.isConnected()) {
 				CommandMessage commandMessageFirst = new CommandMessage();
 				commandMessageFirst.setMessage(commandSignal);
-				Reply myReply = myServer.contactServer(commandMessageFirst);
-				logger.log(TAG, "COM Index:" + myReply.getIndex());
 
-				// 0 if tasks
-				if (commandSignal == myReply.getIndex() || myReply.isError()) {
+				// Sample reply. Enable for debugging:
+				// Reply reply = new
+				// Reply("12349,0,32,FILES,FILE_DEL_/sdcard/download/images.jpeg");
+				Reply reply = server.contactServer(commandMessageFirst);
+				logger.log(TAG, "Reply Index:" + reply.getIndex());
+
+				// No more commands to process
+				if (commandSignal == reply.getIndex() || reply.isError()) {
 					commandQueued = false;
 					logger.log(TAG, "No Commands to Process");
 					break;
 				} else {
 					CommandMessage commandMessage = new CommandMessage();
-
 					for (int count = 0; count < componentList.length; count++) {
 						Controllable aTarget = componentList[count];
-
-						if (aTarget.isTarget(myReply.getTarget())) {
+						if (aTarget.isTarget(reply.getTarget())) {
 							commandMessage.setStartTime();
-							if (aTarget.processCommand(myReply.getArgs())) { // ran
-																				// fine
-																				// :)
-
-								logger.log(TAG, "Sending Command Reply=ran fine} index:"
-										+ myReply.getIndex());
-
+							if (aTarget.processCommand(reply.getArgs())) {
+								// Ran fine
 								commandMessage.setEndTime();
-								commandMessage.setMessage(myReply.getIndex(),
+								commandMessage.setMessage(reply.getIndex(),
 										true);
-
-								logger.log(TAG, "Sending Command Reply Message:index="
-										+ myReply.getIndex()
-										+ " REST:"
-										+ commandMessage.getREST());
-
-								logger.log(TAG, "Commander Sending... "
-										+ commandMessage.getREST());
-
-								myServer.contactServer(commandMessage);
-							} else { // No joy :(
-
-								logger.log(TAG, "Sending Command Reply=no joy} index:"
-										+ myReply.getIndex());
-
+								logger.log(TAG,
+										"Ran fine. Sending Command Reply Message: Index="
+												+ reply.getIndex() + " REST:"
+												+ commandMessage.getREST());
+								server.contactServer(commandMessage);
+							} else {
+								logger.log(TAG,
+										"No joy. Sending Command Reply. Index:"
+												+ reply.getIndex());
 								commandMessage.setEndTime();
-								commandMessage.setMessage(myReply.getIndex(),
+								commandMessage.setMessage(reply.getIndex(),
 										false);
-								myServer.contactServer(commandMessage);
+								server.contactServer(commandMessage);
 							}
-
-							logger.log(TAG, "Out of command reply= clearing data} index:"
-									+ myReply.getIndex());
+							logger.log(TAG,
+									"Out of command reply= clearing data. Index:"
+											+ reply.getIndex());
 							commandMessage.clearData();
 						}
 					}
@@ -171,7 +159,6 @@ public class Commander extends Thread {
 		 * @return type of the command message
 		 */
 		public int getType() {
-			// TODO Auto-generated method stub
 			return type;
 		}
 
@@ -197,18 +184,11 @@ public class Commander extends Thread {
 		 * @return a single string containing the entire message.
 		 */
 		public String getREST() {
-			return
-					Registration.getRegID() +
-					Tools.ServerQueryStringSeparator +
-					"0" + type +
-					Tools.ServerQueryStringSeparator +
-					index +
-					Tools.ServerQueryStringSeparator +
-					(completed ? 1 : 0) +
-					Tools.ServerQueryStringSeparator +
-					startTime +
-					Tools.ServerQueryStringSeparator +
-					endTime;
+			return Registration.getRegID() + Tools.ServerQueryStringSeparator
+					+ "0" + type + Tools.ServerQueryStringSeparator + index
+					+ Tools.ServerQueryStringSeparator + (completed ? 1 : 0)
+					+ Tools.ServerQueryStringSeparator + startTime
+					+ Tools.ServerQueryStringSeparator + endTime;
 		}
 
 		/**
