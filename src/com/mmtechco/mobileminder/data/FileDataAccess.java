@@ -7,13 +7,14 @@ import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.DatabaseException;
 
 import com.mmtechco.mobileminder.prototypes.FileDataWriter;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * This class creates a table in the local database which stores all the
  * information about the file system which will be updated on the server.
  */
 public class FileDataAccess extends DBAccess implements FileDataWriter {
-	private static final String TAG = "FileDataAccess";
+	private static final String TAG = ToolsBB.getSimpleClassName(FileDataAccess.class);
 
 	// Database table
 	protected static final String DATABASE_TABLE = "filesystem";

@@ -11,7 +11,7 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * Transforms the data into easier accessible form.
  */
 public class Reply {
-	private static final String TAG = "Reply";
+	private static final String TAG = ToolsBB.getSimpleClassName(Reply.class);
 	
 	private static final MMTools tools = ToolsBB.getInstance();
 	

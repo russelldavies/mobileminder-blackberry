@@ -4,12 +4,13 @@ import java.util.Vector;
 
 import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 
 public abstract class AccessLegacy {
-	private static final String TAG = "AccessLegacy";
+	private static final String TAG = ToolsBB.getSimpleClassName(AccessLegacy.class);
 	
 	protected static Logger logger = Logger.getInstance();
 	

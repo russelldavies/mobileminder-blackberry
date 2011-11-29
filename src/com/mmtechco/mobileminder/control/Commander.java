@@ -17,7 +17,7 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * responsible for processing responses.
  */
 public class Commander extends Thread {
-	private static final String TAG = "Commander";
+	private static final String TAG = ToolsBB.getSimpleClassName(Commander.class);
 
 	private Server server;
 	private Controllable componentList[];

@@ -5,6 +5,7 @@ import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
@@ -21,7 +22,7 @@ import net.rim.device.api.servicebook.ServiceBook;
 import net.rim.device.api.servicebook.ServiceRecord;
 
 public class MailMonitor implements FolderListener, StoreListener {
-	private static final String TAG = "MailMonitor";
+	private static final String TAG = ToolsBB.getSimpleClassName(MailMonitor.class);
 	
 	private LocalDataWriter actLog;
 			MailMessage 	messageObject;

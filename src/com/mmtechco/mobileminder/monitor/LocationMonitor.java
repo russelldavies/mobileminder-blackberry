@@ -17,12 +17,13 @@ import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Monitors and registers location based events.
  */
 public class LocationMonitor extends Thread implements LocationListener {
-	private static final String TAG = "LocationMonitor";
+	private static final String TAG = ToolsBB.getSimpleClassName(LocationMonitor.class);
 	
 	private LocalDataWriter actLog;
 	private int 			timer;

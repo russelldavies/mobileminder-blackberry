@@ -10,7 +10,7 @@ import com.mmtechco.mobileminder.prototypes.MMTools;
  * 
  */
 public abstract class Tools implements MMTools {
-	protected static final String TAG = "Tools";
+	protected static final String TAG = ToolsBB.getSimpleClassName(Tools.class);
 	
 	public static final String ServerQueryStringSeparator = ",";
 	protected Logger logger = Logger.getInstance();

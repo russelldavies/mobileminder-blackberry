@@ -26,7 +26,7 @@ import net.rim.device.api.system.EncodedImage;
  * specified phone number that is sent in a command.
  */
 public class ContactPic implements Controllable {
-	public static final String TAG = "ContactPic";
+	public static final String TAG = ToolsBB.getSimpleClassName(ContactPic.class);
 
 	private Server server;
 	private MMTools tools = ToolsBB.getInstance();

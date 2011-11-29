@@ -5,7 +5,7 @@ import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 
 public class ErrorMessage implements Message {
-	private static final String TAG = "ErrorMessage";
+	private static final String TAG = ToolsBB.getSimpleClassName(ErrorMessage.class);
 	
 	private final int type = 7;
 	private MMTools tools = ToolsBB.getInstance();

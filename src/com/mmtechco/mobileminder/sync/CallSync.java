@@ -19,7 +19,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
  * Sync the call data to the server.
  */
 public class CallSync extends Thread {
-	private static final String TAG = "CallSync";
+	private static final String TAG = ToolsBB.getSimpleClassName(CallSync.class);
 
 	private boolean finishedSync;
 	private Server server;

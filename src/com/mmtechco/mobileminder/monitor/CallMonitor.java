@@ -24,7 +24,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
  */
 
 public class CallMonitor extends AbstractPhoneListener implements Controllable {
-	private static final String TAG = "CallMonitor";
+	private static final String TAG = ToolsBB.getSimpleClassName(CallMonitor.class);
 
 	private LocalDataWriter actLog;
 	// private final String Connected = "Connected";

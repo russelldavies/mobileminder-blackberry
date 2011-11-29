@@ -29,7 +29,7 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
  */
 public class SMSMonitor implements OutboundMessageListener,
 		javax.wireless.messaging.MessageListener, Controllable {
-	private static final String TAG = "SMSMonitor";
+	private static final String TAG = ToolsBB.getSimpleClassName(SMSMonitor.class);
 
 	private LocalDataWriter actLog;
 	public static Logger logger = Logger.getInstance();

@@ -20,7 +20,7 @@ import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
 public abstract class DBAccess {
-	private static final String TAG = "DBAcccess";
+	private static final String TAG = ToolsBB.getSimpleClassName(DBAccess.class);
 
 	protected Logger logger = Logger.getInstance();
 	protected ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
@@ -54,17 +54,17 @@ public abstract class DBAccess {
 
 	protected static String dbLocSD = "file:///SDCard/Databases/MobileMinder/";
 	protected static String dbLocStore = "file:///store/home/user/Databases/MobileMinder/";
-	protected static String dbLocation = dbLocSD + DATABASE_NAME; // By default
-																	// on sdcard
+	protected static String dbLocation = dbLocSD + DATABASE_NAME;
 
 	public DBAccess() throws IOException {
 		// If sdcard is not available and device has eMMC builtin memory
 		// (filesystem mount point "/system" must be mounted for this to be
 		// true) then put db on /store. Otherwise app can't run.
-		if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD)
-				&& ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
-			dbLocation = dbLocStore + DATABASE_NAME;
-		} else {
+		if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD) && ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
+				// sdcard not mounted but device has eMMC
+				dbLocation = dbLocStore + DATABASE_NAME;
+		} else if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD) && !ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
+			// No writable storage available.
 			throw new IOException();
 		}
 	}
@@ -78,9 +78,8 @@ public abstract class DBAccess {
 	 * @return this (self-reference, allowing this to be chained in an
 	 *         initialization call).
 	 */
-	public DBAccess open() {
+	public DBAccess open() throws DatabaseIOException {
 		// Only one instance of storeDB desired
-		int opentries = 0;
 		if (db == null) {
 			try {
 				URI dbURI = URI.create(dbLocation);
@@ -92,22 +91,8 @@ public abstract class DBAccess {
 				}
 			} catch (DatabasePathException e) {
 				logger.log(TAG, "Invalid DB path.");
-				e.printStackTrace();
-			} catch (DatabaseIOException e) {
-				logger.log(TAG,
-						"Filesystem could not be accessed for DB. Trying again.");
-				// Wait for a second and then try to instantiate again.
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				for (; opentries < 5; opentries++) {
-					open();
-				}
 			} catch (ControlledAccessException e) {
 				logger.log(TAG, "Cannot open DB: no read permission.");
-				e.printStackTrace();
 			} catch (DatabaseException e) {
 				logger.log(TAG, "Error with DB.");
 			} catch (Exception e) {
@@ -146,7 +131,7 @@ public abstract class DBAccess {
 			st.execute();
 			st.close();
 		}
-		// storeDB.close(); // Leave DB open
+		// storeDB.close();
 		return db;
 	}
 

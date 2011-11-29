@@ -8,11 +8,12 @@ import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
 
 import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 
 public class ContactsReader {
-	private static final String TAG = "ContactsReader";
+	private static final String TAG = ToolsBB.getSimpleClassName(ContactsReader.class);
 	
 	Logger logger = Logger.getInstance();
 
