@@ -310,4 +310,14 @@ public class ToolsBB extends Tools {
 		}
 		return false;
 	}
+	
+	public static String getSimpleClassName(Class _class) {
+		String classname = _class.getName();
+		char packageSeparator = '.';
+		int index = classname.lastIndexOf(packageSeparator);
+		if (index != -1) {
+			return classname.substring(index + 1, classname.length());
+		}
+		return classname;
+	}
 }
