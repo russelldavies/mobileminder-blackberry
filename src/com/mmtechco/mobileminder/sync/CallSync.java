@@ -4,13 +4,11 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.monitor.CallMonitor;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
-import net.rim.blackberry.api.phone.phonelogs.CallLog;
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLog;
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
@@ -19,128 +17,94 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
  * Sync the call data to the server.
  */
 public class CallSync extends Thread {
-	private static final String TAG = ToolsBB.getSimpleClassName(CallSync.class);
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(CallSync.class);
 
-	private boolean finishedSync;
 	private Server server;
 	private int type = 11;
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
 
-	public CallSync(Server _server) {
-		logger.log(TAG, "Starting CallSync");
-		finishedSync = false;
-		server = _server;
+	public CallSync(Server server) {
+		logger.log(TAG, "Started");
+		this.server = server;
 	}
 
 	/**
-	 * Matches the device call time with the server call time. If server time is
-	 * less than device call time, it sends call messages to server
+	 * Matches the device call time with the server call time. If the value the
+	 * server holds is less than device call time, it sends call messages to the
+	 * server.
 	 */
 	public void run() {
-		logger.log(TAG, "Running CallSync");
-		StringBuffer stringREST = new StringBuffer();
-		stringREST.append(Registration.getRegID());
-		stringREST.append(Tools.ServerQueryStringSeparator);
-		stringREST.append(type);
-
-		logger.log(TAG, "CallSync::Contacting Server...");
-		Reply serverReply = server.contactServer(stringREST.toString());
-		long lastServerTime;
-		try {
-			lastServerTime = Long.parseLong(serverReply.getInfo());
-		} catch (NumberFormatException e) {
-			lastServerTime = 0;
-		}
-
-		logger.log(TAG, "Callsync calling code:" + serverReply.getCallingCode());
-
-		// Get the list of calls in the call log
-		PhoneLogs phoneLog = PhoneLogs.getInstance();
-		// Store the number of regular calls, and missed calls
-		int numCalls = phoneLog.numberOfCalls(PhoneLogs.FOLDER_NORMAL_CALLS);
-
-		logger.log(TAG, "Number of calls in call log: " + numCalls);
-		logger.log(TAG, "Last call time on server: " + lastServerTime);
+		logger.log(TAG, "Running");
+		Reply serverReply = server.contactServer(Registration.getRegID()
+				+ Tools.ServerQueryStringSeparator + type);
+		logger.log(TAG, "Contacted server. Reply: " + serverReply.getREST());
+		logger.log(TAG, "Calling code" + serverReply.getCallingCode());
 
 		// Check if the reply contained a valid server command
 		if (tools.isNumber(serverReply.getCallingCode())
 				&& Integer.parseInt(serverReply.getCallingCode()) == type) {
-			logger.log(TAG, "CallSync::Valid reply received");
-			// Create object to store each calls details, one by one
-			CallMonitor.CallMessage callMessageHolder = new CallMonitor(null).new CallMessage(true);
+			logger.log(TAG, "Valid reply received");
+			long serverTimestamp = 0;
+			try {
+				// Convert server timestamp to unix time
+				serverTimestamp = tools.getDate(serverReply.getInfo());
+			} catch (Exception e) {
+				// TODO: add error to localdataaccess
+				logger.log(TAG, e.getMessage());
+				return;
+			}
+			// Create object to store details of each call
+			CallMonitor.CallMessage callMessageHolder = new CallMonitor(null).new CallMessage(
+					true);
+			// Get the list of calls in the call log
+			PhoneLogs phoneLog = PhoneLogs.getInstance();
+			int numCalls = phoneLog
+					.numberOfCalls(PhoneLogs.FOLDER_NORMAL_CALLS);
+			logger.log(TAG, "Number of calls in call log: " + numCalls);
+
 			// Loop through call list
-			logger.log(TAG, "CallSync::Looping through call log...");
-			for (int count = 0; count < numCalls; count++) {
-				// Get the call log entry
-				CallLog callLogEntry = phoneLog.callAt(count,
-						PhoneLogs.FOLDER_NORMAL_CALLS);
-
+			logger.log(TAG, "Looping through call log");
+			for (int index = 0; index < numCalls; index++) {
+				// Get particular call and unix timestamp
+				PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog.callAt(
+						index, PhoneLogs.FOLDER_NORMAL_CALLS);
+				long callTimestamp = callLogEntry.getDate().getTime();
 				// Get the phone number from this Call Log entry
-				PhoneCallLog callLog = (PhoneCallLog) phoneLog.callAt(count,
-						PhoneLogs.FOLDER_NORMAL_CALLS);
-				PhoneCallLogID phoneID = callLog.getParticipant();
-
-				// Get the time when the call was made
-				long callSystemTime = callLogEntry.getDate().getTime();
+				PhoneCallLogID callParticipant = callLogEntry.getParticipant();
 
 				// If there is a newer call in the log, than the last one the
-				// server has...
-				if (lastServerTime < Long.parseLong(tools
-						.getDate(callSystemTime))) {
-					logger.log(TAG, "CallSync::Found new call entry");
-					logger.log(TAG, "CALL lastServerTime:" + lastServerTime
-							+ " < " + callSystemTime + "callSystemTime");
-					int StartCallState = callLogEntry.getStatus(); // <- is it
-																	// inbound
-																	// or
-																	// outbound
+				// server has
+				if (serverTimestamp < callTimestamp) {
+					logger.log(TAG, "Found new call entry");
+					logger.log(TAG, "lastServerTime:" + serverTimestamp
+							+ "; callTimestamp" + callTimestamp);
 
-					if (PhoneCallLog.TYPE_PLACED_CALL == StartCallState
-							|| PhoneCallLog.TYPE_RECEIVED_CALL == StartCallState) {
+					// Call must be inbound or outbound (not missed)
+					int callType = callLogEntry.getStatus();
+					if (PhoneCallLog.TYPE_PLACED_CALL == callType
+							|| PhoneCallLog.TYPE_RECEIVED_CALL == callType) {
 						boolean outgoing = false;
-						if (PhoneCallLog.TYPE_PLACED_CALL == StartCallState) {
+						if (PhoneCallLog.TYPE_PLACED_CALL == callType) {
 							outgoing = true;
 						}
-
-						// Output data for DEBUG
-						logger.log(
-								TAG,
-								"Message> "
-										+ phoneID
-												.getAddressBookFormattedNumber()
-										+ " outgoing:" + outgoing + " Date: "
-										+ tools.getDate(callSystemTime)
-										+ " Duration: "
-										+ callLogEntry.getDuration());
-
 						// Add data to object, and subsequently the database.
-						callMessageHolder.setMessage(
-								phoneID.getAddressBookFormattedNumber(),
-								outgoing, tools.getDate(callSystemTime),
-								callLogEntry.getDuration());
-
-						// Contact/Reply to server with the call log entry
+						callMessageHolder
+								.setMessage(callParticipant
+										.getAddressBookFormattedNumber(),
+										outgoing, tools.getDate(callTimestamp),
+										callLogEntry.getDuration());
+						logger.log(TAG, callMessageHolder.getREST());
+						// Contact server with the call log entry
 						server.contactServer(callMessageHolder);
 					}
-					callMessageHolder.clearData();// reset only when the loop is
-													// processing message
-				}// end if check event VS server time
-			} // end for()
-		} // end if()
-		else {
-			logger.log(TAG, "CallSync::No valid reply received");
+					callMessageHolder.clearData();
+				}
+			}
+		} else {
+			logger.log(TAG, "No valid reply received");
 		}
-		logger.log(TAG, "CallSync::Finished sync");
-		finishedSync = true;
-	}
-
-	/**
-	 * Return true if synchronisation is completed.
-	 * 
-	 * @return true if synchronisation is completed, false otherwise.
-	 */
-	public boolean syncComplete() {
-		return finishedSync;
+		logger.log(TAG, "Finished sync");
 	}
 }
