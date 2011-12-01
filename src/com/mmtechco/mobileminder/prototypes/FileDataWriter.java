@@ -1,9 +1,9 @@
 package com.mmtechco.mobileminder.prototypes;
 
-import com.mmtechco.mobileminder.data.FileInfo;
+import com.mmtechco.mobileminder.data.FileContainer;
 
 public interface FileDataWriter {
 	void clean();
-	void add(FileInfo file);
+	void add(FileContainer file);
 	void delete(int id);
 }

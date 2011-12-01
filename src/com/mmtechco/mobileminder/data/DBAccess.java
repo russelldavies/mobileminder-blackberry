@@ -174,7 +174,7 @@ public abstract class DBAccess {
 		// DELETE FROM DATABASE_TABLE WHERE KEY_INDEX=index
 		String sqlRemoveVal = "DELETE FROM " + getDBTable() + " WHERE "
 				+ KEY_INDEX + "=" + String.valueOf(index);
-		update(sqlRemoveVal);
+		sqlExecute(sqlRemoveVal);
 	}
 
 	public void removeFirst() {
@@ -233,7 +233,7 @@ public abstract class DBAccess {
 	 *            not contain statements that return a result set. INSERT,
 	 *            UPDATE, DELETE, and similar SQL statements are allowed.
 	 */
-	protected synchronized void update(String sqlStatement) {
+	protected synchronized void sqlExecute(String sqlStatement) {
 		// Primitive checking to make sure illegal statements
 		// are not executed.
 		if (sqlStatement.indexOf("SELECT") != -1) {
@@ -258,7 +258,7 @@ public abstract class DBAccess {
 	 *            - a legal SQL statement which returns a result set. The SELECT
 	 *            statement is allowed.
 	 */
-	protected Cursor query(String sqlStatement) {
+	protected Cursor sqlQuery(String sqlStatement) {
 		// Primitive checking to make sure illegal statements
 		// are not executed.
 		if (sqlStatement.indexOf("SELECT") == -1) {

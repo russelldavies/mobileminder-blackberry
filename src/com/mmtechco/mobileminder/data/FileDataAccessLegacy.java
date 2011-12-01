@@ -9,7 +9,7 @@ public class FileDataAccessLegacy extends AccessLegacy implements FileDataWriter
 		
 	}
 
-	public void add(FileInfo file) {
+	public void add(FileContainer file) {
 		// TODO Auto-generated method stub
 		
 	}

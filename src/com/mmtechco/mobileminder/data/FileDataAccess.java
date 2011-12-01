@@ -14,20 +14,21 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * information about the file system which will be updated on the server.
  */
 public class FileDataAccess extends DBAccess implements FileDataWriter {
-	private static final String TAG = ToolsBB.getSimpleClassName(FileDataAccess.class);
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(FileDataAccess.class);
 
 	// Database table
 	protected static final String DATABASE_TABLE = "filesystem";
 	// Database fields
-	protected static final String KEY_NEW = "new";
-	protected static final String KEY_FOUND = "found";
-	protected static final String KEY_SENT = "sent";
-	protected static final String KEY_NAME = "name";
-	protected static final String KEY_DIRECTORY = "directory";
-	protected static final String KEY_PATH = "path";
-	protected static final String KEY_TIME = "time";
-	protected static final String KEY_SIZE = "size";
-	protected static final String KEY_MD5 = "md5";
+	public static final String KEY_NEW = "new";
+	public static final String KEY_FOUND = "found";
+	public static final String KEY_SENT = "sent";
+	public static final String KEY_NAME = "name";
+	public static final String KEY_DIRECTORY = "directory";
+	public static final String KEY_PATH = "path";
+	public static final String KEY_TIME = "time";
+	public static final String KEY_SIZE = "size";
+	public static final String KEY_MD5 = "md5";
 
 	public FileDataAccess() throws IOException {
 		super();
@@ -37,45 +38,28 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		return DATABASE_TABLE;
 	}
 
-	public void add(FileInfo file) {
-		addValues(file.getName(), file.getDirectory(), file.getPath(),
-				file.getLastModifiedTime(), file.getSize(), file.getMd5());
-	}
-
-	/**
-	 * Adds the information to the table used to store the file system.
-	 * 
-	 * @param name
-	 *            - file name
-	 * @param path
-	 *            - path to the file
-	 * @param time
-	 *            - last modified time of the file
-	 * @param size
-	 *            - size in bytes of the file
-	 * @param md5
-	 *            - md5 of the file-stream
-	 */
-	private void addValues(String name, String directory, String path,
-			long time, long size, String md5) {
-		logger.log(TAG, "Adding File to DB: " + name + "," + directory + ","
-				+ path + "," + time + "," + size + "," + md5);
+	public void add(FileContainer fc) {
+		logger.log(TAG, "Adding file to DB. File info: " + fc);
 		logger.log(TAG, "DB Size: " + length());
 
 		String sqlAddValues = "INSERT INTO " + getDBTable() + "(" + KEY_NEW
 				+ "," + KEY_FOUND + "," + KEY_SENT + "," + KEY_NAME + ","
 				+ KEY_DIRECTORY + "," + KEY_PATH + "," + KEY_TIME + ","
-				+ KEY_SIZE + "," + KEY_MD5 + ") VALUES (1,1,0," + name + ","
-				+ directory + "," + path + "," + time + "," + size + "," + md5
+				+ KEY_SIZE + "," + KEY_MD5 + ") VALUES (1,1,0," + fc.getName()
+				+ "," + fc.getDir() + "," + fc.getPath() + ","
+				+ fc.getModTime() + "," + fc.getSize() + "," + fc.getMd5()
 				+ ")";
-		update(sqlAddValues);
+		sqlExecute(sqlAddValues);
 	}
 
+	/**
+	 * Sets the 'new' and 'found' column values of each row to false
+	 */
 	public synchronized void clean() {
 		String value = "0";
 		String sql = "UPDATE " + getDBTable() + " SET " + KEY_NEW + "=" + value
 				+ "," + KEY_FOUND + "=" + value;
-		update(sql);
+		sqlExecute(sql);
 	}
 
 	/**
@@ -87,7 +71,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 	public Cursor fileCheckTable() {
 		String sqlStatement = "SELECT " + KEY_INDEX + "," + KEY_FOUND + ","
 				+ KEY_NAME + "," + KEY_PATH + "," + KEY_SIZE;
-		return query(sqlStatement);
+		return sqlQuery(sqlStatement);
 	}
 
 	/**
@@ -101,7 +85,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		String value = "1";
 		String sql = "UPDATE " + getDBTable() + " SET " + KEY_FOUND + "="
 				+ value + " WHERE " + KEY_NAME + "=" + name;
-		update(sql);
+		sqlExecute(sql);
 	}
 
 	/**
@@ -115,7 +99,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		String value = "1";
 		String sql = "UPDATE " + getDBTable() + " SET " + KEY_SENT + "="
 				+ value + " WHERE " + KEY_PATH + "=" + path;
-		update(sql);
+		sqlExecute(sql);
 		logger.log(TAG, path + " has been set as sent");
 	}
 
@@ -131,7 +115,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		// get the index of the last row in table
 		String sqlStatement = "SELECT " + KEY_INDEX + " FROM " + getDBTable()
 				+ " ORDER BY " + KEY_INDEX + "DESC LIMIT 1";
-		Cursor index = query(sqlStatement);
+		Cursor index = sqlQuery(sqlStatement);
 		try {
 			index.first();
 			String key = index.getRow().getString(
@@ -141,7 +125,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 			// update the md5 at that index
 			sqlStatement = "UPDATE " + getDBTable() + " SET " + KEY_INDEX + "="
 					+ key;
-			update(sqlStatement);
+			sqlExecute(sqlStatement);
 			index.close();
 		} catch (DatabaseException e) {
 			e.printStackTrace();
@@ -158,7 +142,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		// select path from storeDB where md5 = select md5 from storeDB where
 		// path = path
 		String[] pathsFound;
-		Cursor duplicatesCursor = query(duplicateQuery);
+		Cursor duplicatesCursor = sqlQuery(duplicateQuery);
 		try {
 			duplicatesCursor.last();
 			int cursorCount = duplicatesCursor.getPosition();
@@ -196,7 +180,7 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 	public Cursor getNewFileTable() {
 		String sqlStatement = "SELECT * FROM " + getDBTable() + " WHERE "
 				+ KEY_NEW + "=1";
-		return query(sqlStatement);
+		return sqlQuery(sqlStatement);
 	}
 
 	/**
@@ -207,13 +191,13 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 	public Cursor getNotFoundFileTable() {
 		String sqlStatement = "SELECT * FROM " + getDBTable() + " WHERE "
 				+ KEY_FOUND + "=0";
-		return query(sqlStatement);
+		return sqlQuery(sqlStatement);
 	}
 
 	public Cursor getUnSentFileTable() {
 		String sqlStatement = "SELECT * FROM " + getDBTable() + " WHERE "
 				+ KEY_SENT + "=0";
-		return query(sqlStatement);
+		return sqlQuery(sqlStatement);
 	}
 
 	/**
@@ -234,6 +218,6 @@ public class FileDataAccess extends DBAccess implements FileDataWriter {
 		String sql = "UPDATE " + getDBTable() + " SET " + KEY_MD5 + "=" + md5
 				+ ", " + KEY_TIME + "=" + time + ", " + KEY_SIZE + "=" + size
 				+ " WHERE " + KEY_INDEX + "=" + index;
-		update(sql);
+		sqlExecute(sql);
 	}
 }

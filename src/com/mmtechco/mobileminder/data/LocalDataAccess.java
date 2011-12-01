@@ -33,6 +33,6 @@ public class LocalDataAccess extends DBAccess implements LocalDataWriter {
 		String sqlAddMessage = "INSERT INTO " + DATABASE_TABLE + "(" + KEY_TIME
 				+ "," + KEY_VALUE + ") VALUES ('" + tools.getDate() + "','"
 				+ message.getREST() + "')";
-		update(sqlAddMessage);
+		sqlExecute(sqlAddMessage);
 	}
 }
