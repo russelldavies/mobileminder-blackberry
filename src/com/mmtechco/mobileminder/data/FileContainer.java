@@ -1,30 +1,33 @@
 package com.mmtechco.mobileminder.data;
 
 /**
- * This class is used to store files.
- * 
- * <p>Fields (use accessors and mutators):</p>
- * <p>newFile - specifies if the file is newly added to the storage.</p>
- * <p>found - specifies if the file exists in the device storage.</p>
- * <p>name - specifies the file name.</p>
- * <p>path - specifies the file path.</p>
- * <p>lastModifiedTime - specifies the file's last modification time.</p>
- * <p>size - specifies the file size in bytes.</p>
- * <p>md5 - specifies the md5 value calculated using the file stream.</p>
+ * Container for file information.
  */
-public class FileInfo {
-	private boolean newFile;
-	private boolean found;
+public class FileContainer {
+	private boolean newFile; // Newly added to storage
+	private boolean found; // File exists in the device storage
 	private boolean sent;
 	private String name;
-	private String directory;
+	private String dir;
 	private String path;
-	private long lastModifiedTime;
-	private long sizeInBytes;
+	private long modTime; // Last modfied time
+	private long size; // In bytes
 	private String md5;
 
-	public FileInfo() {
+	public FileContainer() {
 		clearData();
+	}
+
+	public FileContainer(boolean newFile, boolean found, boolean sent,
+			String name, String dir, String path, long modTime, long size) {
+		this.newFile = newFile;
+		this.found = found;
+		this.sent = sent;
+		this.name = name;
+		this.dir = dir;
+		this.path = path;
+		this.modTime = modTime;
+		this.size = size;
 	}
 
 	public void clearData() {
@@ -32,78 +35,49 @@ public class FileInfo {
 		found = false;
 		sent = false;
 		name = null;
-		directory = null;
+		dir = null;
 		path = null;
-		lastModifiedTime = 0;
-		sizeInBytes = 0;
+		modTime = 0;
+		size = 0;
 		md5 = null;
 	}
-	
-	/**
-	 * Generated Getters and Setters for the files attributes
-	 */
-	public boolean isNewFile() {
-		return newFile;
+
+	public String toString() {
+		return "name: " + name + "; dir: " + dir + "; path: " + path
+				+ "; modification time: " + modTime + "; size: " + size
+				+ "; md5: " + md5;
 	}
 
-	public void setNewFile(boolean newFile) {
-		this.newFile = newFile;
+	public boolean isNewFile() {
+		return newFile;
 	}
 
 	public boolean isFound() {
 		return found;
 	}
 
-	public void setFound(boolean found) {
-		this.found = found;
-	}
-
 	public boolean isSent() {
 		return sent;
-	}
-
-	public void setSent(boolean sent) {
-		this.sent = sent;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getDir() {
+		return dir;
 	}
 
-	public String getDirectory() {
-		return directory;
-	}
-
-	public void setDirectory(String directory) {
-		this.directory = directory;
+	public long getSize() {
+		return size;
 	}
 
 	public String getPath() {
 		return path;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	public long getLastModifiedTime() {
-		return lastModifiedTime;
-	}
-
-	public void setLastModifiedTime(long lastModifiedTime) {
-		this.lastModifiedTime = lastModifiedTime;
-	}
-
-	public long getSize() {
-		return sizeInBytes;
-	}
-
-	public void setSize(long sizeInBytes) {
-		this.sizeInBytes = sizeInBytes;
+	public long getModTime() {
+		return modTime;
 	}
 
 	public String getMd5() {
@@ -113,5 +87,4 @@ public class FileInfo {
 	public void setMd5(String md5) {
 		this.md5 = md5;
 	}
-
 }
