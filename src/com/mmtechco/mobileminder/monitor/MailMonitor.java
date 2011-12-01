@@ -22,173 +22,164 @@ import net.rim.device.api.servicebook.ServiceBook;
 import net.rim.device.api.servicebook.ServiceRecord;
 
 public class MailMonitor implements FolderListener, StoreListener {
-	private static final String TAG = ToolsBB.getSimpleClassName(MailMonitor.class);
-	
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(MailMonitor.class);
+
 	private LocalDataWriter actLog;
-			MailMessage 	messageObject;
-			Message			emailMessage;
-			Logger   		logger				  = Logger.getInstance();
-			boolean 		_hasSupportedAttachment	  = false; 
-			boolean 		_hasUnsupportedAttachment = false;
+	MailMessage messageObject;
+	Message emailMessage;
+	Logger logger = Logger.getInstance();
+	boolean _hasSupportedAttachment = false;
+	boolean _hasUnsupportedAttachment = false;
 
-    public MailMonitor(LocalDataWriter inputAccess)
-    {
-    	logger.log(TAG, "Start MyCallListener");
-        actLog = inputAccess;
-        messageObject = new MailMessage();
-        
-        // The following is a recursive method to search all folders on the device
-        // Since corporate users will have different locations than personal users, we need
-        // to search for their INBOX/OUTBOX, instead of specifying a path.
-        // BONUS: This code can be used on Mobile Minder, and the corporate equivalent later on!
-        ServiceBook sb = ServiceBook.getSB();
-        ServiceRecord[] srs = sb.getRecords();
+	public MailMonitor(LocalDataWriter inputAccess) {
+		actLog = inputAccess;
+		messageObject = new MailMessage();
 
-        for(int cnt = srs.length - 1; cnt >= 0; --cnt)
-        {
-        	//identify the service record associated with a mail message service via a CID of 'CMIME'
-			if( srs[cnt].getCid().equals( "CMIME" ))
-			{
+		// Recursively search all folders on device and search for Inbox/Outbox.
+		// This is more flexible than specifying a path.
+		ServiceBook sb = ServiceBook.getSB();
+		ServiceRecord[] srs = sb.getRecords();
+
+		for (int cnt = srs.length - 1; cnt >= 0; --cnt) {
+			// identify the service record associated with a mail message
+			// service via a CID of 'CMIME'
+			if (srs[cnt].getCid().equals("CMIME")) {
 				ServiceConfiguration sc = new ServiceConfiguration(srs[cnt]);
-                Store store = Session.getInstance(sc).getStore();
-                //store.addFolderListener(this);
-                
-                //then search recursively for INBOX and OUTBOX folders
-        		Folder[] folders = store.list();
-        		for( int foldercnt = folders.length - 1; foldercnt >= 0; --foldercnt)
-        		{
-        			Folder f = folders[foldercnt];
-        			recurse(f);
-        		} // end for()
-			} // end if()
-        }  // end for()
-    }  
+				Store store = Session.getInstance(sc).getStore();
+				// store.addFolderListener(this);
 
-    /**
-     * Recursive method to search a folder, and its sub-folders on
-     * the device to see if it matches "Folder.INBOX"
-     * @param f The folder which we want to compare with "Folder.INBOX"
-     */
-    public void recurse(Folder f)
-    {
-       if ( f.getType() == Folder.INBOX || f.getType() == Folder.SENT)
-       {	// If it matches, we add the listener
-    	   logger.log(TAG, "Folder matching INBOX found! "+f.getFullName());
-           f.addFolderListener(this);           
-       }
-       
-       Folder[] farray = f.list();
-       //Search all the folders sub-folders
-       for (int fcnt = farray.length - 1; fcnt >= 0; --fcnt)
-       {
-           recurse(farray[fcnt]);
-       }
-    }
-    
-// Folders and listeners should all be taken care of at this stage
-// Now we get onto handling the incoming message
+				// then search recursively for INBOX and OUTBOX folders
+				Folder[] folders = store.list();
+				for (int foldercnt = folders.length - 1; foldercnt >= 0; --foldercnt) {
+					Folder f = folders[foldercnt];
+					recurse(f);
+				}
+			}
+		}
+	}
 
-	public void messagesAdded(FolderEvent e)
-	{
+	/**
+	 * Recursive method to search a folder, and its sub-folders on the device to
+	 * see if it matches "Folder.INBOX"
+	 * 
+	 * @param folder
+	 *            - the folder which we want to compare with "Folder.INBOX"
+	 */
+	public void recurse(Folder folder) {
+		// Add listener if it matches
+		if (folder.getType() == Folder.INBOX || folder.getType() == Folder.SENT) {
+			logger.log(TAG,
+					"Folder matching INBOX found! " + folder.getFullName());
+			folder.addFolderListener(this);
+		}
+		Folder[] farray = folder.list();
+		// Search all the folders sub-folders
+		for (int fcnt = farray.length - 1; fcnt >= 0; --fcnt) {
+			recurse(farray[fcnt]);
+		}
+	}
+
+	// Folders and listeners should all be taken care of at this stage
+	// Now we get onto handling the incoming message
+	public void messagesAdded(FolderEvent e) {
 		messageObject.clearData();
-		logger.log(TAG, "Email message "+(e.getMessage().isInbound()?"received":"sent"));
+		logger.log(TAG, "Email message "
+				+ (e.getMessage().isInbound() ? "received" : "sent"));
 		emailMessage = e.getMessage();
 
-		boolean isInbound = (e.getMessage().isInbound()?true:false);
+		boolean isInbound = (e.getMessage().isInbound() ? true : false);
 		messageObject.setMailDirection(isInbound);
-		
-		try
-		{
-			logger.log(TAG, "MailListener::messaesAdded::setting Message");
-			if (isInbound)	// If its inbound it should also only have 1 "from", but maybe other TO or CCs
-			{
-			String name = emailMessage.getFrom().getName();
-			name = name.substring(1,emailMessage.getFrom().getName().length()-1);
-			
-			messageObject.setMessage(emailMessage.getFrom().getAddr(),
-									 name,
-									 emailMessage.getSubject(),
-									 emailMessage.getBodyText(),
-									 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
-									 emailMessage.getSentDate().toString(),
-									 _hasSupportedAttachment||_hasUnsupportedAttachment);
-			}
-			else
-			{
+
+		try {
+			logger.log(TAG, "Setting Message");
+			if (isInbound) {
+				// If it is inbound it should also only have 1 "from",
+				// but maybe other TO or CCs
+				String name = emailMessage.getFrom().getName();
+				name = name.substring(1, emailMessage.getFrom().getName()
+						.length() - 1);
+
+				messageObject.setMessage(emailMessage.getFrom().getAddr(),
+						name, emailMessage.getSubject(), emailMessage
+								.getBodyText(),
+						emailMessage.isInbound() ? (byte) 1 : (byte) 0,
+						emailMessage.getSentDate().toString(),
+						_hasSupportedAttachment || _hasUnsupportedAttachment);
+			} else {
 				// Retrieve all types of recipient
-				Address[] sentTo  = emailMessage.getRecipients(Message.RecipientType.TO);
-				Address[] sentCc  = emailMessage.getRecipients(Message.RecipientType.CC);
-				Address[] sentBcc = emailMessage.getRecipients(Message.RecipientType.BCC);			
-				
+				Address[] sentTo = emailMessage
+						.getRecipients(Message.RecipientType.TO);
+				Address[] sentCc = emailMessage
+						.getRecipients(Message.RecipientType.CC);
+				Address[] sentBcc = emailMessage
+						.getRecipients(Message.RecipientType.BCC);
+
 				// Loops through the arrays and pulls out Recipient names
-				//StringBuffer allRecipientsNames = new StringBuffer();
+				// StringBuffer allRecipientsNames = new StringBuffer();
 				StringBuffer allRecipientsEmails = new StringBuffer();
 
-				for (int count=0 ; count < sentTo.length ; count++)
-				{
+				for (int count = 0; count < sentTo.length; count++) {
 					allRecipientsEmails.append(sentTo[count].getAddr());
 					allRecipientsEmails.append(";");
-					//allRecipientsNames.append(sentTo[count].getName().substring(1, sentTo[count].getName().length()-1));
-					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+					// allRecipientsNames.append(sentTo[count].getName().substring(1,
+					// sentTo[count].getName().length()-1));
+					// allRecipientsNames.append(";"); // This "name" substring
+					// is seperated by a ";"
 				}
-				for (int count=0 ; count < sentCc.length ; count++)
-				{
+				for (int count = 0; count < sentCc.length; count++) {
 					allRecipientsEmails.append(sentCc[count].getAddr());
 					allRecipientsEmails.append(";");
-					//allRecipientsNames.append(sentCc[count].getName().substring(1, sentCc[count].getName().length()-1));
-					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
-				}	
-				for (int count=0 ; count < sentBcc.length ; count++)
-				{
+					// allRecipientsNames.append(sentCc[count].getName().substring(1,
+					// sentCc[count].getName().length()-1));
+					// allRecipientsNames.append(";"); // This "name" substring
+					// is seperated by a ";"
+				}
+				for (int count = 0; count < sentBcc.length; count++) {
 					allRecipientsEmails.append(sentBcc[count].getAddr());
 					allRecipientsEmails.append(";");
-					//allRecipientsNames.append(sentBcc[count].getName().substring(1, sentBcc[count].getName().length()-1));
-					//allRecipientsNames.append(";");	// This "name" substring is seperated by a ";"
+					// allRecipientsNames.append(sentBcc[count].getName().substring(1,
+					// sentBcc[count].getName().length()-1));
+					// allRecipientsNames.append(";"); // This "name" substring
+					// is seperated by a ";"
 				}
-				
-				
-				messageObject.setMessage(allRecipientsEmails.toString(),
-										 "",  //No names on outbound emails, just the email address itself
-										 emailMessage.getSubject(),
-										 emailMessage.getBodyText(),
-										 emailMessage.isInbound()?(byte)1:(byte)0,	// if its true, send 1, else 0
-										 emailMessage.getSentDate().toString(),
-										 _hasSupportedAttachment||_hasUnsupportedAttachment
-										 );
+
+				messageObject.setMessage(
+						allRecipientsEmails.toString(),
+						"", // No names on outbound emails, just the email
+							// address itself
+						emailMessage.getSubject(), emailMessage.getBodyText(),
+						emailMessage.isInbound() ? (byte) 1 : (byte) 0,
+						emailMessage.getSentDate().toString(),
+						_hasSupportedAttachment || _hasUnsupportedAttachment);
 			}
-			
+
 			logger.log(TAG, "Message set");
-			logger.log(TAG, "RESTstring: "+messageObject.getREST());
-		}
-		catch (MessagingException e1)
-		{
-			logger.log(TAG, "x::MailListener::readEmailBody::MessagingException::"+e1.getMessage());
+			logger.log(TAG, "RESTstring: " + messageObject.getREST());
+		} catch (MessagingException e1) {
+			logger.log( TAG, e1.getMessage());
 			e1.printStackTrace();
 		}
-		logger.log(TAG, "MailListener::messagesAdded::Adding message to log");
+		logger.log(TAG, "Adding message to log");
 		actLog.addMessage(messageObject);
 	}
 
-	public void messagesRemoved(FolderEvent e)
-	{
-		logger.log(TAG, "Messages deleted");		
+	public void messagesRemoved(FolderEvent e) {
+		logger.log(TAG, "Messages deleted");
 	}
 
-	public void batchOperation(StoreEvent e)
-	{
+	public void batchOperation(StoreEvent e) {
 		logger.log(TAG, "Batch operation");
 	}
-}	// End MailListener Class
-
-class MailDirectionStatus
-{
-	private MailDirectionStatus(){}
-	
-	public static final byte INBOUND  = 0;
-	public static final byte OUTBOUND = 1;
 }
 
+class MailDirectionStatus {
+	private MailDirectionStatus() {
+	}
 
+	public static final byte INBOUND = 0;
+	public static final byte OUTBOUND = 1;
+}
 
 /**
  * Implements the message interface to hold mail event messages.
@@ -286,8 +277,8 @@ class MailMessage implements com.mmtechco.mobileminder.prototypes.Message {
 	 * @return a single string containing the entire message.
 	 */
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + type
-				+ Tools.ServerQueryStringSeparator + deviceTime
+		return Registration.getRegID() + Tools.ServerQueryStringSeparator
+				+ type + Tools.ServerQueryStringSeparator + deviceTime
 				+ Tools.ServerQueryStringSeparator + contactEmail
 				+ Tools.ServerQueryStringSeparator + contactName
 				+ Tools.ServerQueryStringSeparator + emailSubject
