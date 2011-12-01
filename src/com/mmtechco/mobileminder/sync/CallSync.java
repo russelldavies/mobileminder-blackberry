@@ -55,9 +55,6 @@ public class CallSync extends Thread {
 				logger.log(TAG, e.getMessage());
 				return;
 			}
-			// Create object to store details of each call
-			CallMonitor.CallMessage callMessageHolder = new CallMonitor(null).new CallMessage(
-					true);
 			// Get the list of calls in the call log
 			PhoneLogs phoneLog = PhoneLogs.getInstance();
 			int numCalls = phoneLog
@@ -67,6 +64,9 @@ public class CallSync extends Thread {
 			// Loop through call list
 			logger.log(TAG, "Looping through call log");
 			for (int index = 0; index < numCalls; index++) {
+				// Create object to store details of each call
+				CallMonitor.CallMessage callMessageHolder = new CallMonitor(
+						null).new CallMessage(true);
 				// Get particular call and unix timestamp
 				PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog.callAt(
 						index, PhoneLogs.FOLDER_NORMAL_CALLS);
@@ -91,15 +91,16 @@ public class CallSync extends Thread {
 						}
 						// Add data to object, and subsequently the database.
 						callMessageHolder
-								.setMessage(callParticipant
-										.getAddressBookFormattedNumber(),
-										outgoing, tools.getDate(callTimestamp),
-										callLogEntry.getDuration());
+								.setMessage(
+										tools.getDate(callTimestamp),
+										callParticipant
+												.getAddressBookFormattedNumber(),
+										callParticipant.getName(), callLogEntry
+												.getDuration(), outgoing);
 						logger.log(TAG, callMessageHolder.getREST());
 						// Contact server with the call log entry
 						server.contactServer(callMessageHolder);
 					}
-					callMessageHolder.clearData();
 				}
 			}
 		} else {
