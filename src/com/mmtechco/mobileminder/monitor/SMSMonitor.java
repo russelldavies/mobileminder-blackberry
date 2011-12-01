@@ -1,13 +1,11 @@
 package com.mmtechco.mobileminder.monitor;
 
-import java.io.IOException;
-
-import java.io.InterruptedIOException;
 import java.util.Date;
 
 import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
 import javax.wireless.messaging.MessageConnection;
+import javax.wireless.messaging.MessageListener;
 import javax.wireless.messaging.TextMessage;
 
 import com.mmtechco.mobileminder.Registration;
@@ -27,13 +25,14 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
  * MyTextListener monitors and registers text message based events.
  * 
  */
-public class SMSMonitor implements OutboundMessageListener,
-		javax.wireless.messaging.MessageListener, Controllable {
-	private static final String TAG = ToolsBB.getSimpleClassName(SMSMonitor.class);
+public class SMSMonitor implements OutboundMessageListener, MessageListener,
+		Controllable {
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(SMSMonitor.class);
 
 	private LocalDataWriter actLog;
-	public static Logger logger = Logger.getInstance();
-	MessageConnection _mc;
+	private static Logger logger = Logger.getInstance();
+	private static MessageConnection receiver;
 	private MMTools tools = ToolsBB.getInstance();
 	private SMSMessage smsMessage;
 
@@ -45,21 +44,18 @@ public class SMSMonitor implements OutboundMessageListener,
 	 *            log of actions
 	 */
 	public SMSMonitor(LocalDataWriter inputAccess) {
-		logger.log(TAG, "Starting MyTextListener...");
+		logger.log(TAG, "Started");
+		
 		actLog = inputAccess;
 		smsMessage = new SMSMessage();
 
 		try {
-			_mc = (MessageConnection) Connector.open("sms://:1212"); // is port
-																		// 1212
-																		// valid??
-			_mc.setMessageListener(this);
-		} catch (IOException e) {
-			logger.log(TAG, "MyTextListener::IOException:: " + e.getMessage());
-			// TODO: actLog.addMessage(smsMessage);
+			receiver = (MessageConnection)Connector.open("sms://:0");
+			if (receiver != null) {
+				receiver.setMessageListener(this);
+			}
 		} catch (Exception e) {
-			logger.log(TAG, "MyTextListener::Exception:: " + e.getMessage());
-			// TODO:actLog.addMessage(smsMessage);
+			logger.log(TAG, e.getMessage());
 		}
 	}
 
@@ -70,13 +66,13 @@ public class SMSMonitor implements OutboundMessageListener,
 	 *            message structure
 	 * @param inputDestinationAddress
 	 *            message address
-	 * @param _date
+	 * @param date
 	 * @param txtBody
 	 */
-
 	private void addToLog(String inputStatus, String contactNumber,
-			String _date, String _txtBody) {
-		logger.log(TAG, "Adding to log:MyTextListener");
+			String date, String messageBody) {
+		logger.log(TAG, "Adding message to log");
+
 		smsMessage.clearData();
 		boolean isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true
 				: false;
@@ -85,10 +81,10 @@ public class SMSMonitor implements OutboundMessageListener,
 		logger.log(TAG, "SMS Address: " + contactNumber);
 		logger.log(TAG, "Direction is: "
 				+ (isOutgoing ? "Outgoing" : "Incoming"));
-		logger.log(TAG, "Date: " + _date);
-		logger.log(TAG, "SMS Body: " + _txtBody);
+		logger.log(TAG, "Date: " + date);
+		logger.log(TAG, "SMS Body: " + messageBody);
 
-		smsMessage.setMessage(contactNumber, isOutgoing, _date, _txtBody);
+		smsMessage.setMessage(contactNumber, isOutgoing, date, messageBody);
 		// set contact name seperately
 		String contactName = new PhoneCallLogID(contactNumber).getName();
 		smsMessage.setContactName((null == contactName ? "" : contactName));
@@ -98,69 +94,37 @@ public class SMSMonitor implements OutboundMessageListener,
 		logger.log(TAG, "Message added to log...");
 	}
 
-	/**
-	 * Adds an outgoing message to the action log
-	 * 
-	 * @param message
-	 *            message structure
-	 */
-
 	public void notifyOutgoingMessage(Message message) {
 		logger.log(TAG, "SMS message outgoing");
 
-		// Get the body contents of the SMS Text
-		String txtBody = "";
+		String messageBody = "";
 		// If "message" is an object of type "TextMessage"
 		if (message instanceof TextMessage) {
-			txtBody = ((TextMessage) message).getPayloadText();
+			messageBody = ((TextMessage) message).getPayloadText();
 		}
-
-		// Add to log, but get a proper formatted PH Number without sms:// at
-		// the start
-		String phNumber = message.getAddress();
-		addToLog("Outgoing Message",
-				phNumber.substring(phNumber.lastIndexOf('/') + 1),
-				tools.getDate(), txtBody);
+		String recipient = message.getAddress();
+		// Strip off 'sms://'
+		recipient = recipient.substring(recipient.lastIndexOf('/')) + 1;
+		addToLog("Outgoing Message", recipient, tools.getDate(), messageBody);
 	}
 
-	/**
-	 * Adds an incoming message to the action log
-	 * 
-	 * @param message
-	 *            message structure
-	 */
-
 	// In the simulator, ensure source and destination SMS ports are the same in
-	// the Network menu,
-	// This way, you will receive the text you just sent, and can test
-	// notifyIncomingMessage
+	// the Network menu, this way you will receive the text you just sent, and
+	// can test notifyIncomingMessage
 	public void notifyIncomingMessage(MessageConnection conn) {
 		logger.log(TAG, "SMS message incoming");
 
-		// Get the message
 		TextMessage message = null;
 		try {
 			message = (TextMessage) conn.receive();
-		} catch (InterruptedIOException e1) {
-			logger.log(TAG,
-					"MyTextListener::notifyIncomingMessage::InterruptedIOException::"
-							+ e1.getMessage());
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			logger.log(
-					TAG,
-					"MyTextListener::notifyIncomingMessage::IOException::"
-							+ e1.getMessage());
-			e1.printStackTrace();
+		} catch (Exception e) {
+			logger.log(TAG, "Could not read SMS");
 		}
-
-		String phNumber = message.getAddress();
-		addToLog("Incoming Message",
-				phNumber.substring(phNumber.lastIndexOf('/')), tools.getDate(),
+		String sender = message.getAddress();
+		// Strip off 'sms://'
+		sender = sender.substring(sender.lastIndexOf('/')) + 1;
+		addToLog("Incoming Message", sender, tools.getDate(),
 				message.getPayloadText());
-
-		// http://myhowto.org/java/j2me/22-sending-and-receiving-gsm-sms-on-blackberry-using-rim-apis/
-		// http://www.blackberry.com/developers/docs/6.0.0api/Messaging-summary.html#MG_3
 	}
 
 	public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS) {
@@ -187,7 +151,6 @@ public class SMSMonitor implements OutboundMessageListener,
 		return false;
 	}
 }
-
 
 /**
  * Implements the message interface to hold SMS event messages.
@@ -288,8 +251,8 @@ class SMSMessage implements com.mmtechco.mobileminder.prototypes.Message {
 	 * @return a single string containing the entire message.
 	 */
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + type
-				+ Tools.ServerQueryStringSeparator + deviceTime
+		return Registration.getRegID() + Tools.ServerQueryStringSeparator
+				+ type + Tools.ServerQueryStringSeparator + deviceTime
 				+ Tools.ServerQueryStringSeparator + number
 				+ Tools.ServerQueryStringSeparator + contactName
 				+ Tools.ServerQueryStringSeparator + startStatus

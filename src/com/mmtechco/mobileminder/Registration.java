@@ -8,7 +8,6 @@ import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.ui.UiApplication;
 
 import com.mmtechco.mobileminder.data.DBFactory;
 import com.mmtechco.mobileminder.net.Reply;
@@ -27,7 +26,7 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * Checks the registration stage that currently the device is in.
  */
 public class Registration extends Thread implements Controllable, MobileMinderResource {
-	private static final String TAG = "Registration";
+	private static final String TAG = ToolsBB.getSimpleClassName(Registration.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	public static String KEY_STAGE = "registration_stage";
@@ -55,6 +54,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	 * from server.
 	 */
 	public Registration() {
+		logger.log(TAG, "Started");
 		server = new Server();
 
 		// Read registration data or set to default values
@@ -76,15 +76,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 			emergNums = String.valueOf(regTable.get(KEY_NUMBERS));
 		}
 		
-		// Display help notification if registered and there are emergency
-		// numbers.
-		if (regStage >= 2 && emergNums != "0") {
-			// TODO: update screen text
-			InfoScreen s = (InfoScreen) UiApplication.getUiApplication().getActiveScreen();
-			s.setRegID(regID);
-		}
 		stageState(regStage);
-		this.start();
 	}
 
 	/**

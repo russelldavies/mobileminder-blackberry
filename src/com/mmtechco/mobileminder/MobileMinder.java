@@ -2,6 +2,7 @@ package com.mmtechco.mobileminder;
 
 import com.mmtechco.mobileminder.data.DBAccess;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
+import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.system.ApplicationManager;
@@ -12,38 +13,45 @@ import net.rim.device.api.ui.UiApplication;
  * Main entry point of the application.
  */
 class MobileMinder extends UiApplication implements SystemListener2 {
-	private static MobileMinder theApp;
+	private static final String TAG = "App";
+	private static MobileMinder app;
 	
 	public static void main(String[] args) {
 		// Start logging
 		// Logger.startEventLogger();
 
-		theApp = new MobileMinder();
+		app = new MobileMinder();
 
+		/*
 		if (args != null && args.length > 0 && args[0].equals("autostartup")) {
 			// App started from autorun on startup
-			
+		*/
+		
 			// If system startup is still in progress when this
 			// application is run.
 			if (ApplicationManager.getApplicationManager().inStartup()) {
 				// Add a system listener to detect when system is ready and
 				// available.
-				theApp.addSystemListener(theApp);
+				app.addSystemListener(app);
 			} else {
 				// System is already ready and available so perform start up
 				// work now. Note that this work must be completed using
 				// invokeLater because the application has not yet entered the
 				// event dispatcher.
-				theApp.doStartupWorkLater();
+				app.doStartupWorkLater();
+				//UiApplication.getUiApplication().pushScreen(new InfoScreen());
 			}
-			
+		/*
 		} else {
 			// App was started from icon click
-			theApp.doStartupWorkLater();
+			Logger.getInstance().log(TAG, "Started from icon click");
+			app.doStartupWorkLater();
 			UiApplication.getUiApplication().pushScreen(new InfoScreen());
 		}
+		*/
+			
 		// Start event thread
-		theApp.enterEventDispatcher();
+		app.enterEventDispatcher();
 	}
 	
 	// Spawn the controller which takes care of execution of everything else.
@@ -78,6 +86,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 				e.printStackTrace();
 			}
 		}
+		Logger.getInstance().log(TAG, "Started from powerup");
 		doStartupWork();
 	}
 

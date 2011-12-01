@@ -1,5 +1,7 @@
 package com.mmtechco.mobileminder.prototypes;
 
+import net.rim.device.api.database.DatabaseIOException;
+
 import com.mmtechco.mobileminder.data.DBAccess;
 
 /**
@@ -44,5 +46,5 @@ public interface LocalDataWriter {
 	 */
 	void addMessage(Message message);
 
-	DBAccess open();
+	DBAccess open() throws DatabaseIOException;
 }

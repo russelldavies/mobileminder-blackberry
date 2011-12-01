@@ -1,6 +1,7 @@
 package com.mmtechco.mobileminder;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
@@ -30,7 +31,8 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
 
 public class InfoScreen extends MainScreen implements MobileMinderResource {
-	private static final String TAG = "InfoScreen";
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(InfoScreen.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	private static Logger logger = Logger.getInstance();
@@ -58,25 +60,15 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 			Dialog.inform(r.getString(i18n_HelpSending));
 			(new Thread() {
 				boolean sendStatus = false;
+
 				public void run() {
-					// TODO: implement location part
-					String[] emergNums = Registration.getEmergNums();
-					for (int i = 0; i < emergNums.length; i++) {
-						try {
-							((ToolsBB)ToolsBB.getInstance()).sendSMS(emergNums[i], "help me");
-							sendStatus = true;
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+					sendStatus = sendHelpMe();
 					if (sendStatus) {
 						Dialog.inform(r.getString(i18n_HelpSent));
 					}
-					
 				}
 			}).start();
-			
+
 		}
 	};
 
@@ -130,16 +122,23 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 		add(vfm);
 	}
 
+	protected void onUiEngineAttached(boolean attached) {
+		// Display help notification if registered and there are emergency
+		// numbers.
+		// if (regStage >= 2 && emergNums != "0") {
+		setIdLabel(Registration.getRegID());
+	}
+
 	public boolean onClose() {
 		UiApplication.getUiApplication().requestBackground();
 		return true;
 	}
 
-	public void setRegStatus(String text) {
+	public void setStatusLabel(String text) {
 		regStatusLabel.setText(text);
 	}
 
-	public void setRegID(String text) {
+	public void setIdLabel(String text) {
 		regIDLabel.setText(text);
 	}
 
@@ -191,7 +190,7 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 		}
 	}
 
-	// private void updateContent(LabelField labelfield, final String text) {
+	/*
 	private void updateContent() {
 		UiApplication.getUiApplication().invokeLater(new Runnable() {
 			public void run() {
@@ -206,4 +205,19 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 	 * sleep(1000); } catch (InterruptedException e) { // TODO Auto-generated
 	 * catch block e.printStackTrace(); } } } }
 	 */
+
+	private boolean sendHelpMe() {
+		// TODO: implement location part
+		String[] emergNums = Registration.getEmergNums();
+		for (int i = 0; i < emergNums.length; i++) {
+			try {
+				// TODO: put message into resource bundle
+				((ToolsBB) ToolsBB.getInstance()).sendSMS(emergNums[i],
+						"help me");
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

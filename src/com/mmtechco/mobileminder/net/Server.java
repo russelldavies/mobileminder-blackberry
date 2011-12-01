@@ -30,7 +30,7 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * and sends them to the web server at specific intervals.
  */
 public class Server extends Thread implements MMServer, MobileMinderResource {
-	private static final String TAG = "Server";
+	private static final String TAG = ToolsBB.getSimpleClassName(Server.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
 	private Logger logger = Logger.getInstance();
@@ -51,10 +51,9 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * the server connection.
 	 */
 	public Server() {
-		logger.log(TAG, "Starting Server...");
 		security = new Security();
 		crc = new CRC32();
-		logger.log(TAG, "Server Started");
+		logger.log(TAG, "Started");
 	}
 
 	/**

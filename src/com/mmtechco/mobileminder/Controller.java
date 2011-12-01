@@ -1,6 +1,9 @@
 package com.mmtechco.mobileminder;
 
 import java.io.IOException;
+
+import net.rim.device.api.database.DatabaseIOException;
+
 import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.control.Commander;
 import com.mmtechco.mobileminder.data.DBFactory;
@@ -10,6 +13,7 @@ import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.ToolsBB;
 
 /**
  * Initializes event listeners for the system and starts server and
@@ -17,7 +21,7 @@ import com.mmtechco.mobileminder.util.Logger;
  * 
  */
 public class Controller implements Runnable {
-	private static final String TAG = "Controller";
+	private static final String TAG = ToolsBB.getSimpleClassName(Controller.class);
 
 	private LocalDataWriter actLog;
 	private Registration reg;
@@ -31,6 +35,8 @@ public class Controller implements Runnable {
 	public void run() {
 		logger.log(TAG, "Starting registration");
 		reg = new Registration();
+		reg.start();
+		
 		// Wait until registration has processed
 		try {
 			while (!reg.isRegistered()) {
@@ -46,15 +52,23 @@ public class Controller implements Runnable {
 			actLog = DBFactory.getLocalDataWriter();
 		} catch (IOException e) {
 			logger.log(TAG, "Device has no storage that is can be written to by DB. Alerting user.");
+			return;
 			// TODO: pop dialog to user
 		}
-		actLog.open();
+		try {
+			actLog.open();
+		} catch (DatabaseIOException e) {
+			e.printStackTrace();
+			logger.log(TAG, "fs could not access db");
+			return;
+		}
 
+		// Start sync
+		new CallSync(new Server(actLog)).start();
+		
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
 		new AppMonitor(actLog, appTime);
-		new CallSync(new Server(actLog)).start();
-		new CallMonitor(actLog);
 		new LocationMonitor(actLog, locTime);
 		new MailMonitor(actLog);
 		
@@ -62,6 +76,7 @@ public class Controller implements Runnable {
 		components[0] = new SMSMonitor(actLog);
 		components[1] = new CallMonitor(actLog);
 		components[2] = new ContactPic(actLog);
+		//components[3] = new MediaSync(actLog);
 		new Commander(actLog, components).start();
 		
 		// Monitor activity log

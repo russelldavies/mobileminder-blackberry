@@ -17,11 +17,11 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * Monitors and registers application based events.
  */
 public class AppMonitor extends Thread {
-	private static final String TAG = "AppMonitor";
+	private static final String TAG = ToolsBB.getSimpleClassName(AppMonitor.class);
 	
-	private static final Logger logger = Logger.getInstance();;
+	private static final Logger logger = Logger.getInstance();
 	private LocalDataWriter actLog;
-	private int AppTimer;
+	private int interval;
 
 	/**
 	 * The AppListener constructor initialise the action store location and the
@@ -35,7 +35,7 @@ public class AppMonitor extends Thread {
 	 */
 	public AppMonitor(LocalDataWriter actLog, int inputAppTimer) {
 		this.actLog = actLog;
-		AppTimer = inputAppTimer;
+		interval = inputAppTimer;
 		this.start();
 	}
 
@@ -56,7 +56,7 @@ public class AppMonitor extends Thread {
 	 * 
 	 */
 	public void run() {
-		logger.log(TAG, "MyAppListener begin...");
+		logger.log(TAG, "Started");
 		try {
 			int lastProcessId = 0;
 			ApplicationManager manager = ApplicationManager
@@ -67,7 +67,7 @@ public class AppMonitor extends Thread {
 			ApplicationDescriptor runningApps[];
 
 			while (true) {
-				sleep(AppTimer);
+				sleep(interval);
 				// Store a list of running apps
 				runningApps = manager.getVisibleApplications();
 
@@ -84,9 +84,7 @@ public class AppMonitor extends Thread {
 							lastAppName = runningApps[count].getName();
 							logger.log(TAG, "Current running app name is: "
 									+ lastAppName);
-							logger.log(TAG, "App found. Adding to log...");
-							// ...add details of this app to the AppMessage
-							// object...
+							// Add to log
 							appMessage.clearData();
 							appMessage.setMessage(lastAppName,
 									runningApps[count].getModuleName());
@@ -130,11 +128,11 @@ class AppMessage implements Message {
 	 * @param _packageName
 	 *            application package name
 	 */
-	public void setMessage(String _appName, String _packageName) {
-		appName = _appName;
+	public void setMessage(String appName, String packageName) {
+		this.appName = appName;
 		launchTime = tools.getDate();
-		startTime = new Date();// get the time now
-		fullPackageName = _packageName;
+		startTime = new Date();
+		fullPackageName = packageName;
 	}
 
 	/**
@@ -149,9 +147,7 @@ class AppMessage implements Message {
 	 * parameters.
 	 * 
 	 */
-	public void clearData()// This is used to ensure good practices and save
-							// resources on the device.
-	{
+	public void clearData() {
 		upTime = 0;
 		appName = "";
 		fullPackageName = "";
@@ -159,28 +155,16 @@ class AppMessage implements Message {
 		startTime = null;
 	}
 
-	/**
-	 * This method retrieves the type number for the application message
-	 * 
-	 * @return the type number corresponding to an application message
-	 */
-	// @Override
 	public int getType() {
 		return type;
 	}
 
-	/**
-	 * This method retrieves the launch time of the application
-	 * 
-	 * @return the application launch time
-	 */
-	// @Override
 	public String getTime() {
 		return launchTime;
 	}
 
 	/**
-	 * This method retrieves the message formatted in to a single string value.
+	 * Retrieves the message formatted in to a single string value.
 	 * <p>
 	 * App message consists of:
 	 * <ul>
@@ -194,7 +178,6 @@ class AppMessage implements Message {
 	 * 
 	 * @return a single string containing the entire message.
 	 */
-	// @Override
 	public String getREST() {
 		return
 				Registration.getRegID() +
