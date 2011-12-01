@@ -21,22 +21,22 @@ import com.mmtechco.mobileminder.util.ToolsBB;
  * 
  */
 public class Controller implements Runnable {
-	private static final String TAG = ToolsBB.getSimpleClassName(Controller.class);
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(Controller.class);
 
 	private LocalDataWriter actLog;
 	private Registration reg;
 	private Logger logger = Logger.getInstance();
-	
+
 	// Timer values
 	private int locTime = 29000;
 	private int appTime = 31000;
-	
 
 	public void run() {
 		logger.log(TAG, "Starting registration");
 		reg = new Registration();
 		reg.start();
-		
+
 		// Wait until registration has processed
 		try {
 			while (!reg.isRegistered()) {
@@ -51,7 +51,8 @@ public class Controller implements Runnable {
 		try {
 			actLog = DBFactory.getLocalDataWriter();
 		} catch (IOException e) {
-			logger.log(TAG, "Device has no storage that is can be written to by DB. Alerting user.");
+			logger.log(TAG,
+					"Device has no storage that is can be written to by DB. Alerting user.");
 			return;
 			// TODO: pop dialog to user
 		}
@@ -63,22 +64,23 @@ public class Controller implements Runnable {
 			return;
 		}
 
-		// Start sync
+		// Start call sync. Note that there is no faculty to access existing SMS
+		// messages stored on the device.
 		new CallSync(new Server(actLog)).start();
-		
+
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
 		new AppMonitor(actLog, appTime);
 		new LocationMonitor(actLog, locTime);
 		new MailMonitor(actLog);
-		
+
 		Controllable[] components = new Controllable[3];
 		components[0] = new SMSMonitor(actLog);
 		components[1] = new CallMonitor(actLog);
 		components[2] = new ContactPic(actLog);
-		//components[3] = new MediaSync(actLog);
+		// components[3] = new MediaSync(actLog);
 		new Commander(actLog, components).start();
-		
+
 		// Monitor activity log
 		new Server(actLog).start();
 	}
