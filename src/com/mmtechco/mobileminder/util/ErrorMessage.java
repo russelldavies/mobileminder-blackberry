@@ -5,9 +5,8 @@ import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 
 public class ErrorMessage implements Message {
-	private static final String TAG = ToolsBB.getSimpleClassName(ErrorMessage.class);
+	private static final int type = 7;
 	
-	private final int type = 7;
 	private MMTools tools = ToolsBB.getInstance();
 
 	private String errorType = "";
@@ -16,13 +15,6 @@ public class ErrorMessage implements Message {
 	private String errorPackage = "";
 	private long deviceUpTime = 0;
 	private String deviceTime;
-
-	/**
-	 * The constructor initialises all the message parameters
-	 */
-	private ErrorMessage() {
-		clearData();
-	}
 
 	public ErrorMessage(Exception inputE) {
 		clearData();
