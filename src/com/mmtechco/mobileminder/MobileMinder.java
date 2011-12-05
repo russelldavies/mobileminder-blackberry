@@ -1,11 +1,14 @@
 package com.mmtechco.mobileminder;
 
 import com.mmtechco.mobileminder.data.DBAccess;
+import com.mmtechco.mobileminder.monitor.UninstallMonitor;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.CodeModuleListener;
+import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
 
@@ -50,6 +53,9 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		}
 		*/
 			
+		// Listen for removal of app
+		CodeModuleManager.addListener(app, new UninstallMonitor());
+		
 		// Start event thread
 		app.enterEventDispatcher();
 	}
@@ -94,18 +100,18 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		DBAccess.close();
 	}
 
-	public void batteryLow() {
-	}
-
-	public void batteryStatusChange(int status) {
-	}
-
 	public void rootChanged(int state, String rootName) {
 		// TODO: implement
 	}
 
 	public void backlightStateChange(boolean on) {
 		// TODO: possibly restart app if crashed
+	}
+	
+	public void batteryLow() {
+	}
+
+	public void batteryStatusChange(int status) {
 	}
 
 	public void cradleMismatch(boolean mismatch) {
