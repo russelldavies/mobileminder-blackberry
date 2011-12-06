@@ -50,6 +50,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	private Hashtable regTable;
 	
 	private boolean registered = false;
+	private static Vector observers = new Vector();
 	
 	/**
 	 * Initializes context, creates own instance of Server. Requests a
@@ -331,10 +332,6 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 		return registered;
 	}
 	
-	
-	// Subject stuff
-	private static Vector observers = new Vector();
-	
 	public static void addObserver(Screen screen) {
 		observers.addElement(screen);
 	}
@@ -343,7 +340,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 		observers.removeElement(screen);
 	}
 	
-	public static void notifyObservers() {
+	private void notifyObservers() {
 		for(int i = 0; i < observers.size(); i++) {
 			((InfoScreen) observers.elementAt(i)).update();
 		}

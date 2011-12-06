@@ -122,12 +122,9 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 		add(vfm);
 	}
 
-	public boolean onClose() {
-		UiApplication.getUiApplication().requestBackground();
-		return true;
-	}
-
-	// Called from Registration
+	/*
+	 * Update the screen label fields
+	 */
 	public void update() {
 		UiApplication.getUiApplication().invokeLater(new Runnable() {
 			public void run() {
@@ -135,6 +132,11 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 				regStatusLabel.setText(Registration.getStatus());
 			}
 		});
+	}
+
+	public boolean onClose() {
+		UiApplication.getUiApplication().requestBackground();
+		return true;
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
@@ -184,22 +186,6 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 			logger.log(TAG, "Could not update notification icon");
 		}
 	}
-
-	/*
-	private void updateContent() {
-		UiApplication.getUiApplication().invokeLater(new Runnable() {
-			public void run() {
-				doPaint();
-			}
-		});
-	}
-
-	/*
-	 * private class StatusThread extends Thread { public void run() { for (;;)
-	 * { //updateContent(new Date().toString()); updateContent(); try {
-	 * sleep(1000); } catch (InterruptedException e) { // TODO Auto-generated
-	 * catch block e.printStackTrace(); } } } }
-	 */
 
 	private boolean sendHelpMe() {
 		// TODO: implement location part
