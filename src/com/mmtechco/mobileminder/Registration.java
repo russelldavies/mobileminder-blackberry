@@ -83,7 +83,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 		// Display help notification if registered and there are emergency
 		// numbers.
 		if (regStage >= 2 && emergNums != null) {
-			notifyObservers();
+			// TODO: set HelpMe menu
 		}
 		stageState(regStage);
 	}
@@ -229,18 +229,14 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	private void switchStage(int inputStage, String stateText) {
 		switch (inputStage) {
 		case 0: // New install
-			// TODO: implement
 			logger.log(TAG, "Status text updated to: " + stateText);
-			//StatusBar.UpdateStatus(stateText);
 			status = stateText;
 			notifyObservers();
 			break;
 		case 1: // New & has SN
 		case 2: // Wed Reg
 		case 3: // Device Reg
-			// TODO: implement
 			logger.log(TAG, "Status text updated to: " + stateText + " " + regID);
-			//StatusBar.UpdateStatus(stateText + " [" + regID + "]");
 			status = stateText;
 			notifyObservers();
 			break;
