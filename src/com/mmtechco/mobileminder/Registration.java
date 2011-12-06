@@ -2,12 +2,14 @@ package com.mmtechco.mobileminder;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.ui.Screen;
 
 import com.mmtechco.mobileminder.data.DBFactory;
 import com.mmtechco.mobileminder.net.Reply;
@@ -36,6 +38,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	private static int regStage;
 	private static String regID;
 	private static String emergNums;
+	private static String status;
 	private final int sleepTimeLong = 1000 * 60 * 60 * 24; // 24h
 	private final int sleepTimeShort = 1000 * 60 * 2; // 2 min
 
@@ -47,7 +50,7 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	private Hashtable regTable;
 	
 	private boolean registered = false;
-
+	
 	/**
 	 * Initializes context, creates own instance of Server. Requests a
 	 * registration ID and the and the registration state of the current device
@@ -76,6 +79,11 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 			emergNums = String.valueOf(regTable.get(KEY_NUMBERS));
 		}
 		
+		// Display help notification if registered and there are emergency
+		// numbers.
+		if (regStage >= 2 && emergNums != null) {
+			notifyObservers();
+		}
 		stageState(regStage);
 	}
 
@@ -223,6 +231,8 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 			// TODO: implement
 			logger.log(TAG, "Status text updated to: " + stateText);
 			//StatusBar.UpdateStatus(stateText);
+			status = stateText;
+			notifyObservers();
 			break;
 		case 1: // New & has SN
 		case 2: // Wed Reg
@@ -230,6 +240,8 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 			// TODO: implement
 			logger.log(TAG, "Status text updated to: " + stateText + " " + regID);
 			//StatusBar.UpdateStatus(stateText + " [" + regID + "]");
+			status = stateText;
+			notifyObservers();
 			break;
 		}
 	}
@@ -264,6 +276,10 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 		} else {
 			return regID;
 		}
+	}
+	
+	public static String getStatus() {
+		return status;
 	}
 
 	/**
@@ -313,6 +329,24 @@ public class Registration extends Thread implements Controllable, MobileMinderRe
 	
 	public boolean isRegistered() {
 		return registered;
+	}
+	
+	
+	// Subject stuff
+	private static Vector observers = new Vector();
+	
+	public static void addObserver(Screen screen) {
+		observers.addElement(screen);
+	}
+	
+	public static void removeObserver(Screen screen) {
+		observers.removeElement(screen);
+	}
+	
+	public static void notifyObservers() {
+		for(int i = 0; i < observers.size(); i++) {
+			((InfoScreen) observers.elementAt(i)).update();
+		}
 	}
 }
 

@@ -17,7 +17,6 @@ import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.database.DatabaseIOException;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.CodeModuleListener;
 import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
@@ -39,31 +38,31 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 
 		app = new MobileMinder();
 
-		/*
-		 * if (args != null && args.length > 0 && args[0].equals("autostartup"))
-		 * { // App started from autorun on startup
-		 */
+		if (args != null && args.length > 0 && args[0].equals("autostartup")) {
+			// App started from autorun on startup
 
-		// If system startup is still in progress when this
-		// application is run.
-		if (ApplicationManager.getApplicationManager().inStartup()) {
-			// Add a system listener to detect when system is ready and
-			// available.
-			app.addSystemListener(app);
+			// If system startup is still in progress when this
+			// application is run.
+			if (ApplicationManager.getApplicationManager().inStartup()) {
+				// Add a system listener to detect when system is ready and
+				// available.
+				app.addSystemListener(app);
+			} else {
+				// System is already ready and available so perform start up
+				// work now. Note that this work must be completed using
+				// invokeLater because the application has not yet entered the
+				// event dispatcher.
+				app.doStartupWorkLater();
+				// UiApplication.getUiApplication().pushScreen(new
+				// InfoScreen());
+			}
+
 		} else {
-			// System is already ready and available so perform start up
-			// work now. Note that this work must be completed using
-			// invokeLater because the application has not yet entered the
-			// event dispatcher.
+			// App was started from icon click
+			Logger.getInstance().log(TAG, "Started from icon click");
 			app.doStartupWorkLater();
-			// UiApplication.getUiApplication().pushScreen(new InfoScreen());
+			UiApplication.getUiApplication().pushScreen(new InfoScreen());
 		}
-		/*
-		 * } else { // App was started from icon click
-		 * Logger.getInstance().log(TAG, "Started from icon click");
-		 * app.doStartupWorkLater();
-		 * UiApplication.getUiApplication().pushScreen(new InfoScreen()); }
-		 */
 
 		// Listen for removal of app
 		CodeModuleManager.addListener(app, new UninstallMonitor());
@@ -77,11 +76,11 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		// Timer values
 		final int locTime = 29000;
 		final int appTime = 31000;
-	
+
 		logger.log(TAG, "Starting registration");
 		reg = new Registration();
 		reg.start();
-		
+
 		// Wait until registration has processed
 		try {
 			while (!reg.isRegistered()) {

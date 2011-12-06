@@ -1,7 +1,6 @@
 package com.mmtechco.mobileminder;
 
 import java.io.IOException;
-import java.util.Vector;
 
 import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
@@ -78,6 +77,7 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 
 		// Start helper thread
 		// statusThread.start();
+		Registration.addObserver(this);
 
 		// General layout manager
 		VerticalFieldManager vfm = new VerticalFieldManager(
@@ -122,24 +122,19 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 		add(vfm);
 	}
 
-	protected void onUiEngineAttached(boolean attached) {
-		// Display help notification if registered and there are emergency
-		// numbers.
-		// if (regStage >= 2 && emergNums != "0") {
-		setIdLabel(Registration.getRegID());
-	}
-
 	public boolean onClose() {
 		UiApplication.getUiApplication().requestBackground();
 		return true;
 	}
 
-	public void setStatusLabel(String text) {
-		regStatusLabel.setText(text);
-	}
-
-	public void setIdLabel(String text) {
-		regIDLabel.setText(text);
+	// Called from Registration
+	public void update() {
+		UiApplication.getUiApplication().invokeLater(new Runnable() {
+			public void run() {
+				regIDLabel.setText(Registration.getRegID());
+				regStatusLabel.setText(Registration.getStatus());
+			}
+		});
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
