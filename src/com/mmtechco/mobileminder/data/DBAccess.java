@@ -14,8 +14,10 @@ import net.rim.device.api.database.Statement;
 import net.rim.device.api.io.MalformedURIException;
 import net.rim.device.api.io.URI;
 import net.rim.device.api.system.ControlledAccessException;
+import net.rim.device.api.system.RuntimeStore;
 
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
+import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
@@ -25,7 +27,7 @@ public abstract class DBAccess {
 	protected Logger logger = Logger.getInstance();
 	protected ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
 
-	protected static Database db; // TODO: check can be non-static
+	private static RuntimeStore runtimeStore = RuntimeStore.getRuntimeStore();
 
 	// Database definitions
 	private static final String DATABASE_NAME = "mobileminder.db";
@@ -79,6 +81,8 @@ public abstract class DBAccess {
 	 *         initialization call).
 	 */
 	public DBAccess open() throws DatabaseIOException {
+		Database db = (Database)runtimeStore.get(Constants.db);
+		
 		// Only one instance of storeDB desired
 		if (db == null) {
 			try {
@@ -86,8 +90,10 @@ public abstract class DBAccess {
 				// Open db otherwise create it
 				if (DatabaseFactory.exists(dbURI)) {
 					db = DatabaseFactory.open(dbURI);
+					runtimeStore.put(Constants.db, db);
 				} else {
 					db = createDB(dbLocation);
+					runtimeStore.put(Constants.db, db);
 				}
 			} catch (DatabasePathException e) {
 				logger.log(TAG, "Invalid DB path.");
@@ -122,7 +128,7 @@ public abstract class DBAccess {
 		// DatabaseSecurityOptions dbso = new DatabaseSecurityOptions(true);
 		// TODO: enable security
 		// db = DatabaseFactory.create(dbURI, dbso);
-		db = DatabaseFactory.create(dbURI);
+		Database db = DatabaseFactory.create(dbURI);
 		// Open db and create schema
 		// Create statements must be executed individually
 		for (int i = 0; i < DATABASE_CREATES.length; i++) {
@@ -140,6 +146,7 @@ public abstract class DBAccess {
 	 */
 	public static void close() {
 		try {
+			Database db = (Database)runtimeStore.get(Constants.db);
 			db.close();
 		} catch (DatabaseIOException e) {
 			Logger.getInstance().log(TAG,
@@ -164,6 +171,7 @@ public abstract class DBAccess {
 	public Cursor getAll() throws DatabaseException {
 		// SQL statement:
 		// SELECT * FROM DATABASE_TABLE
+		Database db = (Database)runtimeStore.get(Constants.db);
 		Statement st = db.createStatement("SELECT * FROM " + getDBTable());
 		st.prepare();
 		return st.getCursor();
@@ -240,6 +248,7 @@ public abstract class DBAccess {
 			return;
 		}
 		try {
+			Database db = (Database)runtimeStore.get(Constants.db);
 			Statement st = db.createStatement(sqlStatement);
 			st.prepare();
 			st.execute();
@@ -265,6 +274,7 @@ public abstract class DBAccess {
 			return null;
 		}
 		try {
+			Database db = (Database)runtimeStore.get(Constants.db);
 			Statement st = db.createStatement(sqlStatement);
 			st.prepare();
 			return st.getCursor();
