@@ -16,7 +16,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
 /**
  * Sync the call data to the server.
  */
-public class CallSync extends Thread {
+public class CallSync implements Runnable {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(CallSync.class);
 
@@ -25,9 +25,9 @@ public class CallSync extends Thread {
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
 
-	public CallSync(Server server) {
+	public CallSync() {
 		logger.log(TAG, "Started");
-		this.server = server;
+		this.server = new Server();
 	}
 
 	/**
@@ -65,8 +65,7 @@ public class CallSync extends Thread {
 			logger.log(TAG, "Looping through call log");
 			for (int index = 0; index < numCalls; index++) {
 				// Create object to store details of each call
-				CallMonitor.CallMessage callMessageHolder = new CallMonitor(
-						null).new CallMessage(true);
+				CallMonitor.CallMessage callMessageHolder = new CallMonitor.CallMessage(true);
 				// Get particular call and unix timestamp
 				PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog.callAt(
 						index, PhoneLogs.FOLDER_NORMAL_CALLS);

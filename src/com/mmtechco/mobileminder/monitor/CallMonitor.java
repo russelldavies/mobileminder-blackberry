@@ -24,7 +24,7 @@ public class CallMonitor extends AbstractPhoneListener implements Controllable {
 			.getSimpleClassName(CallMonitor.class);
 
 	private LocalDataWriter actLog;
-	Logger logger = Logger.getInstance();
+	private Logger logger = Logger.getInstance();
 	private CallMessage callMessage;
 
 	public CallMonitor(LocalDataWriter inputAccess) {
@@ -83,7 +83,7 @@ public class CallMonitor extends AbstractPhoneListener implements Controllable {
 	/**
 	 * This class implements the message interface to hold call event messages.
 	 */
-	public class CallMessage implements Message {
+	public static class CallMessage implements Message {
 		private MMTools tools = ToolsBB.getInstance();
 		private final String type;
 		private String callTimeStamp;
