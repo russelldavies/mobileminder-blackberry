@@ -135,6 +135,8 @@ public class InfoScreen extends MainScreen implements MobileMinderResource {
 	}
 
 	public boolean onClose() {
+		// App is pushed to background rather than terminated when screen is
+		// closed.
 		UiApplication.getUiApplication().requestBackground();
 		return true;
 	}

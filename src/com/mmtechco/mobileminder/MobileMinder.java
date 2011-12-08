@@ -32,14 +32,20 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	private Registration reg;
 	private Logger logger = Logger.getInstance();
 
+	/**
+	 * Entry point for application
+	 * 
+	 * @param args
+	 *            Alternate entry point arguments.
+	 */
 	public static void main(String[] args) {
 		// Start logging
 		// Logger.startEventLogger();
 
 		app = new MobileMinder();
 
+		// App started from autorun on startup
 		if (args != null && args.length > 0 && args[0].equals("autostartup")) {
-			// App started from autorun on startup
 
 			// If system startup is still in progress when this
 			// application is run.
@@ -53,17 +59,13 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 				// invokeLater because the application has not yet entered the
 				// event dispatcher.
 				app.doStartupWorkLater();
-				// UiApplication.getUiApplication().pushScreen(new
-				// InfoScreen());
 			}
-
 		} else {
 			// App was started from icon click
 			Logger.getInstance().log(TAG, "Started from icon click");
 			app.doStartupWorkLater();
 			UiApplication.getUiApplication().pushScreen(new InfoScreen());
 		}
-
 		// Listen for removal of app
 		CodeModuleManager.addListener(app, new UninstallMonitor());
 
@@ -91,33 +93,31 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 			e.printStackTrace();
 		}
 
-		// Open database
+		// Open the database
 		try {
 			actLog = DBFactory.getLocalDataWriter();
+			actLog.open();
 		} catch (IOException e) {
 			logger.log(TAG,
 					"Device has no storage that is can be written to by DB. Alerting user.");
 			return;
 			// TODO: pop dialog to user
-		}
-		try {
-			actLog.open();
 		} catch (DatabaseIOException e) {
 			e.printStackTrace();
-			logger.log(TAG, "fs could not access db");
+			logger.log(TAG, "Filesystem could not access DB");
 			return;
 		}
 
 		// Start call sync. Note that there is no faculty to access existing SMS
 		// messages stored on the device.
-		new CallSync(new Server(actLog)).start();
+		new Thread(new CallSync()).start();
 
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
 		new AppMonitor(actLog, appTime);
 		new LocationMonitor(actLog, locTime);
 		new MailMonitor(actLog);
-
+		
 		Controllable[] components = new Controllable[3];
 		components[0] = new SMSMonitor(actLog);
 		components[1] = new CallMonitor(actLog);
