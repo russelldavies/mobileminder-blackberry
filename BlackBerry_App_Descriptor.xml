@@ -2,7 +2,7 @@
 
 <Properties ModelVersion="1.1.2">
   <General Title="Mobile Minder" Version="1.0.0" Vendor="mm Technologies" Description=""/>
-  <Application Type="BlackBerry Application" MainMIDletName="" MainArgs="" HomeScreenPosition="0" StartupTier="7" IsSystemModule="false" IsAutostartup="false"/>
+  <Application Type="BlackBerry Application" MainMIDletName="" MainArgs="" HomeScreenPosition="0" StartupTier="7" IsSystemModule="false" IsAutostartup="true"/>
   <Resources hasTitleResource="false" TitleResourceBundleName="" TitleResourceBundleRelativePath="" TitleResourceBundleClassName="" TitleResourceBundleKey="" DescriptionId="">
     <Icons>
       <Icon CanonicalFileName="res/img/icon_96.png" IsFocus="false"/>
@@ -19,10 +19,5 @@
     <ClassProtection/>
     <PackageProtection/>
   </HiddenProperties>
-  <AlternateEntryPoints>
-    <AlternateEntryPoint Title="MobileMinder_autostartup" MainMIDletName="" ArgumentsForMain="autostartup" HomeScreenPosition="0" StartupTier="7" IsSystemModule="false" IsAutostartup="true" hasTitleResource="false" TitleResourceBundleKey="" TitleResourceBundleName="" TitleResourceBundleClassName="" TitleResourceBundleRelativePath="">
-      <Icons/>
-      <KeywordResources KeywordResourceBundleName="" KeywordResourceBundleRelativePath="" KeywordResourceBundleClassName="" KeywordResourceBundleKey=""/>
-    </AlternateEntryPoint>
-  </AlternateEntryPoints>
+  <AlternateEntryPoints/>
 </Properties>
