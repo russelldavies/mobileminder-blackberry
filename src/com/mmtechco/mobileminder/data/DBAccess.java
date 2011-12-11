@@ -24,8 +24,8 @@ import com.mmtechco.mobileminder.util.ToolsBB;
 public abstract class DBAccess {
 	private static final String TAG = ToolsBB.getSimpleClassName(DBAccess.class);
 
-	protected Logger logger = Logger.getInstance();
-	protected ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
+	protected static Logger logger = Logger.getInstance();
+	protected static ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
 
 	private static RuntimeStore runtimeStore = RuntimeStore.getRuntimeStore();
 
@@ -144,7 +144,7 @@ public abstract class DBAccess {
 	/**
 	 * Close access to the DB. Should be called when device is shutting down.
 	 */
-	public static void close() {
+	public void close() {
 		try {
 			Database db = (Database)runtimeStore.get(Constants.db);
 			db.close();

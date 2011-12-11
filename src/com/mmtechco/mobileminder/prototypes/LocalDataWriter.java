@@ -47,4 +47,6 @@ public interface LocalDataWriter {
 	void addMessage(Message message);
 
 	DBAccess open() throws DatabaseIOException;
+	
+	void close();
 }
