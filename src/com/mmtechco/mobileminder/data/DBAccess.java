@@ -17,17 +17,18 @@ import net.rim.device.api.system.ControlledAccessException;
 import net.rim.device.api.system.RuntimeStore;
 
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
-import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
 public abstract class DBAccess {
-	private static final String TAG = ToolsBB.getSimpleClassName(DBAccess.class);
+	private static final String TAG = ToolsBB
+			.getSimpleClassName(DBAccess.class);
+
+	// "com.mmtechco.mobileminder.db"
+	private static final long DB_ID = 0xae7374baf7ae6095L;
 
 	protected static Logger logger = Logger.getInstance();
 	protected static ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
-
-	private static RuntimeStore runtimeStore = RuntimeStore.getRuntimeStore();
 
 	// Database definitions
 	private static final String DATABASE_NAME = "mobileminder.db";
@@ -62,10 +63,12 @@ public abstract class DBAccess {
 		// If sdcard is not available and device has eMMC builtin memory
 		// (filesystem mount point "/system" must be mounted for this to be
 		// true) then put db on /store. Otherwise app can't run.
-		if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD) && ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
-				// sdcard not mounted but device has eMMC
-				dbLocation = dbLocStore + DATABASE_NAME;
-		} else if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD) && !ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
+		if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD)
+				&& ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
+			// sdcard not mounted but device has eMMC
+			dbLocation = dbLocStore + DATABASE_NAME;
+		} else if (!ToolsBB.fsMounted(FILESYSTEM.SDCARD)
+				&& !ToolsBB.fsMounted(FILESYSTEM.SYSTEM)) {
 			// No writable storage available.
 			throw new IOException();
 		}
@@ -74,38 +77,50 @@ public abstract class DBAccess {
 	/**
 	 * Opens the database. If cannot be opened attempts to create a new instance
 	 * of the database. If it cannot be created throw an exception to signal
-	 * failure. Note that once the database is opened it is cached so multiple
-	 * calls to open an already open database have no impact.
+	 * failure. Note that once the database has been opened it is cached so
+	 * further open calls are idempotent.
 	 * 
 	 * @return this (self-reference, allowing this to be chained in an
 	 *         initialization call).
+	 * @throws DatabaseException 
 	 */
-	public DBAccess open() throws DatabaseIOException {
-		Database db = (Database)runtimeStore.get(Constants.db);
-		
-		// Only one instance of storeDB desired
-		if (db == null) {
-			try {
-				URI dbURI = URI.create(dbLocation);
-				// Open db otherwise create it
-				if (DatabaseFactory.exists(dbURI)) {
-					db = DatabaseFactory.open(dbURI);
-					runtimeStore.put(Constants.db, db);
-				} else {
-					db = createDB(dbLocation);
-					runtimeStore.put(Constants.db, db);
+	public DBAccess open() throws DatabaseException {
+			getDb();
+		return this;
+	}
+
+	private Database getDb() throws DatabaseException {
+		Database db;
+		RuntimeStore runtimeStore = RuntimeStore.getRuntimeStore();
+
+		synchronized (runtimeStore) {
+			db = (Database) runtimeStore.get(DB_ID);
+			if (db == null) {
+				URI dbURI;
+				try {
+					dbURI = URI.create(dbLocation);
+					// Open db otherwise create it
+					if (DatabaseFactory.exists(dbURI)) {
+						db = DatabaseFactory.open(dbURI);
+					} else {
+						db = createDB(dbLocation);
+					}
+				} catch (IllegalArgumentException e) {
+					logger.log(TAG, "URI is null");
+				} catch (MalformedURIException e) {
+					logger.log(TAG, "URI is invalid");
+				} catch (ControlledAccessException e) {
+					logger.log(TAG, "Cannot open DB: no read permission.");
+				} catch (DatabasePathException e) {
+					logger.log(TAG, "Invalid DB path.");
+				} catch (DatabaseIOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (DatabasePathException e) {
-				logger.log(TAG, "Invalid DB path.");
-			} catch (ControlledAccessException e) {
-				logger.log(TAG, "Cannot open DB: no read permission.");
-			} catch (DatabaseException e) {
-				logger.log(TAG, "Error with DB.");
-			} catch (Exception e) {
-				logger.log(TAG, "DB Exception");
+				runtimeStore.put(DB_ID, db);
 			}
 		}
-		return this;
+		return db;
 	}
 
 	/**
@@ -137,16 +152,16 @@ public abstract class DBAccess {
 			st.execute();
 			st.close();
 		}
-		// storeDB.close();
 		return db;
 	}
 
 	/**
 	 * Close access to the DB. Should be called when device is shutting down.
+	 * @throws DatabaseException 
 	 */
-	public void close() {
+	public void close() throws DatabaseException {
 		try {
-			Database db = (Database)runtimeStore.get(Constants.db);
+			Database db = getDb();
 			db.close();
 		} catch (DatabaseIOException e) {
 			Logger.getInstance().log(TAG,
@@ -171,7 +186,7 @@ public abstract class DBAccess {
 	public Cursor getAll() throws DatabaseException {
 		// SQL statement:
 		// SELECT * FROM DATABASE_TABLE
-		Database db = (Database)runtimeStore.get(Constants.db);
+		Database db = getDb();
 		Statement st = db.createStatement("SELECT * FROM " + getDBTable());
 		st.prepare();
 		return st.getCursor();
@@ -248,7 +263,7 @@ public abstract class DBAccess {
 			return;
 		}
 		try {
-			Database db = (Database)runtimeStore.get(Constants.db);
+			Database db = getDb();
 			Statement st = db.createStatement(sqlStatement);
 			st.prepare();
 			st.execute();
@@ -274,7 +289,7 @@ public abstract class DBAccess {
 			return null;
 		}
 		try {
-			Database db = (Database)runtimeStore.get(Constants.db);
+			Database db = getDb();
 			Statement st = db.createStatement(sqlStatement);
 			st.prepare();
 			return st.getCursor();

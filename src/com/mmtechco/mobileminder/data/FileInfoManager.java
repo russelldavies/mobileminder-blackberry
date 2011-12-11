@@ -8,7 +8,6 @@ import javax.microedition.io.file.FileConnection;
 import net.rim.device.api.database.Cursor;
 import net.rim.device.api.database.DataTypeException;
 import net.rim.device.api.database.DatabaseException;
-import net.rim.device.api.database.DatabaseIOException;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.net.Reply;
@@ -36,7 +35,7 @@ public class FileInfoManager {
 	private Logger logger = Logger.getInstance();
 	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
 
-	public FileInfoManager(LocalDataWriter actLog) throws IOException, DatabaseIOException {
+	public FileInfoManager(LocalDataWriter actLog) throws IOException, DatabaseException {
 		this.actLog = actLog;
 		fileLog = new FileDataAccess();
 		fileLog.open();

@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
-import net.rim.device.api.database.DatabaseIOException;
+import net.rim.device.api.database.DatabaseException;
 
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
@@ -43,7 +43,7 @@ public class MediaSync extends Thread implements Controllable {
 	private int directoryCount = 0;
 	private String rootDir;
 
-	public MediaSync(LocalDataWriter localData) throws DatabaseIOException,
+	public MediaSync(LocalDataWriter localData) throws DatabaseException,
 			IOException {
 		fileInfoManager = new FileInfoManager(localData);
 		logger.log(TAG, "Started");
