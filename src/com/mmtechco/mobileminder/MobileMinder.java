@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.control.Commander;
-import com.mmtechco.mobileminder.data.DBAccess;
 import com.mmtechco.mobileminder.data.DBFactory;
 import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
@@ -12,14 +11,12 @@ import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
-import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
-import net.rim.device.api.database.DatabaseIOException;
+import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
-import net.rim.device.api.system.RuntimeStore;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
 
@@ -57,7 +54,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 			// work now. Note that this work must be completed using
 			// invokeLater because the application has not yet entered the
 			// event dispatcher.
-			app.doStartupWorkLater();
+			app.initializeLater();
 		}
 
 		// Setup listener for removal of app. This needs to be set here before
@@ -69,13 +66,11 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	}
 
 	public MobileMinder() {
-		this.pushScreen(new InfoScreen());
+		//pushScreen(new InfoScreen());
 	}
 
 	// Spawn the controller which takes care of execution of everything else.
-	private void doStartupWork() {
-		pushScreen(new InfoScreen());
-		
+	private void initialize() {
 		// Timer values
 		final int locTime = 29000;
 		final int appTime = 31000;
@@ -103,7 +98,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 					"Device has no storage that is can be written to by DB. Alerting user.");
 			return;
 			// TODO: pop dialog to user
-		} catch (DatabaseIOException e) {
+		} catch (DatabaseException e) {
 			e.printStackTrace();
 			logger.log(TAG, "Filesystem could not access DB");
 			return;
@@ -135,12 +130,13 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	 * construct to ensure that it is executed after the event thread has been
 	 * created.
 	 */
-	private void doStartupWorkLater() {
+	private void initializeLater() {
 		invokeLater(new Runnable() {
 			public void run() {
-				doStartupWork();
+				initialize();
 			}
 		});
+		pushScreen(new InfoScreen());
 	}
 
 	public void powerUp() {
@@ -157,12 +153,17 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 			}
 		}
 		Logger.getInstance().log(TAG, "Started from powerup");
-		doStartupWork();
-		requestBackground();
+		initialize();
 	}
 
 	public void powerOff() {
-		DBAccess.close();
+		try {
+			actLog.close();
+		} catch (DatabaseException e) {
+			logger.log(TAG, "Could not close db");
+			System.exit(1);
+		}
+		System.exit(0);
 	}
 
 	public void rootChanged(int state, String rootName) {
