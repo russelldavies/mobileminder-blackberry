@@ -66,7 +66,8 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	}
 
 	public MobileMinder() {
-		//pushScreen(new InfoScreen());
+		pushScreen(new InfoScreen());
+		requestBackground();
 	}
 
 	// Spawn the controller which takes care of execution of everything else.
@@ -136,7 +137,6 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 				initialize();
 			}
 		});
-		pushScreen(new InfoScreen());
 	}
 
 	public void powerUp() {
