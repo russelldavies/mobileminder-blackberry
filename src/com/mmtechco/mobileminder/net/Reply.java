@@ -39,7 +39,7 @@ public class Reply {
 			restString = restMessage;
 			String[] replyArray;
 			replyArray = tools.split(restString, Tools.ServerQueryStringSeparator);
-			logger.log(TAG, "rest messsage: " + restMessage);
+			logger.log(TAG, "rest message: " + restMessage);
 
 			try {
 				if (0 < replyArray[1].length() // check if string is blank
@@ -193,7 +193,6 @@ public class Reply {
 	 */
 	public String[] getArgs() {
 		logger.log(TAG, "Processing the args :" + args);
-		// TODO: check that the pipe is not being interpreted as a regex
 		String[] processedArgs = tools.split(args, "|");
 		return processedArgs;
 	}

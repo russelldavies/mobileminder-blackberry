@@ -1,7 +1,7 @@
 package com.mmtechco.mobileminder.monitor;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
@@ -25,14 +25,14 @@ public class MailMonitor implements FolderListener, StoreListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(MailMonitor.class);
 
-	private LocalDataWriter actLog;
+	private LogDb actLog;
 	MailMessage messageObject;
 	Message emailMessage;
 	Logger logger = Logger.getInstance();
 	boolean _hasSupportedAttachment = false;
 	boolean _hasUnsupportedAttachment = false;
 
-	public MailMonitor(LocalDataWriter inputAccess) {
+	public MailMonitor(LogDb inputAccess) {
 		actLog = inputAccess;
 		messageObject = new MailMessage();
 

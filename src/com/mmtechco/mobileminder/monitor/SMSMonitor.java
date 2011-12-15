@@ -9,10 +9,8 @@ import javax.wireless.messaging.MessageListener;
 import javax.wireless.messaging.TextMessage;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
 import com.mmtechco.mobileminder.util.ToolsBB;
@@ -25,12 +23,11 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
  * MyTextListener monitors and registers text message based events.
  * 
  */
-public class SMSMonitor implements OutboundMessageListener, MessageListener,
-		Controllable {
+public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(SMSMonitor.class);
 
-	private LocalDataWriter actLog;
+	private LogDb actLog;
 	private static Logger logger = Logger.getInstance();
 	private static MessageConnection receiver;
 	private MMTools tools = ToolsBB.getInstance();
@@ -43,7 +40,7 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener,
 	 * @param inputAccess
 	 *            log of actions
 	 */
-	public SMSMonitor(LocalDataWriter inputAccess) {
+	public SMSMonitor(LogDb inputAccess) {
 		logger.log(TAG, "Started");
 		
 		actLog = inputAccess;
@@ -125,30 +122,6 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener,
 		sender = sender.substring(sender.lastIndexOf('/')) + 1;
 		addToLog("Incoming Message", sender, tools.getDate(),
 				message.getPayloadText());
-	}
-
-	public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS) {
-		logger.log(TAG, "TextListener::isTarget::COMMAND_TARGETS.");
-		if (inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean isTarget(String inputCOMMAND_TARGETS) {
-		logger.log(TAG, "TextListener::isTarget::String.");
-		if (inputCOMMAND_TARGETS == COMMAND_TARGETS.TEXT.toString()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean processCommand(String[] arg0) {
-		logger.log(TAG, "TextListener::processCommand::String[].");
-		// TODO Auto-generated method stub
-		return false;
 	}
 }
 

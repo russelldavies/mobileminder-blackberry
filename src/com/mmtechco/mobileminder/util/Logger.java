@@ -2,6 +2,8 @@ package com.mmtechco.mobileminder.util;
 
 import java.util.Date;
 
+import com.mmtechco.mobileminder.DebugScreen;
+
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.system.EventLogger;
 
@@ -22,6 +24,8 @@ public class Logger {
 	// Used to format dates into a standard format
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
+	
+	private static DebugScreen scr;
 
 	protected Logger() {
 	}
@@ -34,14 +38,18 @@ public class Logger {
 	}
 
 	public void log(String tag, String msg) {
-		// Select here whether to use console or device logging
-		boolean console = true;
-
-		if (console) {
+		if (Constants.DEBUG) {
 			out(tag, msg);
+			if (scr != null) {
+				scr.addNewLog(tag + "::" + msg);
+			}
 		} else {
 			logInformationEvent(msg);
 		}
+	}
+	
+	public static void addObserver(DebugScreen screen) {
+		scr = screen;
 	}
 
 	// These methods are for logging to console. Useful for simulator debugging.

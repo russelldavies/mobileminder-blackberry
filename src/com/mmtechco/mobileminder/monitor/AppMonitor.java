@@ -6,7 +6,7 @@ import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.Logger;
@@ -19,9 +19,11 @@ import com.mmtechco.mobileminder.util.ToolsBB;
 public class AppMonitor extends Thread {
 	private static final String TAG = ToolsBB.getSimpleClassName(AppMonitor.class);
 	
+	// Interval that polling is done, in milliseconds
+	private static int interval = 30 * 1000;
+	
 	private static final Logger logger = Logger.getInstance();
-	private LocalDataWriter actLog;
-	private int interval;
+	private LogDb actLog;
 
 	/**
 	 * The AppListener constructor initialise the action store location and the
@@ -30,12 +32,9 @@ public class AppMonitor extends Thread {
 	 * 
 	 * @param inputAccess
 	 *            log of actions
-	 * @param inputAppTimer
-	 *            interval value
 	 */
-	public AppMonitor(LocalDataWriter actLog, int inputAppTimer) {
+	public AppMonitor(LogDb actLog) {
 		this.actLog = actLog;
-		interval = inputAppTimer;
 		this.start();
 	}
 

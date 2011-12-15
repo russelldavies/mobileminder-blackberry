@@ -3,10 +3,10 @@ package com.mmtechco.mobileminder.contacts;
 import java.util.Enumeration;
 import javax.microedition.pim.PIM;
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
@@ -33,7 +33,7 @@ public class ContactPic implements Controllable {
 	private ContactPicMessage flyContactPicMessage;
 	static Logger logger = Logger.getInstance();
 
-	public ContactPic(LocalDataWriter actLog) {
+	public ContactPic(LogDb actLog) {
 		server = new Server(actLog);
 		flyContactPicMessage = new ContactPicMessage();
 	}
@@ -228,15 +228,6 @@ public class ContactPic implements Controllable {
 		return complete;
 	}
 
-	/**
-	 * This method has been overridden from the Controllable interface. By
-	 * implementing this interface this class can specify the type of commands
-	 * it can process.
-	 * 
-	 * @param target
-	 *            passed to be checked.
-	 * @return true if this is the desired target.
-	 */
 	public boolean isTarget(COMMAND_TARGETS targets) {
 		if (targets == COMMAND_TARGETS.CONTACTS) {
 			return true;

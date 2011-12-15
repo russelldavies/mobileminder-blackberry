@@ -16,7 +16,7 @@ import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.io.transport.TransportInfo;
 import com.mmtechco.mobileminder.MobileMinderResource;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
@@ -35,7 +35,7 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
-	private LocalDataWriter actLog;
+	private LogDb actLog;
 	private final String URL = "http://www.mobileminder.net/WebService.php?";
 	private int freq = 1000 * 30; // 30 seconds
 	private String serverErrorReply = Tools.ServerQueryStringSeparator
@@ -43,7 +43,6 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			+ Tools.ServerQueryStringSeparator
 			+ Tools.ServerQueryStringSeparator;
 	private Security security;
-	// TODO: check RIM CRC32 works
 	private CRC32 crc;
 
 	/**
@@ -63,7 +62,7 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * @param actLog
 	 *            - local storage location.
 	 */
-	public Server(LocalDataWriter actLog) {
+	public Server(LogDb actLog) {
 		this();
 		this.actLog = actLog;
 	}
@@ -73,22 +72,19 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * and sends them to the server.
 	 */
 	public void run() {
-		logger.log(TAG,
-				"Server running. Message queue length: " + actLog.length());
-		String[] serverReply = null;
-		int counter = -1;
-
 		while (actLog != null) {
+			String[] serverReply = null;
+			int counter = -1;
 			if (tools.isConnected()) {
 				logger.log(TAG,
 						"Checking for new messages to send. Message queue length: "
 								+ actLog.length());
 				// Check is a message is in the local storage
-				while (actLog.length() > 0 && tools.isConnected()) {
+				while (!actLog.isEmpty() && tools.isConnected()) {
 					try {
 						// Send the first message from the queue to the server
 						// and parse reply
-						serverReply = tools.split(get(actLog.getValue(0)),
+						serverReply = tools.split(get(actLog.getValue(1)),
 								Tools.ServerQueryStringSeparator);
 						// No error
 						if (serverReply.length > 2
@@ -166,7 +162,6 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			connection.setRequestMethod(HttpConnection.GET);
 
 			int status = connection.getResponseCode();
-			// TODO: check if this is necessary
 			if (status == HttpConnection.HTTP_OK) {
 				InputStream input = connection.openInputStream();
 				byte[] reply = IOUtilities.streamToBytes(input);

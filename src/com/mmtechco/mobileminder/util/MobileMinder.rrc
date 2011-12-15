@@ -15,6 +15,7 @@ i18n_RegTrial#0="Trial Account";
 i18n_SMSError#0="Could not send Help Me SMS";
 i18n_SMSSuccess#0="Succesfully sent Help Me SMS";
 i18n_Starting#0="Starting";
+i18n_StorageError#0="Please insert an SDCard";
 i18n_Uninstall#0="You have uninstalled Mobile Minder. Your parents have been notified.";
 i18n_WaitMsg#0="Please wait";
 i18n_WelcomeMsg#0="Welcome to MobileMinder. This service is designed to keep your child safe on their phone.";

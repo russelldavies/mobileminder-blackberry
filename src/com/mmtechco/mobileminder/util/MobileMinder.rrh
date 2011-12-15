@@ -20,3 +20,4 @@ i18n_HelpSent#0=16;
 i18n_WaitMsg#0=17;
 i18n_SMSError#0=18;
 i18n_SMSSuccess#0=19;
+i18n_StorageError#0=20;

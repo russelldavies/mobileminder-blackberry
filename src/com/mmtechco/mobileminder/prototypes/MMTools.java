@@ -144,12 +144,6 @@ public interface MMTools {
 	 */
 	public String getRandomString(int length);
 	
-	/**
-	 * Gets the manufacturer information of the device.
-	 * @return String of manufacturer otherwise an "(unavailable)".
-	 */
-	public String getDeviceManufacturer();
-
 	public String[] split(String strString, String strDelimiter);
 	
 	public boolean isConnected();

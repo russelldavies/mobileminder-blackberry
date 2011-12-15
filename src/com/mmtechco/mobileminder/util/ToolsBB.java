@@ -27,7 +27,6 @@ import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.system.RadioInfo;
@@ -93,10 +92,6 @@ public class ToolsBB extends Tools {
 			return HttpDateParser.parse(formattedDate);
 		}
 		return 0;
-	}
-
-	public String getDeviceManufacturer() {
-		return String.valueOf(Branding.getVendorId());
 	}
 
 	/**
@@ -303,7 +298,7 @@ public class ToolsBB extends Tools {
 				byte[] reply = IOUtilities.streamToBytes(input);
 				input.close();
 				connection.close();
-				return expectedResponse.equals(reply);
+				return expectedResponse.equals(new String(reply));
 			}
 		} catch (Exception e) {
 			logger.log(TAG, "Connectivity test failed");

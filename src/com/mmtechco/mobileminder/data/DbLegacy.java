@@ -9,8 +9,8 @@ import com.mmtechco.mobileminder.util.ToolsBB;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 
-public abstract class AccessLegacy {
-	private static final String TAG = ToolsBB.getSimpleClassName(AccessLegacy.class);
+public abstract class DbLegacy {
+	private static final String TAG = ToolsBB.getSimpleClassName(DbLegacy.class);
 	
 	protected static Logger logger = Logger.getInstance();
 	
@@ -19,7 +19,7 @@ public abstract class AccessLegacy {
 	protected static Vector localData; // list of Actions
 	
 	
-	public AccessLegacy open() {
+	public DbLegacy open() {
 		synchronized (store) {
 			if (null == store.getContents()) {
 				store.setContents(new Vector());

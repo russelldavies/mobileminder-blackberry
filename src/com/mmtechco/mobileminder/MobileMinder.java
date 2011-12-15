@@ -1,35 +1,39 @@
 package com.mmtechco.mobileminder;
 
-import java.io.IOException;
-
 import com.mmtechco.mobileminder.contacts.ContactPic;
-import com.mmtechco.mobileminder.control.Commander;
-import com.mmtechco.mobileminder.data.DBFactory;
+import com.mmtechco.mobileminder.data.DbFactory;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
+import com.mmtechco.mobileminder.sync.FileSync;
+import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.mobileminder.util.StorageException;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
 import net.rim.device.api.database.DatabaseException;
+import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.Dialog;
 
 /**
  * Main entry point of the application.
  */
 class MobileMinder extends UiApplication implements SystemListener2 {
 	private static final String TAG = "App";
-	private static MobileMinder app;
-
-	private LocalDataWriter actLog;
-	private Registration reg;
+	public static ResourceBundle r = ResourceBundle.getBundle(
+			MobileMinderResource.BUNDLE_ID, MobileMinderResource.BUNDLE_NAME);
+	
 	private Logger logger = Logger.getInstance();
+
+	private LogDb actLog;
+	private InfoScreen infoscreen;
 
 	/**
 	 * Entry point for application
@@ -39,9 +43,10 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	 */
 	public static void main(String[] args) {
 		// Start logging
+		// TODO: implement
 		// Logger.startEventLogger();
 
-		app = new MobileMinder();
+		MobileMinder app = new MobileMinder();
 
 		// If system startup is still in progress when this
 		// application is run.
@@ -65,40 +70,36 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		app.enterEventDispatcher();
 	}
 
-	public MobileMinder() {
-		pushScreen(new InfoScreen());
-		requestBackground();
-	}
-
-	// Spawn the controller which takes care of execution of everything else.
 	private void initialize() {
-		// Timer values
-		final int locTime = 29000;
-		final int appTime = 31000;
+		if (Constants.DEBUG) {
+			pushScreen(new DebugScreen());
+		} else {
+			infoscreen = new InfoScreen();
+			pushScreen(infoscreen);
+		}
 
 		logger.log(TAG, "Starting registration");
-		reg = new Registration();
+		Registration reg = new Registration();
 		reg.start();
+	}
 
-		// Wait until registration has processed
-		try {
-			while (!reg.isRegistered()) {
-				logger.log(TAG, "Waiting for registration to process");
-				Thread.sleep(10000);
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	/**
+	 * Start components
+	 */
+	public void startComponents() {
+		if (!Constants.DEBUG) {
+			// Register application indicator
+			//infoscreen.registerIndicator();
 		}
 
 		// Open the database
 		try {
-			actLog = DBFactory.getLocalDataWriter();
+			actLog = DbFactory.getLocalDataWriter();
 			actLog.open();
-		} catch (IOException e) {
-			logger.log(TAG,
-					"Device has no storage that is can be written to by DB. Alerting user.");
+		} catch (StorageException e) {
+			logger.log(TAG, e.getMessage() + " Alerting user");
+			Dialog.alert(r.getString(MobileMinderResource.i18n_StorageError));
 			return;
-			// TODO: pop dialog to user
 		} catch (DatabaseException e) {
 			e.printStackTrace();
 			logger.log(TAG, "Filesystem could not access DB");
@@ -111,16 +112,18 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
-		new AppMonitor(actLog, appTime);
-		new LocationMonitor(actLog, locTime);
+		new AppMonitor(actLog);
+		new LocationMonitor(actLog);
 		new MailMonitor(actLog);
+		new CallMonitor(actLog);
+		new SMSMonitor(actLog);
 
-		Controllable[] components = new Controllable[3];
-		components[0] = new SMSMonitor(actLog);
-		components[1] = new CallMonitor(actLog);
-		components[2] = new ContactPic(actLog);
-		// components[3] = new MediaSync(actLog);
+		Controllable[] components = new Controllable[2];
+		components[0] = new ContactPic(actLog);
+		FileSync mediasync = new FileSync(actLog);
+		components[1] = mediasync;
 		new Commander(actLog, components).start();
+		mediasync.start();
 
 		// Monitor activity log
 		new Server(actLog).start();
@@ -140,8 +143,10 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	}
 
 	public void powerUp() {
+		Logger.getInstance().log(TAG, "Started from powerup");
+
 		removeSystemListener(this);
-		// Wait 30 seconds for sdcard to mount
+		// Wait up to 30 seconds for sdcard to mount
 		for (int i = 0; i < 30; i++) {
 			if (ToolsBB.fsMounted(FILESYSTEM.SDCARD)) {
 				break;
@@ -152,7 +157,6 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 				e.printStackTrace();
 			}
 		}
-		Logger.getInstance().log(TAG, "Started from powerup");
 		initialize();
 	}
 

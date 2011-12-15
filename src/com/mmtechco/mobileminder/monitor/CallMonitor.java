@@ -3,11 +3,9 @@ package com.mmtechco.mobileminder.monitor;
 import java.util.Date;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
 import com.mmtechco.mobileminder.util.ToolsBB;
@@ -19,15 +17,15 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 /**
  * Monitors and registers call based events.
  */
-public class CallMonitor extends AbstractPhoneListener implements Controllable {
+public class CallMonitor extends AbstractPhoneListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(CallMonitor.class);
 
-	private LocalDataWriter actLog;
+	private LogDb actLog;
 	private Logger logger = Logger.getInstance();
 	private CallMessage callMessage;
 
-	public CallMonitor(LocalDataWriter inputAccess) {
+	public CallMonitor(LogDb inputAccess) {
 		actLog = inputAccess;
 		Phone.addPhoneListener(this);
 		logger.log(TAG, "Started");
@@ -67,21 +65,8 @@ public class CallMonitor extends AbstractPhoneListener implements Controllable {
 		logger.log(TAG, "Call message added to log");
 	}
 
-	public boolean isTarget(COMMAND_TARGETS inputCOMMAND_TARGETS) {
-		if (inputCOMMAND_TARGETS == COMMAND_TARGETS.CALL) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean processCommand(String[] arg0) {
-		// TODO implement
-		return true;
-	}
-
 	/**
-	 * This class implements the message interface to hold call event messages.
+	 * Holds call events in Message format.
 	 */
 	public static class CallMessage implements Message {
 		private MMTools tools = ToolsBB.getInstance();

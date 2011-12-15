@@ -51,7 +51,6 @@ public class CallSync implements Runnable {
 				// Convert server timestamp to unix time
 				serverTimestamp = tools.getDate(serverReply.getInfo());
 			} catch (Exception e) {
-				// TODO: add error to localdataaccess
 				logger.log(TAG, e.getMessage());
 				return;
 			}

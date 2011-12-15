@@ -114,7 +114,7 @@ public abstract class Tools implements MMTools {
 		StringBuffer builder = new StringBuffer();
 		char[] text = inputString.toCharArray();
 		String prefix = "&#";
-		logger.log(TAG, "Before Safe Range Encoding: " + inputString);
+		//logger.log(TAG, "Before Safe Range Encoding: " + inputString);
 
 		for (int count = 0; count < text.length; count++) {
 			if (255 < text[count]) {
@@ -126,7 +126,7 @@ public abstract class Tools implements MMTools {
 				builder.append(text[count]);
 			}
 		}
-		logger.log(TAG, "After Safe Range Encoding: " + builder.toString());
+		//logger.log(TAG, "After Safe Range Encoding: " + builder.toString());
 
 		return builder.toString();
 	}
@@ -162,6 +162,4 @@ public abstract class Tools implements MMTools {
 		}
 		return text.toString();
 	}
-	
-	public abstract String getDeviceManufacturer();
 }

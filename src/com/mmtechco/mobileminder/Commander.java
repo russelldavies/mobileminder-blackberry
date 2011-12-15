@@ -1,10 +1,9 @@
-package com.mmtechco.mobileminder.control;
+package com.mmtechco.mobileminder;
 
-import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.LocalDataWriter;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.ErrorMessage;
@@ -22,16 +21,16 @@ public class Commander extends Thread {
 	private Server server;
 	private Controllable componentList[];
 	private final int time;
-	private LocalDataWriter actLog;
+	private LogDb actLog;
 	private final int commandSignal = 0;
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
 
 	/**
-	 * Used by Controller to initialises the {@link LocalDataAccess} object and
+	 * Used by Controller to initialises the {@link LogDb} object and
 	 * {@link Controllable} objects.
 	 */
-	public Commander(LocalDataWriter actlog,
+	public Commander(LogDb actlog,
 			Controllable[] components) {
 		this.actLog = actlog;
 		server = new Server(actlog);
