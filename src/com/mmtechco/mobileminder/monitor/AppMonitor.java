@@ -6,7 +6,7 @@ import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.Logger;
@@ -23,7 +23,6 @@ public class AppMonitor extends Thread {
 	private static int interval = 30 * 1000;
 	
 	private static final Logger logger = Logger.getInstance();
-	private LogDb actLog;
 
 	/**
 	 * The AppListener constructor initialise the action store location and the
@@ -33,8 +32,7 @@ public class AppMonitor extends Thread {
 	 * @param inputAccess
 	 *            log of actions
 	 */
-	public AppMonitor(LogDb actLog) {
-		this.actLog = actLog;
+	public AppMonitor() {
 		this.start();
 	}
 
@@ -88,7 +86,7 @@ public class AppMonitor extends Thread {
 							appMessage.setMessage(lastAppName,
 									runningApps[count].getModuleName());
 							// ...and then to the database
-							actLog.addMessage(appMessage);
+							ActivityLog.addMessage(appMessage);
 							break;
 						}
 					}

@@ -1,6 +1,6 @@
 package com.mmtechco.mobileminder;
 
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
@@ -21,7 +21,6 @@ public class Commander extends Thread {
 	private Server server;
 	private Controllable componentList[];
 	private final int time;
-	private LogDb actLog;
 	private final int commandSignal = 0;
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
@@ -30,10 +29,8 @@ public class Commander extends Thread {
 	 * Used by Controller to initialises the {@link LogDb} object and
 	 * {@link Controllable} objects.
 	 */
-	public Commander(LogDb actlog,
-			Controllable[] components) {
-		this.actLog = actlog;
-		server = new Server(actlog);
+	public Commander(Controllable[] components) {
+		server = new Server();
 		time = 1000 * 60 * 5; // 5mins
 		componentList = components;
 	}
@@ -95,7 +92,7 @@ public class Commander extends Thread {
 			try {
 				Thread.sleep(time);
 			} catch (InterruptedException e) {
-				actLog.addMessage(new ErrorMessage(e));
+				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}

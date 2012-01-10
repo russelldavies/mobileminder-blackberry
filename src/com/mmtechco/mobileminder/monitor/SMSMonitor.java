@@ -9,7 +9,7 @@ import javax.wireless.messaging.MessageListener;
 import javax.wireless.messaging.TextMessage;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
@@ -27,7 +27,6 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(SMSMonitor.class);
 
-	private LogDb actLog;
 	private static Logger logger = Logger.getInstance();
 	private static MessageConnection receiver;
 	private MMTools tools = ToolsBB.getInstance();
@@ -40,10 +39,9 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	 * @param inputAccess
 	 *            log of actions
 	 */
-	public SMSMonitor(LogDb inputAccess) {
+	public SMSMonitor() {
 		logger.log(TAG, "Started");
 		
-		actLog = inputAccess;
 		smsMessage = new SMSMessage();
 
 		try {
@@ -87,7 +85,7 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 		smsMessage.setContactName((null == contactName ? "" : contactName));
 
 		logger.log(TAG, "Adding message to log...");
-		actLog.addMessage(smsMessage);
+		ActivityLog.addMessage(smsMessage);
 		logger.log(TAG, "Message added to log...");
 	}
 

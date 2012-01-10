@@ -10,16 +10,10 @@ import net.rim.device.api.io.file.FileSystemJournalListener;
 
 public class FileListener implements FileSystemJournalListener {
 	private static final String TAG = ToolsBB.getSimpleClassName(FileListener.class);
-	
 	private static Logger logger = Logger.getInstance();
-	private FileDb fileLog;
 	
 	private long lastUSN = 0;
 	
-	public FileListener(FileDb fileLog) {
-		this.fileLog = fileLog;
-	}
-
 	public void fileJournalChanged() {
 		long nextUSN = FileSystemJournal.getNextUSN();
 		
@@ -37,25 +31,26 @@ public class FileListener implements FileSystemJournalListener {
 				switch (entry.getEvent()) {
 				case FileSystemJournalEntry.FILE_ADDED:
 					logger.log(TAG, "File added: " + path);
-					fileLog.add(path);
+					FileLog.add(path);
 					break;
 				case FileSystemJournalEntry.FILE_DELETED:
 					logger.log(TAG, "File deleted: " + path);
-					fileLog.delete(path);
+					FileLog.delete(path);
 					break;
 				case FileSystemJournalEntry.FILE_RENAMED:
 					logger.log(TAG, "File renamed: " + path);
-					fileLog.renamed(path, "file://" + entry.getOldPath());
+					FileLog.renamed(path, "file://" + entry.getOldPath());
 					break;
 				case FileSystemJournalEntry.FILE_CHANGED:
 					logger.log(TAG, "File changed: " + path);
-					fileLog.changed(path);
+					FileLog.changed(path);
 					break;
 				}
 			}
 		}
 		lastUSN = nextUSN;
 		
-		fileLog.upload();
+		// Upload the new files
+		FileLog.upload();
 	}
 }

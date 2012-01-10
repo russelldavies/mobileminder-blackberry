@@ -16,7 +16,7 @@ import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.io.transport.TransportInfo;
 import com.mmtechco.mobileminder.MobileMinderResource;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
@@ -35,7 +35,6 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 
 	private Logger logger = Logger.getInstance();
 	private MMTools tools = ToolsBB.getInstance();
-	private LogDb actLog;
 	private final String URL = "http://www.mobileminder.net/WebService.php?";
 	private int freq = 1000 * 30; // 30 seconds
 	private String serverErrorReply = Tools.ServerQueryStringSeparator
@@ -56,41 +55,30 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	}
 
 	/**
-	 * Initializes server parameters, creates a new security instance and starts
-	 * the server connection.
-	 * 
-	 * @param actLog
-	 *            - local storage location.
-	 */
-	public Server(LogDb actLog) {
-		this();
-		this.actLog = actLog;
-	}
-
-	/**
 	 * Monitors the local storage for new messages stored at specific intervals
 	 * and sends them to the server.
 	 */
 	public void run() {
-		while (actLog != null) {
+		while (true) {
 			String[] serverReply = null;
 			int counter = -1;
 			if (tools.isConnected()) {
 				logger.log(TAG,
 						"Checking for new messages to send. Message queue length: "
-								+ actLog.length());
+								+ ActivityLog.length());
 				// Check is a message is in the local storage
-				while (!actLog.isEmpty() && tools.isConnected()) {
+				while (ActivityLog.length() > 0 && tools.isConnected()) {
 					try {
 						// Send the first message from the queue to the server
 						// and parse reply
-						serverReply = tools.split(get(actLog.getValue(1)),
+						serverReply = tools.split(
+								get(ActivityLog.getMessage()),
 								Tools.ServerQueryStringSeparator);
 						// No error
 						if (serverReply.length > 2
 								&& (Integer.parseInt(serverReply[2]) == 0)) {
 							// Pop the message off the queue
-							actLog.removeFirst();
+							ActivityLog.removeMessage();
 							counter = -1;
 						}
 					} catch (NullPointerException e) {
@@ -110,12 +98,12 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 						if (0 < serverReply[1].length()) {
 							counter++;
 							if (counter == 2) {
-								actLog.removeFirst();
+								ActivityLog.removeMessage();
 								counter = -1;
 							}
 						} else {
 							// No network
-							actLog.removeFirst();
+							ActivityLog.removeMessage();
 							break;
 						}
 					}
@@ -268,7 +256,9 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 					HttpProtocolConstants.HEADER_CONTENT_TYPE,
 					HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
 							+ ";boundary=" + boundary);
-			connection.setRequestProperty(HttpProtocolConstants.HEADER_CONTENT_LENGTH, String.valueOf(fileData.length));
+			connection.setRequestProperty(
+					HttpProtocolConstants.HEADER_CONTENT_LENGTH,
+					String.valueOf(fileData.length));
 			connection.setRequestProperty("xim-rim-transcode-content", "none");
 			// Create payload
 			MultipartPostData postData = new MultipartPostData("UTF-8", true);
@@ -359,8 +349,8 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			}
 		}
 		crc.update(text.getBytes());
-		logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
-		logger.log(TAG, "Client CRC: " + crc.getValue());
+		//logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
+		//logger.log(TAG, "Client CRC: " + crc.getValue());
 		logger.log(TAG, "Decrypted server reply: " + text);
 		// Check CRC
 		if (Long.parseLong(replyArray[1]) == crc.getValue()) {
@@ -369,7 +359,7 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			return null;
 		}
 	}
-	
+
 	private HttpConnection setupConnection(String url) throws IOException {
 		return ((ToolsBB) ToolsBB.getInstance()).setupConnection(url);
 	}

@@ -1,12 +1,9 @@
 package com.mmtechco.mobileminder;
 
-import java.io.IOException;
 import java.util.Hashtable;
 
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
-
-import com.mmtechco.mobileminder.data.DbAdapter;
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.data.FileLog;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.util.Logger;
 
@@ -14,10 +11,11 @@ import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
-import net.rim.device.api.system.RuntimeStore;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.ui.component.ButtonField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
@@ -98,32 +96,24 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			}
 		};
 
-		MenuItem delDbMenu = new MenuItem(
-				new StringProvider("Delete Database"), 0x100040, 3) {
+		MenuItem delStoreMenu = new MenuItem(
+				new StringProvider("Delete Store"), 0x100040, 3) {
 			public void run() {
-				try {
-					FileConnection fc = (FileConnection) Connector
-							.open(DbAdapter.dbLocation);
-					fc.delete();
-					fc.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				PersistentStore.destroyPersistentObject(ActivityLog.ID);
+				PersistentStore.destroyPersistentObject(FileLog.ID);
 				System.exit(0);
 			}
 
 		};
 		menu.add(clearMenu);
 		menu.add(delRegMenu);
-		menu.add(delDbMenu);
+		menu.add(delStoreMenu);
 
 		super.makeMenu(menu, instance);
 	}
 
 	public void close() {
-		RuntimeStore.getRuntimeStore().remove(DbAdapter.DB_ID);
-		// TODO: call DBAccess.close, remove filesystem listener, remove call
-		// and sms listeners.
+		// TODO: remove filesystem listener, remove call and sms listeners.
 		super.close();
 	}
 
@@ -144,7 +134,8 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				} else {
 					add(new LabelField(regTable.get(Registration.KEY_STAGE)));
 					add(new LabelField(regTable.get(Registration.KEY_ID)));
-					String num = (String) regTable.get(Registration.KEY_NUMBERS);
+					String num = (String) regTable
+							.get(Registration.KEY_NUMBERS);
 					if (num.equals("")) {
 						add(new LabelField("No emergency numbers stored"));
 					} else {
@@ -152,6 +143,15 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					}
 				}
 			}
+
+			ButtonField exitButton = new ButtonField("Exit",
+					ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
+			exitButton.setChangeListener(new FieldChangeListener() {
+				public void fieldChanged(Field field, int context) {
+					System.exit(0);
+				}
+			});
+			add(exitButton);
 		}
 
 		/**

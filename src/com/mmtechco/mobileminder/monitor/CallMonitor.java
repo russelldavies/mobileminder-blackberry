@@ -3,7 +3,7 @@ package com.mmtechco.mobileminder.monitor;
 import java.util.Date;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.Logger;
@@ -21,12 +21,10 @@ public class CallMonitor extends AbstractPhoneListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(CallMonitor.class);
 
-	private LogDb actLog;
 	private Logger logger = Logger.getInstance();
 	private CallMessage callMessage;
 
-	public CallMonitor(LogDb inputAccess) {
-		actLog = inputAccess;
+	public CallMonitor() {
 		Phone.addPhoneListener(this);
 		logger.log(TAG, "Started");
 	}
@@ -53,7 +51,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		logger.log(TAG, "Call ended by user");
 
 		callMessage.callEnded(CallEndStatus.FINISHED);
-		actLog.addMessage(callMessage);
+		ActivityLog.addMessage(callMessage);
 		logger.log(TAG, "Call message added to log");
 	}
 
@@ -61,7 +59,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		logger.log(TAG, "Call disconnected");
 
 		callMessage.callEnded(CallEndStatus.DROPPED);
-		actLog.addMessage(callMessage);
+		ActivityLog.addMessage(callMessage);
 		logger.log(TAG, "Call message added to log");
 	}
 

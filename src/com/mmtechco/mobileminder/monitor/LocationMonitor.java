@@ -12,7 +12,7 @@ import net.rim.device.api.gps.GPSInfo;
 import net.rim.device.api.gps.LocationInfo;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.util.ErrorMessage;
 import com.mmtechco.mobileminder.util.Logger;
@@ -26,7 +26,6 @@ public class LocationMonitor implements LocationListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(LocationMonitor.class);
 
-	private LogDb actLog;
 	private Logger logger = Logger.getInstance();
 
 	// Represents the period of the position query, in seconds
@@ -36,9 +35,7 @@ public class LocationMonitor implements LocationListener {
 	private double latitude;
 	private double longitude;
 
-	public LocationMonitor(LogDb actLog) {
-		this.actLog = actLog;
-
+	public LocationMonitor() {
 		// Enable location services
 		if (LocationInfo.getAvailableLocationSources() != 0) {
 			LocationInfo.setLocationOn();
@@ -94,7 +91,7 @@ public class LocationMonitor implements LocationListener {
 						TAG,
 						"Failed to instantiate LocationProvider object:"
 								+ le.toString());
-				actLog.addMessage(new ErrorMessage(le));
+				ActivityLog.addMessage(new ErrorMessage(le));
 			}
 		} else {
 			logger.log(TAG, "GPS is not supported on this device.");
@@ -116,7 +113,7 @@ public class LocationMonitor implements LocationListener {
 				latitude = location.getQualifiedCoordinates().getLatitude();
 
 				Message locMsg = new LocationMessage(longitude, latitude, speed);
-				actLog.addMessage(locMsg);
+				ActivityLog.addMessage(locMsg);
 			}
 		}
 	}

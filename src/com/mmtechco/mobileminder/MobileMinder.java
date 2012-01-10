@@ -1,8 +1,6 @@
 package com.mmtechco.mobileminder;
 
 import com.mmtechco.mobileminder.contacts.ContactPic;
-import com.mmtechco.mobileminder.data.DbFactory;
-import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
@@ -11,16 +9,13 @@ import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
 import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.StorageException;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
-import net.rim.device.api.database.DatabaseException;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
-import net.rim.device.api.ui.component.Dialog;
 
 /**
  * Main entry point of the application.
@@ -32,7 +27,6 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	
 	private Logger logger = Logger.getInstance();
 
-	private LogDb actLog;
 	private InfoScreen infoscreen;
 
 	/**
@@ -92,41 +86,27 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 			//infoscreen.registerIndicator();
 		}
 
-		// Open the database
-		try {
-			actLog = DbFactory.getLocalDataWriter();
-			actLog.open();
-		} catch (StorageException e) {
-			logger.log(TAG, e.getMessage() + " Alerting user");
-			Dialog.alert(r.getString(MobileMinderResource.i18n_StorageError));
-			return;
-		} catch (DatabaseException e) {
-			e.printStackTrace();
-			logger.log(TAG, "Filesystem could not access DB");
-			return;
-		}
-
 		// Start call sync. Note that there is no faculty to access existing SMS
 		// messages stored on the device.
 		new Thread(new CallSync()).start();
 
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
-		new AppMonitor(actLog);
-		new LocationMonitor(actLog);
-		new MailMonitor(actLog);
-		new CallMonitor(actLog);
-		new SMSMonitor(actLog);
+		new AppMonitor();
+		new LocationMonitor();
+		new MailMonitor();
+		new CallMonitor();
+		new SMSMonitor();
 
 		Controllable[] components = new Controllable[2];
-		components[0] = new ContactPic(actLog);
-		FileSync mediasync = new FileSync(actLog);
+		components[0] = new ContactPic();
+		FileSync mediasync = new FileSync();
 		components[1] = mediasync;
-		new Commander(actLog, components).start();
+		new Commander(components).start();
 		mediasync.start();
 
 		// Monitor activity log
-		new Server(actLog).start();
+		new Server().start();
 	}
 
 	/**
@@ -161,13 +141,6 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	}
 
 	public void powerOff() {
-		try {
-			actLog.close();
-		} catch (DatabaseException e) {
-			logger.log(TAG, "Could not close db");
-			System.exit(1);
-		}
-		System.exit(0);
 	}
 
 	public void rootChanged(int state, String rootName) {

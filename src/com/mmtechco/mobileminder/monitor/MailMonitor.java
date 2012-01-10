@@ -1,7 +1,7 @@
 package com.mmtechco.mobileminder.monitor;
 
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.Tools;
@@ -25,15 +25,13 @@ public class MailMonitor implements FolderListener, StoreListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(MailMonitor.class);
 
-	private LogDb actLog;
 	MailMessage messageObject;
 	Message emailMessage;
 	Logger logger = Logger.getInstance();
 	boolean _hasSupportedAttachment = false;
 	boolean _hasUnsupportedAttachment = false;
 
-	public MailMonitor(LogDb inputAccess) {
-		actLog = inputAccess;
+	public MailMonitor() {
 		messageObject = new MailMessage();
 
 		// Recursively search all folders on device and search for Inbox/Outbox.
@@ -161,7 +159,7 @@ public class MailMonitor implements FolderListener, StoreListener {
 			e1.printStackTrace();
 		}
 		logger.log(TAG, "Adding message to log");
-		actLog.addMessage(messageObject);
+		ActivityLog.addMessage(messageObject);
 	}
 
 	public void messagesRemoved(FolderEvent e) {

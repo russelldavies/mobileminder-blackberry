@@ -3,7 +3,6 @@ package com.mmtechco.mobileminder.contacts;
 import java.util.Enumeration;
 import javax.microedition.pim.PIM;
 import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.data.LogDb;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
@@ -33,8 +32,8 @@ public class ContactPic implements Controllable {
 	private ContactPicMessage flyContactPicMessage;
 	static Logger logger = Logger.getInstance();
 
-	public ContactPic(LogDb actLog) {
-		server = new Server(actLog);
+	public ContactPic() {
+		server = new Server();
 		flyContactPicMessage = new ContactPicMessage();
 	}
 

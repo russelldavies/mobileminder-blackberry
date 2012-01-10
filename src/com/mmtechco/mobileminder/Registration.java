@@ -14,7 +14,7 @@ import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.data.DbFactory;
+import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
@@ -161,12 +161,7 @@ public class Registration extends Thread implements Controllable,
 					Thread.sleep(time);// 1Day
 					logger.log(TAG, "RegWalk");
 				} catch (Exception e) {
-					try {
-						DbFactory.getLocalDataWriter().addMessage(
-								new ErrorMessage(e));
-					} catch (StorageException e1) {
-						logger.log(TAG, e1.getMessage());
-					}
+					ActivityLog.addMessage(new ErrorMessage(e));
 					break;
 				}
 			}
@@ -288,12 +283,7 @@ public class Registration extends Thread implements Controllable,
 				setRegData(KEY_NUMBERS, emergNums);
 				complete = true;
 			} catch (Exception e) {
-				try {
-					DbFactory.getLocalDataWriter().addMessage(
-							new ErrorMessage(e));
-				} catch (StorageException e1) {
-					logger.log(TAG, e1.getMessage());
-				}
+				ActivityLog.addMessage(new ErrorMessage(e));
 				complete = false;
 			}
 		}
