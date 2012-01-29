@@ -8,7 +8,6 @@ import javax.microedition.io.file.FileConnection;
 
 import com.mmtechco.mobileminder.data.DbAdapter;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
 
 import net.rim.device.api.i18n.ResourceBundle;
@@ -95,7 +94,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			public void run() {
 				UiApplication.getUiApplication().pushScreen(
 						new RegPopupScreen());
-				PersistentStore.destroyPersistentObject(Constants.regData);
+				PersistentStore.destroyPersistentObject(Registration.ID);
 			}
 		};
 
@@ -137,7 +136,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			add(new SeparatorField());
 
 			PersistentObject regData = PersistentStore
-					.getPersistentObject(Constants.regData);
+					.getPersistentObject(Registration.ID);
 			synchronized (regData) {
 				Hashtable regTable = (Hashtable) regData.getContents();
 				if (regTable == null) {
