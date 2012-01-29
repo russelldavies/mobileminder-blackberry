@@ -5,12 +5,14 @@ import java.util.Vector;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.device.api.i18n.ResourceBundle;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.Branding;
 import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.ui.Screen;
 import net.rim.device.api.ui.UiApplication;
+import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.data.DbFactory;
 import com.mmtechco.mobileminder.net.Reply;
@@ -20,7 +22,6 @@ import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.ErrorMessage;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.StorageException;
@@ -35,6 +36,8 @@ public class Registration extends Thread implements Controllable,
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(Registration.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
+	public static final long ID = StringUtilities
+			.stringHashToLong(Registration.class.getName());
 
 	public static String KEY_STAGE = "registration_stage";
 	public static String KEY_ID = "registration_id";
@@ -64,7 +67,7 @@ public class Registration extends Thread implements Controllable,
 
 		// Read registration data or set to default values
 		PersistentObject regData = PersistentStore
-				.getPersistentObject(Constants.regData);
+				.getPersistentObject(ID);
 		synchronized (regData) {
 			Hashtable regTable = (Hashtable) regData.getContents();
 			if (regTable == null) {
@@ -181,7 +184,7 @@ public class Registration extends Thread implements Controllable,
 	 */
 	private boolean setRegData(String key, String value) {
 		PersistentObject regData = PersistentStore
-				.getPersistentObject(Constants.regData);
+				.getPersistentObject(ID);
 		synchronized (regData) {
 			Hashtable regTable = (Hashtable) regData.getContents();
 			Object oldValue = regTable.put(key, value);
@@ -322,7 +325,7 @@ public class Registration extends Thread implements Controllable,
 
 class RegistrationMessage implements Message {
 	private final static int type = 9;
-	private final int mmVERSION = Constants.APP_VERSION;
+	private final String appVersion = ApplicationDescriptor.currentApplicationDescriptor().getVersion();
 	private String deviceTime;
 	private int stage;
 	private String phoneNum;
@@ -350,7 +353,7 @@ class RegistrationMessage implements Message {
 				+ Tools.ServerQueryStringSeparator + DeviceInfo.getDeviceName()
 				+ Tools.ServerQueryStringSeparator
 				+ DeviceInfo.getSoftwareVersion()
-				+ Tools.ServerQueryStringSeparator + mmVERSION
+				+ Tools.ServerQueryStringSeparator + appVersion
 				+ Tools.ServerQueryStringSeparator + info;
 	}
 
