@@ -34,6 +34,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 
 	private LogDb actLog;
 	private InfoScreen infoscreen;
+	private Registration reg;
 
 	/**
 	 * Entry point for application
@@ -79,7 +80,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		}
 
 		logger.log(TAG, "Starting registration");
-		Registration reg = new Registration();
+		reg = new Registration();
 		reg.start();
 	}
 
@@ -118,12 +119,13 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		new CallMonitor(actLog);
 		new SMSMonitor(actLog);
 
-		Controllable[] components = new Controllable[2];
+		Controllable[] components = new Controllable[3];
 		components[0] = new ContactPic(actLog);
-		FileSync mediasync = new FileSync(actLog);
-		components[1] = mediasync;
+		FileSync filesync = new FileSync(actLog);
+		components[1] = filesync;
+		components[2] = reg;
 		new Commander(actLog, components).start();
-		mediasync.start();
+		filesync.start();
 
 		// Monitor activity log
 		new Server(actLog).start();
