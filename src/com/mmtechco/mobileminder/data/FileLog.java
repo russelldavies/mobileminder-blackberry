@@ -50,7 +50,7 @@ public class FileLog {
 	 *            Fully qualified path to the file
 	 */
 	public synchronized static void add(String path) {
-		add(path, false);
+		add(path, true);
 	}
 
 	/**
