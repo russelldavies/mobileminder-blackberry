@@ -238,6 +238,8 @@ public class FileLog {
 	}
 
 	public static void commit() {
+		// Note: store does not need to be synchronized since the calling
+		// methods are already synchronized
 		store.setContents(files);
 		store.commit();
 	}
