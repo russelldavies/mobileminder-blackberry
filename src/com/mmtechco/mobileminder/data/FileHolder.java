@@ -14,12 +14,22 @@ public final class FileHolder implements Persistable {
 	private boolean uploaded;
 
 	/**
-	 * Creates a new FileHolder object
+	 * Create a new FileHolder object with the specified path, modification time
+	 * and md5
 	 * 
 	 * @param fullPath
-	 *            The path and file name provided from the FileConnection.
+	 *            The path and file name provided from the FileConnection
+	 * @param modTime
+	 *            Unix time of when file was last modified
+	 * @param md5
+	 *            MD5 String hash of the file
+	 * @throws IllegalArgumentException
+	 *             if any of the parameters are null
 	 */
 	public FileHolder(String fullPath, long modTime, String md5) {
+		if (fullPath == null || modTime == 0 || md5 == null) {
+			throw new IllegalArgumentException();
+		}
 		this.path = fullPath;
 		this.modTime = modTime;
 		this.md5 = md5;
@@ -44,7 +54,7 @@ public final class FileHolder implements Persistable {
 	public String getPath() {
 		return path;
 	}
-	
+
 	public void setPath(String newPath) {
 		this.path = newPath;
 	}
@@ -71,5 +81,21 @@ public final class FileHolder implements Persistable {
 
 	public boolean isUploaded() {
 		return uploaded;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+
+		if (obj instanceof FileHolder) {
+			FileHolder other = (FileHolder) obj;
+			if (!other.path.equals(path))
+				return false;
+			if (!other.md5.equals(md5))
+				return false;
+			return true;
+		}
+		return false;
 	}
 }
