@@ -45,6 +45,7 @@ public class FileLog {
 
 	/**
 	 * Add file to log committing the file to the persistent store immediately.
+	 * If the file already exists it will not be added.
 	 * 
 	 * @param path
 	 *            Fully qualified path to the file
@@ -65,6 +66,10 @@ public class FileLog {
 	 *            caller
 	 */
 	public synchronized static void add(String path, boolean commit) {
+		if (path == null) {
+			throw new IllegalArgumentException();
+		}
+
 		// Check if file exists in db
 		if (exists(path)) {
 			logger.log(TAG, "File already in DB: " + path);
@@ -103,6 +108,10 @@ public class FileLog {
 	 *            the full path to the file.
 	 */
 	public synchronized static void delete(String path) {
+		if (path == null) {
+            throw new IllegalArgumentException();
+		}
+		
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
 			if (fileholder.getPath().equals(path)) {
@@ -125,6 +134,10 @@ public class FileLog {
 	 * @param oldPath
 	 */
 	public synchronized static void renamed(String newPath, String oldPath) {
+		if (newPath == null || oldPath == null) {
+            throw new IllegalArgumentException();
+		}
+		
 		logger.log(TAG, newPath + " has been renamed from: " + oldPath);
 
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
@@ -149,6 +162,10 @@ public class FileLog {
 	 *            the full path of the file.
 	 */
 	public synchronized static void changed(String path) {
+		if (path == null) {
+            throw new IllegalArgumentException();
+		}
+		
 		for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) enum.nextElement();
 			if (fileholder.getPath().equals(path)) {
