@@ -8,6 +8,7 @@ import javax.microedition.io.file.FileConnection;
 
 import net.rim.device.api.crypto.DigestInputStream;
 import net.rim.device.api.crypto.MD5Digest;
+import net.rim.device.api.system.ObjectGroup;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.system.WLANInfo;
@@ -83,6 +84,8 @@ public class FileLog {
 			fc = (FileConnection) Connector.open(path);
 			FileHolder fileholder = new FileHolder(path, fc.lastModified(),
 					generateMd5(fc));
+			// Group object to save object handles
+			ObjectGroup.createGroup(fileholder);
 			files.addElement(fileholder);
 			if (commit) {
 				commit();
@@ -143,7 +146,13 @@ public class FileLog {
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
 			if (fileholder.getPath().equals(oldPath)) {
+				// Object must be ungrouped to modify it
+				if (ObjectGroup.isInGroup(fileholder)) {
+			        fileholder = (FileHolder)ObjectGroup.expandGroup(fileholder);
+				}
 				fileholder.setPath(newPath);
+				// Regroup object
+				ObjectGroup.createGroup(fileholder);
 				commit();
 				// Add notification to activity log
 				FileMessage fm = new FileMessage();
@@ -169,11 +178,17 @@ public class FileLog {
 		for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) enum.nextElement();
 			if (fileholder.getPath().equals(path)) {
+				// Object must be ungrouped to modify it
+				if (ObjectGroup.isInGroup(fileholder)) {
+			        fileholder = (FileHolder)ObjectGroup.expandGroup(fileholder);
+				}
 				FileConnection fc = null;
 				try {
 					fc = (FileConnection) Connector.open(path);
 					fileholder.setModTime(fc.lastModified());
 					fileholder.setMd5(generateMd5(fc));
+					// Regroup object
+					ObjectGroup.createGroup(fileholder);
 					commit();
 				} catch (IOException e) {
 					logger.log(TAG, e.toString());
