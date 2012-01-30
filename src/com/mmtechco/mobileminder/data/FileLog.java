@@ -8,6 +8,7 @@ import javax.microedition.io.file.FileConnection;
 
 import net.rim.device.api.crypto.DigestInputStream;
 import net.rim.device.api.crypto.MD5Digest;
+import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.ObjectGroup;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
@@ -112,9 +113,9 @@ public class FileLog {
 	 */
 	public synchronized static void delete(String path) {
 		if (path == null) {
-            throw new IllegalArgumentException();
+			throw new IllegalArgumentException();
 		}
-		
+
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
 			if (fileholder.getPath().equals(path)) {
@@ -138,9 +139,9 @@ public class FileLog {
 	 */
 	public synchronized static void renamed(String newPath, String oldPath) {
 		if (newPath == null || oldPath == null) {
-            throw new IllegalArgumentException();
+			throw new IllegalArgumentException();
 		}
-		
+
 		logger.log(TAG, newPath + " has been renamed from: " + oldPath);
 
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
@@ -148,7 +149,8 @@ public class FileLog {
 			if (fileholder.getPath().equals(oldPath)) {
 				// Object must be ungrouped to modify it
 				if (ObjectGroup.isInGroup(fileholder)) {
-			        fileholder = (FileHolder)ObjectGroup.expandGroup(fileholder);
+					fileholder = (FileHolder) ObjectGroup
+							.expandGroup(fileholder);
 				}
 				fileholder.setPath(newPath);
 				// Regroup object
@@ -172,15 +174,16 @@ public class FileLog {
 	 */
 	public synchronized static void changed(String path) {
 		if (path == null) {
-            throw new IllegalArgumentException();
+			throw new IllegalArgumentException();
 		}
-		
+
 		for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) enum.nextElement();
 			if (fileholder.getPath().equals(path)) {
 				// Object must be ungrouped to modify it
 				if (ObjectGroup.isInGroup(fileholder)) {
-			        fileholder = (FileHolder)ObjectGroup.expandGroup(fileholder);
+					fileholder = (FileHolder) ObjectGroup
+							.expandGroup(fileholder);
 				}
 				FileConnection fc = null;
 				try {
@@ -213,7 +216,8 @@ public class FileLog {
 		// Only upload if have received instruction from server to upload or
 		// connected to wifi
 		if (mobileSync
-				|| (WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED)) {
+				|| (WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED)
+				|| DeviceInfo.isSimulator()) {
 			// Get all files that have no been uploaded
 			for (Enumeration e = files.elements(); e.hasMoreElements();) {
 				FileHolder fileholder = (FileHolder) e.nextElement();
