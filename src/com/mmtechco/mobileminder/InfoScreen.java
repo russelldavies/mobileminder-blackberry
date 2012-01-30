@@ -31,7 +31,6 @@ import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
-import net.rim.device.api.util.StringProvider;
 
 public class InfoScreen extends MainScreen implements ObserverScreen,
 		MobileMinderResource {
@@ -156,8 +155,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
-		MenuItem helpMenu = new MenuItem(new StringProvider(
-				r.getString(i18n_MenuHelp)), 0x100010, 0) {
+		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010, 0) {
 			public void run() {
 				// TODO: make modalless
 				// Dialog.inform(r.getString(i18n_HelpSending));
