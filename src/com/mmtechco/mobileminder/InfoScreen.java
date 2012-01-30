@@ -6,9 +6,12 @@ import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
+//#ifndef VER_4.5.0
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+//#endif
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EncodedImage;
@@ -30,7 +33,6 @@ import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
-import net.rim.device.api.ui.decor.BackgroundFactory;
 
 public class InfoScreen extends MainScreen implements ObserverScreen,
 		MobileMinderResource {
@@ -44,12 +46,15 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private TextField statusTextField = new TextField(Field.NON_FOCUSABLE);
 	private TextField idTextField = new TextField(Field.NON_FOCUSABLE);
 
+	
+	//#ifndef VER_4.5.0
 	// Notification icons
 	ApplicationIcon icon_reg = new ApplicationIcon(
 			EncodedImage.getEncodedImageResource("notify_reg.png"));
 	ApplicationIcon icon_unreg = new ApplicationIcon(
 			EncodedImage.getEncodedImageResource("notify_unreg.png"));
 	ApplicationIcon notifyIcon = icon_unreg;
+	//#endif
 
 	public InfoScreen() {
 		super(Manager.NO_VERTICAL_SCROLL);
@@ -113,8 +118,10 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		 */
 		vfm.add(helpButton);
 
+		//#ifndef VER_4.5.0
 		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
+		//#endif
 		add(vfm);
 	}
 
@@ -196,6 +203,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		return true;
 	}
 
+	//#ifndef VER_4.5.0
 	public void registerIndicator() {
 		try {
 			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
@@ -238,6 +246,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 			logger.log(TAG, "Could not update notification icon");
 		}
 	}
+	//#endif
 
 	// Custom private class that creates the button and switches the image
 	// depending on the return value of onFocus()
