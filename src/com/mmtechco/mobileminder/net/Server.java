@@ -14,7 +14,6 @@ import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
-import net.rim.device.api.io.transport.TransportInfo;
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMServer;
@@ -236,10 +235,8 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 	 * @return the server reply.
 	 */
 	private String postMultiPart(String queryString, FileConnection pic) {
-		// Don't start if no connection or there is no WiFi
-		if (!tools.isConnected()
-				&& TransportInfo
-						.hasSufficientCoverage(TransportInfo.TRANSPORT_TCP_WIFI)) {
+		// Don't start if no connection
+		if (!tools.isConnected()) {
 			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
 		}
 		logger.log(TAG, "POST multipart query string: " + queryString);
