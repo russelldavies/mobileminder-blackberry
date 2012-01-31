@@ -5,6 +5,7 @@
 bin/
 deliverables/
 .locale_interfaces/
+.preprocessed/
 
 .DS_Store
 Thumbs.db
