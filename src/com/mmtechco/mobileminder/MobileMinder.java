@@ -10,7 +10,6 @@ import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
-import com.mmtechco.mobileminder.util.Constants;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
@@ -71,12 +70,12 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	}
 
 	private void initialize() {
-		if (Constants.DEBUG) {
-			pushScreen(new DebugScreen());
-		} else {
-			infoscreen = new InfoScreen();
-			pushScreen(infoscreen);
-		}
+		//#ifdef DEBUG
+		pushScreen(new DebugScreen());
+		//#else
+		infoscreen = new InfoScreen();
+		pushScreen(infoscreen);
+		//#endif
 
 		logger.log(TAG, "Starting registration");
 		reg = new Registration();
@@ -87,10 +86,10 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	 * Start components
 	 */
 	public void startComponents() {
-		if (!Constants.DEBUG) {
-			// Register application indicator
-			//infoscreen.registerIndicator();
-		}
+		//#ifndef VER_4.5.0
+		// Register application indicator
+		infoscreen.registerIndicator();
+		//#endif
 
 		// Start call sync. Note that there is no faculty to access existing SMS
 		// messages stored on the device.

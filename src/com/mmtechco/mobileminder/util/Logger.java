@@ -1,3 +1,4 @@
+//#preprocess
 package com.mmtechco.mobileminder.util;
 
 import java.util.Date;
@@ -5,7 +6,10 @@ import java.util.Date;
 import com.mmtechco.mobileminder.DebugScreen;
 
 import net.rim.device.api.i18n.SimpleDateFormat;
+import net.rim.device.api.system.Application;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.EventLogger;
+import net.rim.device.api.util.StringUtilities;
 
 /**
  * Provides a simple logging facility. Can also use the BlackBerry EventLogger.
@@ -21,10 +25,15 @@ import net.rim.device.api.system.EventLogger;
 public class Logger {
 	private static Logger logger;
 
+	private static final String APP_NAME = ApplicationDescriptor
+			.currentApplicationDescriptor().getName();
+	private static final long GUID = StringUtilities
+			.stringHashToLong(Application.getApplication().getClass().getName());
+
 	// Used to format dates into a standard format
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
-	
+
 	private static DebugScreen scr;
 
 	protected Logger() {
@@ -38,16 +47,16 @@ public class Logger {
 	}
 
 	public void log(String tag, String msg) {
-		if (Constants.DEBUG) {
-			out(tag, msg);
-			if (scr != null) {
-				scr.addNewLog(tag + "::" + msg);
-			}
-		} else {
-			logInformationEvent(msg);
+		//#ifdef DEBUG
+		out(tag, msg);
+		if (scr != null) {
+			scr.addNewLog(tag + "::" + msg);
 		}
+		//#else
+		logInformationEvent(msg);
+		//#endif
 	}
-	
+
 	public static void addObserver(DebugScreen screen) {
 		scr = screen;
 	}
@@ -77,19 +86,19 @@ public class Logger {
 	}
 
 	private String setUpMessageString(String tag, String msg) {
-		return "***" + Constants.APP_NAME + "*** ["
+		return "***" + APP_NAME + "*** ["
 				+ dateFormat.format(new Date()) + "] " + tag + "::" + msg;
 	}
 
 	// These methods are for logging to BlackBerry EventLog. Useful for device
 	// debugging.
 	public void startEventLogger() {
-		EventLogger.register(Constants.GUID, Constants.APP_NAME,
+		EventLogger.register(GUID, APP_NAME,
 				EventLogger.VIEWER_STRING);
 	}
 
 	private static void logEvent(String msg, int level) {
-		EventLogger.logEvent(Constants.GUID, msg.getBytes(), level);
+		EventLogger.logEvent(GUID, msg.getBytes(), level);
 	}
 
 	public static void logDebugEvent(String msg) {
