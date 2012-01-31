@@ -1,3 +1,4 @@
+//#preprocess
 package com.mmtechco.mobileminder;
 
 import java.io.IOException;

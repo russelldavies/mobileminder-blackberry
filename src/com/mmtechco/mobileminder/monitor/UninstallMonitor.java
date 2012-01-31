@@ -1,3 +1,5 @@
+//#preprocess
+//#implicit VER_5.0.0 | VER_6.0.0 | VER_7.0.0
 package com.mmtechco.mobileminder.monitor;
 
 import com.mmtechco.mobileminder.MobileMinderResource;

@@ -1,3 +1,4 @@
+//#preprocess
 package com.mmtechco.mobileminder.util;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import javax.microedition.io.file.FileSystemRegistry;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
 
+
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
@@ -22,9 +24,14 @@ import net.rim.blackberry.api.mail.Store;
 import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpDateParser;
+//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 import net.rim.device.api.io.transport.ConnectionDescriptor;
 import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
+//#else
+import rimx.network.TransportDetective;
+import rimx.network.URLFactory;
+//#endif
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.DeviceInfo;
@@ -266,6 +273,7 @@ public class ToolsBB extends Tools {
 			return (HttpConnection) Connector.open(url + ";deviceside=true",
 					Connector.READ_WRITE);
 		}
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 		ConnectionFactory cf = new ConnectionFactory();
 		// Ordered list of preferred transports
 		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
@@ -275,6 +283,25 @@ public class ToolsBB extends Tools {
 		cf.setPreferredTransportTypes(transportPrefs);
 		ConnectionDescriptor cd = cf.getConnection(url);
 		return (HttpConnection) cd.getConnection();
+		//#else
+		TransportDetective td = new TransportDetective();
+		URLFactory urlFactory = new URLFactory(url);
+		String connectionUrl;
+		if(td.isCoverageAvailable(TransportDetective.TRANSPORT_TCP_WIFI)) {
+		   connectionUrl = urlFactory.getHttpTcpWiFiUrl();
+		} else if (td.isCoverageAvailable(TransportDetective.DEFAULT_TCP_CELLULAR)) {
+			connectionUrl = urlFactory.getHttpDefaultTcpCellularUrl(td.getDefaultTcpCellularServiceRecord());
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_WAP2)) {
+			connectionUrl = urlFactory.getHttpWap2Url(td.getWap2ServiceRecord());
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_MDS)) {
+			connectionUrl = urlFactory.getHttpMdsUrl(false);
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_BIS_B)) {
+			connectionUrl = urlFactory.getHttpBisUrl();
+		} else {
+			connectionUrl = urlFactory.getHttpDefaultUrl();
+		}
+		return (HttpConnection)Connector.open(connectionUrl, Connector.READ_WRITE);
+		//#endif
 	}
 	
 	/**

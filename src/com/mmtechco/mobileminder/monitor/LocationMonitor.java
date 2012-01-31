@@ -1,3 +1,4 @@
+//#preprocess
 package com.mmtechco.mobileminder.monitor;
 
 import javax.microedition.location.Criteria;
@@ -6,10 +7,16 @@ import javax.microedition.location.LocationException;
 import javax.microedition.location.LocationListener;
 import javax.microedition.location.LocationProvider;
 
+//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 import net.rim.device.api.gps.BlackBerryCriteria;
 import net.rim.device.api.gps.BlackBerryLocationProvider;
+//#endif
+//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 import net.rim.device.api.gps.GPSInfo;
+//#endif
+//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0 | VER_5.0.0
 import net.rim.device.api.gps.LocationInfo;
+//#endif
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
@@ -31,14 +38,22 @@ public class LocationMonitor implements LocationListener {
 	// Represents the period of the position query, in seconds
 	private static int interval = 120;
 
+	//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 	private BlackBerryLocationProvider locationProvider;
+	//#else
+	private LocationProvider locationProvider;
+	//#endif
 	private double latitude;
 	private double longitude;
 
-	public LocationMonitor() {
+	public LocationMonitor() throws LocationException {
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0 | VER_5.0.0
 		// Enable location services
 		if (LocationInfo.getAvailableLocationSources() != 0) {
 			LocationInfo.setLocationOn();
+		//#else
+        if (LocationProvider.getInstance(null) == null) {
+		//#endif
 			// Attempt to start the listening thread
 			if (startLocationUpdate()) {
 				logger.log(TAG,
@@ -57,21 +72,31 @@ public class LocationMonitor implements LocationListener {
 	public boolean startLocationUpdate() {
 		boolean started = false;
 
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 		if (GPSInfo.getDefaultGPSMode() != GPSInfo.GPS_MODE_NONE) {
+		//#endif
 			try {
+				//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 				// Use default mode on the device
-				BlackBerryCriteria criteria = new BlackBerryCriteria();
-				// retrieve geolocation fix if GPS fix unavailable
+				BlackBerryCriteria criteria = new BlackBerryCriteria(GPSInfo.GPS_MODE_ASSIST);
 				criteria.enableGeolocationWithGPS();
+				criteria.setFailoverMode(GPSInfo.GPS_MODE_AUTONOMOUS, 3, 100);
+				criteria.setSubsequentMode(GPSInfo.GPS_MODE_CELLSITE);
+				//#else
+				Criteria criteria = new Criteria();
 				//criteria.setMode(GPSInfo.GPS_MODE_AUTONOMOUS);
-				// criteria.setCostAllowed(true);
+				criteria.setCostAllowed(true);
+				//#endif
 				criteria.setHorizontalAccuracy(5);
 				criteria.setVerticalAccuracy(5);
 				criteria.setPreferredPowerConsumption(Criteria.POWER_USAGE_MEDIUM);
 				criteria.setPreferredResponseTime(10000);
 
-				locationProvider = (BlackBerryLocationProvider) LocationProvider
-						.getInstance(criteria);
+				//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+				locationProvider = (BlackBerryLocationProvider) LocationProvider.getInstance(criteria);
+				//#else
+				locationProvider = LocationProvider.getInstance(criteria);
+				//#endif
 
 				if (locationProvider != null) {
 					/*
@@ -93,9 +118,11 @@ public class LocationMonitor implements LocationListener {
 								+ le.toString());
 				ActivityLog.addMessage(new ErrorMessage(le));
 			}
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 		} else {
 			logger.log(TAG, "GPS is not supported on this device.");
 		}
+		//#endif
 		return started;
 	}
 
@@ -122,6 +149,13 @@ public class LocationMonitor implements LocationListener {
 		logger.log(TAG, "GPS Provider changed");
 		if (newState == LocationProvider.TEMPORARILY_UNAVAILABLE) {
 			provider.reset();
+		}
+	}
+
+	public void stopLocation() {
+		if (locationProvider != null) {
+			locationProvider.reset();
+			locationProvider.setLocationListener(null, -1, -1, -1);
 		}
 	}
 }
