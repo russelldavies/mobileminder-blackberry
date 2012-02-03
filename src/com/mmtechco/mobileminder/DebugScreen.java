@@ -26,7 +26,7 @@ import net.rim.device.api.ui.container.VerticalFieldManager;
 
 /**
  * Screen that displays all the logging info. Useful for debugging. Enable by
- * setting the global debug flag in {@link Constants#DEBUG}
+ * enabling the DEBUG preprocessor directive.
  */
 public class DebugScreen extends MainScreen implements ObserverScreen,
 		MobileMinderResource {
