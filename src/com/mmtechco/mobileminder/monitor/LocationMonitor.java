@@ -72,57 +72,46 @@ public class LocationMonitor implements LocationListener {
 	public boolean startLocationUpdate() {
 		boolean started = false;
 
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-		if (GPSInfo.getDefaultGPSMode() != GPSInfo.GPS_MODE_NONE) {
-		//#endif
-			try {
-				//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-				// Use default mode on the device
-				BlackBerryCriteria criteria = new BlackBerryCriteria(GPSInfo.GPS_MODE_ASSIST);
-				criteria.enableGeolocationWithGPS();
-				criteria.setFailoverMode(GPSInfo.GPS_MODE_AUTONOMOUS, 3, 100);
-				criteria.setSubsequentMode(GPSInfo.GPS_MODE_CELLSITE);
-				//#else
-				Criteria criteria = new Criteria();
-				//criteria.setMode(GPSInfo.GPS_MODE_AUTONOMOUS);
-				criteria.setCostAllowed(true);
-				//#endif
-				criteria.setHorizontalAccuracy(5);
-				criteria.setVerticalAccuracy(5);
-				criteria.setPreferredPowerConsumption(Criteria.POWER_USAGE_MEDIUM);
-				criteria.setPreferredResponseTime(10000);
+		try {
+			//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+			BlackBerryCriteria criteria = new BlackBerryCriteria(GPSInfo.GPS_MODE_ASSIST);
+			criteria.enableGeolocationWithGPS();
+			criteria.setFailoverMode(GPSInfo.GPS_MODE_AUTONOMOUS, 3, 100);
+			//criteria.setSubsequentMode(GPSInfo.GPS_MODE_CELLSITE);
+			//#else
+			Criteria criteria = new Criteria();
+			// criteria.setMode(GPSInfo.GPS_MODE_AUTONOMOUS);
+			criteria.setCostAllowed(true);
+			//#endif
+			criteria.setHorizontalAccuracy(5);
+			criteria.setVerticalAccuracy(5);
+			criteria.setPreferredPowerConsumption(Criteria.POWER_USAGE_MEDIUM);
+			criteria.setPreferredResponseTime(10000);
 
-				//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-				locationProvider = (BlackBerryLocationProvider) LocationProvider.getInstance(criteria);
-				//#else
-				locationProvider = LocationProvider.getInstance(criteria);
-				//#endif
+			//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+			locationProvider = (BlackBerryLocationProvider) LocationProvider
+					.getInstance(criteria);
+			//#else
+			locationProvider = LocationProvider.getInstance(criteria);
+			//#endif
 
-				if (locationProvider != null) {
-					/*
-					 * Only a single listener can be associated with a provider,
-					 * and unsetting it involves the same call but with null.
-					 * Therefore, there is no need to cache the listener
-					 * instance request an update every second.
-					 */
-					locationProvider
-							.setLocationListener(this, interval, -1, -1);
-					started = true;
-				} else {
-					logger.log(TAG, "Failed to obtain a location provider.");
-				}
-			} catch (final LocationException le) {
-				logger.log(
-						TAG,
-						"Failed to instantiate LocationProvider object:"
-								+ le.toString());
-				ActivityLog.addMessage(new ErrorMessage(le));
+			if (locationProvider != null) {
+				/*
+				 * Only a single listener can be associated with a provider, and
+				 * unsetting it involves the same call but with null. Therefore,
+				 * there is no need to cache the listener instance request an
+				 * update every second.
+				 */
+				locationProvider.setLocationListener(this, interval, -1, -1);
+				started = true;
+			} else {
+				logger.log(TAG, "Failed to obtain a location provider.");
 			}
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-		} else {
-			logger.log(TAG, "GPS is not supported on this device.");
+		} catch (final LocationException le) {
+			logger.log(TAG, "Failed to instantiate LocationProvider object:"
+					+ le.toString());
+			ActivityLog.addMessage(new ErrorMessage(le));
 		}
-		//#endif
 		return started;
 	}
 

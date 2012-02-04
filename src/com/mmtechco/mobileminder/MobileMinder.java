@@ -88,7 +88,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	public void startComponents() {
 		//#ifndef VER_4.5.0
 		// Register application indicator
-		infoscreen.registerIndicator();
+		//infoscreen.registerIndicator();
 		//#endif
 
 		// Start call sync. Note that there is no faculty to access existing SMS
@@ -98,14 +98,14 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
 		new AppMonitor();
+		new MailMonitor();
+		new CallMonitor();
+		new SMSMonitor();
 		try {
 			new LocationMonitor();
 		} catch (LocationException e) {
 			logger.log(TAG, e.getMessage());
 		}
-		new MailMonitor();
-		new CallMonitor();
-		new SMSMonitor();
 
 		Controllable[] components = new Controllable[3];
 		components[0] = new ContactPic();
