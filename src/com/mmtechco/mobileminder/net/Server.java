@@ -335,8 +335,9 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 		}
 
 		crc.reset();
-		String[] replyArray = Reply.stringToArray(security.cryptFull(
-				tools.hexToString(tools.reverseTopAndTail(inputText)), false));
+		String[] replyArray = tools.split(security.cryptFull(
+				tools.hexToString(tools.reverseTopAndTail(inputText)), false),
+				",");
 
 		// rebuild message
 		for (int count = 2; count < replyArray.length; count++) {
@@ -346,8 +347,8 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			}
 		}
 		crc.update(text.getBytes());
-		//logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
-		//logger.log(TAG, "Client CRC: " + crc.getValue());
+		// logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
+		// logger.log(TAG, "Client CRC: " + crc.getValue());
 		logger.log(TAG, "Decrypted server reply: " + text);
 		// Check CRC
 		if (Long.parseLong(replyArray[1]) == crc.getValue()) {

@@ -3,7 +3,6 @@ package com.mmtechco.mobileminder.net;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.MMLinkedList;
 import com.mmtechco.mobileminder.util.Tools;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
@@ -195,46 +194,5 @@ public class Reply {
 		logger.log(TAG, "Processing the args :" + args);
 		String[] processedArgs = tools.split(args, "|");
 		return processedArgs;
-	}
-
-	/**
-	 * Splits an input string by its separators and returns each section as part
-	 * of an array
-	 * 
-	 * @param inputCSV
-	 *            input string
-	 * @return array of values between separators
-	 */
-	public static String[] stringToArray(String inputCSV) {
-		MMLinkedList tempList = new MMLinkedList();
-
-		char[] tempCharList = inputCSV.toCharArray();
-		int start = 0, end = 0;
-
-		for (int count = 0; count < tempCharList.length; count++) {
-			if (tempCharList[count] == ',') {
-				if (start == end) {
-					tempList.add(new String());
-				} else {
-					tempList.add(new String(inputCSV.substring(start, end)));
-				}
-				end++;
-				start = end;
-			} else {
-				end++;
-			}
-		}
-		// This accounts for the lasts value in the string, that will
-		// not be detected within the loop that searches for commas
-		if (start == end) {
-			tempList.add(new String());
-		} else {
-			tempList.add(new String(inputCSV.substring(start, end)));
-		}
-
-		String[] returnArray = new String[tempList.size()];// =
-															// tempList.toArray();
-		tempList.toArray(returnArray);
-		return returnArray;
 	}
 }
