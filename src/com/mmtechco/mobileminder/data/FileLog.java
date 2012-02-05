@@ -236,7 +236,14 @@ public class FileLog {
 								.toLowerCase();
 						// If server successfully processed mark as uploaded
 						if (reply.indexOf("ok") != -1) {
+							// Object must be ungrouped to modify it
+							if (ObjectGroup.isInGroup(fileholder)) {
+								fileholder = (FileHolder) ObjectGroup
+										.expandGroup(fileholder);
+							}
 							fileholder.setUploaded(true);
+							// Regroup object
+							ObjectGroup.createGroup(fileholder);
 						}
 					} catch (IOException e1) {
 						logger.log(TAG, e1.getMessage());
