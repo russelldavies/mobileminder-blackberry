@@ -3,16 +3,15 @@ package com.mmtechco.mobileminder.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.Random;
 
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 
-import net.rim.blackberry.api.browser.MultipartPostData;
 import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.io.IOUtilities;
+import net.rim.device.api.io.MIMETypeAssociations;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.data.ActivityLog;
@@ -247,22 +246,40 @@ public class Server extends Thread implements MMServer, MobileMinderResource {
 			// Setup connection
 			HttpConnection connection = setupConnection(URL
 					+ encodeQueryString(queryString));
+
+			// Specify connection properties
 			connection.setRequestMethod(HttpConnection.POST);
-			String boundary = Long.toString(new Date().getTime()); // Uniqueness
+			String boundary = "--------------------"
+					+ System.currentTimeMillis();
 			connection.setRequestProperty(
 					HttpProtocolConstants.HEADER_CONTENT_TYPE,
 					HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
 							+ ";boundary=" + boundary);
-			connection.setRequestProperty(
-					HttpProtocolConstants.HEADER_CONTENT_LENGTH,
-					String.valueOf(fileData.length));
-			connection.setRequestProperty("xim-rim-transcode-content", "none");
-			// Create payload
-			MultipartPostData postData = new MultipartPostData("UTF-8", true);
-			postData.setData(fileData);
+
 			// Send data via POST
 			OutputStream output = connection.openOutputStream();
+			output.write(("\r\n--" + boundary + "\r\n").getBytes());
+			output.write(("Content-Disposition: form-data; name=\"userfile\"; filename=\""
+					+ pic.getName() + "\"\r\n").getBytes());
+			output.write(("Content-Type: "
+					+ MIMETypeAssociations.getNormalizedType(pic.getPath()
+							+ pic.getName()) + "\r\n\r\n").getBytes());
+			output.write(fileData);
+			output.write(("\r\n--" + boundary + "--\r\n").getBytes());
+
+			// Create payload
+			/*
+			// Note: This doesn't work as setData overwrites all post data
+			MultipartPostData postData = new MultipartPostData(
+					MultipartPostData.DEFAULT_CHARSET, true);
+			postData.setData(fileData);
+			postData.append("name", "userfile");
+			postData.append("filename", pic.getName());
 			output.write(postData.getBytes());
+			*/
+
+			output.flush();
+
 			// Read response
 			if (connection.getResponseCode() == HttpConnection.HTTP_OK) {
 				InputStream input = connection.openInputStream();
