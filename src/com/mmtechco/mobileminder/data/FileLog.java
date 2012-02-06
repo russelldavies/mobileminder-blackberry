@@ -17,6 +17,7 @@ import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
@@ -221,7 +222,7 @@ public class FileLog {
 			// Get all files that have no been uploaded
 			for (Enumeration e = files.elements(); e.hasMoreElements();) {
 				FileHolder fileholder = (FileHolder) e.nextElement();
-				if (fileholder.isUploaded() == false) {
+				if (!fileholder.isUploaded()) {
 					FileConnection fc = null;
 					try {
 						// Get handle to file
@@ -231,11 +232,9 @@ public class FileLog {
 						FileMessage fm = new FileMessage();
 						fm.add(path, fileholder.getModTime(),
 								fileholder.getMd5());
-						String reply = new Server()
-								.contactServer(fm.getREST(), fc).getREST()
-								.toLowerCase();
+						Reply reply = new Server().contactServer(fm.getREST(), fc);
 						// If server successfully processed mark as uploaded
-						if (reply.indexOf("ok") != -1) {
+						if (!reply.isError()) {
 							// Object must be ungrouped to modify it
 							if (ObjectGroup.isInGroup(fileholder)) {
 								fileholder = (FileHolder) ObjectGroup
