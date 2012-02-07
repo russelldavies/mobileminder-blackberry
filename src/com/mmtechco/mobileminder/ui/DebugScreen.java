@@ -1,7 +1,9 @@
-package com.mmtechco.mobileminder;
+package com.mmtechco.mobileminder.ui;
 
 import java.util.Hashtable;
 
+import com.mmtechco.mobileminder.MobileMinderResource;
+import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.data.FileLog;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;

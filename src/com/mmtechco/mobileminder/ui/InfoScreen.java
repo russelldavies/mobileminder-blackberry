@@ -1,8 +1,10 @@
 //#preprocess
-package com.mmtechco.mobileminder;
+package com.mmtechco.mobileminder.ui;
 
 import java.io.IOException;
 
+import com.mmtechco.mobileminder.MobileMinderResource;
+import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
