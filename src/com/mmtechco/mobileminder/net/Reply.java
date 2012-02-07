@@ -38,7 +38,7 @@ public class Reply {
 			restString = restMessage;
 			String[] replyArray;
 			replyArray = tools.split(restString, Tools.ServerQueryStringSeparator);
-			logger.log(TAG, "rest message: " + restMessage);
+			//logger.log(TAG, "rest message: " + restMessage);
 
 			try {
 				if (0 < replyArray[1].length() // check if string is blank
@@ -57,12 +57,12 @@ public class Reply {
 				} else { // all others
 					// id,calling code,error,info
 					if (replyArray.length == 3) {
-						logger.log(TAG, "ReplyArray length=3");
+						//logger.log(TAG, "ReplyArray length=3");
 						initialize(replyArray[0], replyArray[1],
 								Integer.parseInt(replyArray[2]) != 0, "");
 					} else {
 						try {
-							logger.log(TAG, "ReplyArray length=4");
+							//logger.log(TAG, "ReplyArray length=4");
 							initialize(replyArray[0], replyArray[1],
 									Integer.parseInt(replyArray[2]) != 0,
 									replyArray[3]);
@@ -94,7 +94,7 @@ public class Reply {
 		regID = inputRegID;
 		error = inputError;
 		callingCODE = inputCallingCode;
-		logger.log(TAG, "ReplyInfo: " + inputInfo);
+		//logger.log(TAG, "ReplyInfo: " + inputInfo);
 		info = inputInfo;
 	}
 
@@ -191,7 +191,7 @@ public class Reply {
 	 * @return the regID. Returns the argument of the command message
 	 */
 	public String[] getArgs() {
-		logger.log(TAG, "Processing the args :" + args);
+		//logger.log(TAG, "Processing the args :" + args);
 		String[] processedArgs = tools.split(args, "|");
 		return processedArgs;
 	}
