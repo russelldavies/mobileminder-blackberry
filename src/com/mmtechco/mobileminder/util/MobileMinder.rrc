@@ -3,6 +3,7 @@ i18n_Description#0="MobileMinder keeps your child safe on mobile devices.";
 i18n_ErrorCorruptedMsg#0="Corrupted Message";
 i18n_ErrorNoSim#0="No SIM card present";
 i18n_ErrorServer#0="Server Unreachable";
+i18n_HelpMsg#0="I need help! My location is ";
 i18n_HelpSending#0="Sending Help Me Message";
 i18n_HelpSent#0="Help Me message sent";
 i18n_LearnMore#0="http://www.mobileminder.com";

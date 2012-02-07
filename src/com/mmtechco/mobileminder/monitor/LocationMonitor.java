@@ -43,8 +43,8 @@ public class LocationMonitor implements LocationListener {
 	//#else
 	private LocationProvider locationProvider;
 	//#endif
-	private double latitude;
-	private double longitude;
+	public static double latitude;
+	public static double longitude;
 
 	public LocationMonitor() throws LocationException {
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0 | VER_5.0.0

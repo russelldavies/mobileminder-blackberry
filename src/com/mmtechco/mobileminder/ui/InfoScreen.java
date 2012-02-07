@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.util.Logger;
 import com.mmtechco.mobileminder.util.ToolsBB;
@@ -192,13 +193,13 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	}
 
 	private boolean sendHelpMe() {
-		// TODO: implement location part
+		String mapLocation = "http://www.mobileminder.net/findme.php?"
+				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
 		String[] emergNums = Registration.getEmergNums();
 		for (int i = 0; i < emergNums.length; i++) {
 			try {
-				// TODO: put message into resource bundle
 				((ToolsBB) ToolsBB.getInstance()).sendSMS(emergNums[i],
-						"help me");
+						r.getString(i18n_HelpMsg) + mapLocation);
 			} catch (IOException e) {
 				return false;
 			}
