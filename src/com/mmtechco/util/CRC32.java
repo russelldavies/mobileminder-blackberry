@@ -56,7 +56,7 @@ package com.mmtechco.util;
  * @author Per Bothner
  * @date April 1, 1999.
  */
-public class CRC32 implements Checksum {
+public class CRC32 {
 	/** The crc data checksum so far. */
 	private int crc = 0;
 
