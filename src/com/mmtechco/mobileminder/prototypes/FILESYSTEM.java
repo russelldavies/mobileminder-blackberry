@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes.enums;
+package com.mmtechco.mobileminder.prototypes;
 
 public class FILESYSTEM {
 	private String name;

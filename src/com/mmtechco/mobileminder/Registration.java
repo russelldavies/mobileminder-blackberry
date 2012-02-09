@@ -17,11 +17,10 @@ import net.rim.device.api.util.StringUtilities;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.util.ErrorMessage;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.Tools;
@@ -49,7 +48,7 @@ public class Registration extends Thread implements Controllable,
 	private final int sleepTimeLong = 1000 * 60 * 60 * 24; // 24h
 	private final int sleepTimeShort = 1000 * 60 * 2; // 2 min
 
-	private MMServer server;
+	private Server server;
 	private Logger logger = Logger.getInstance();
 	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
 

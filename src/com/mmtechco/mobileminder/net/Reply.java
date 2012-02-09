@@ -1,7 +1,7 @@
 package com.mmtechco.mobileminder.net;
 
+import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;

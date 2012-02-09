@@ -7,7 +7,7 @@ import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
+import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
 import com.mmtechco.mobileminder.ui.DebugScreen;

@@ -1,6 +1,5 @@
 package com.mmtechco.mobileminder.prototypes;
 
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 
 /**
  * An interface which defines the structure for processing commands and checking targets.

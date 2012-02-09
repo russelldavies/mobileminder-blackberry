@@ -11,10 +11,10 @@ import net.rim.device.api.ui.UiApplication;
 
 import com.mmtechco.mobileminder.data.FileListener;
 import com.mmtechco.mobileminder.data.FileLog;
+import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.Controllable;
+import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 

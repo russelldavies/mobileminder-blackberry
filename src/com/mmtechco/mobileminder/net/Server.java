@@ -15,7 +15,6 @@ import net.rim.device.api.io.MIMETypeAssociations;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.CRC32;
@@ -27,7 +26,7 @@ import com.mmtechco.util.ToolsBB;
  * Monitors for new actions stored in the local storage for recording actions
  * and sends them to the web server at specific intervals.
  */
-public class Server extends Thread implements MMServer, MobileMinderResource {
+public class Server extends Thread implements MobileMinderResource {
 	private static final String TAG = ToolsBB.getSimpleClassName(Server.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 

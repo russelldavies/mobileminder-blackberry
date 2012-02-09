@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes.enums;
+package com.mmtechco.mobileminder.prototypes;
 
 /**
  * Used to reference valid image types.
