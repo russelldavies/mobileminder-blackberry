@@ -24,7 +24,6 @@ import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.util.ErrorMessage;
 import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.StorageException;
 import com.mmtechco.mobileminder.util.Tools;
 import com.mmtechco.mobileminder.util.ToolsBB;
 
