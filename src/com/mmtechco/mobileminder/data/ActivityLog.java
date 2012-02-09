@@ -8,8 +8,8 @@ import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 public class ActivityLog {
 	private static final String TAG = ToolsBB

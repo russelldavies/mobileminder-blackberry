@@ -7,8 +7,8 @@ import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 //#ifndef VER_4.5.0
 import net.rim.blackberry.api.messagelist.ApplicationIcon;

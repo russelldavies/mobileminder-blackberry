@@ -12,8 +12,8 @@ import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
 import com.mmtechco.mobileminder.ui.DebugScreen;
 import com.mmtechco.mobileminder.ui.InfoScreen;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.ApplicationManager;

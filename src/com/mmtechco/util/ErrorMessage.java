@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.util;
+package com.mmtechco.util;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.prototypes.MMTools;

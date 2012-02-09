@@ -22,10 +22,10 @@ import com.mmtechco.mobileminder.prototypes.MMServer;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.util.ErrorMessage;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.Tools;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.ErrorMessage;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.Tools;
+import com.mmtechco.util.ToolsBB;
 
 /**
  * Checks the registration stage that currently the device is in.

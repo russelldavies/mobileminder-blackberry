@@ -7,7 +7,7 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.data.FileLog;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.mobileminder.util.Logger;
+import com.mmtechco.util.Logger;
 
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;

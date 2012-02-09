@@ -15,8 +15,8 @@ import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.enums.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.enums.FILESYSTEM;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 /**
  * Synchronizes device files of a certain criteria to the server. Specify the

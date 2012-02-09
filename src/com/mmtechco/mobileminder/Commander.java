@@ -6,10 +6,10 @@ import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.mobileminder.util.ErrorMessage;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.Tools;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.ErrorMessage;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.Tools;
+import com.mmtechco.util.ToolsBB;
 
 /**
  * Responsible for contacting the server and getting responses. It is also

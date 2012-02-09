@@ -7,8 +7,8 @@ import javax.microedition.pim.ContactList;
 import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
 
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 

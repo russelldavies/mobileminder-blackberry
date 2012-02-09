@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.util;
+package com.mmtechco.util;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

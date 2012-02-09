@@ -1,5 +1,5 @@
 //#preprocess
-package com.mmtechco.mobileminder.util;
+package com.mmtechco.util;
 
 import java.io.IOException;
 import java.io.InputStream;

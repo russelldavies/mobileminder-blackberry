@@ -1,6 +1,6 @@
 package com.mmtechco.mobileminder.net;
 
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.ToolsBB;
 
 /**
  * The encryption logic and can be called by other classes when encryption or

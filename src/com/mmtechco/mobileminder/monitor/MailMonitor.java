@@ -3,9 +3,9 @@ package com.mmtechco.mobileminder.monitor;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.util.Logger;
-import com.mmtechco.mobileminder.util.Tools;
-import com.mmtechco.mobileminder.util.ToolsBB;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.Tools;
+import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
