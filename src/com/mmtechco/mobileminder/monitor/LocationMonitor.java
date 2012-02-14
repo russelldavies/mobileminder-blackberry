@@ -75,13 +75,15 @@ public class LocationMonitor implements LocationListener {
 		try {
 			//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 			BlackBerryCriteria criteria = new BlackBerryCriteria(GPSInfo.GPS_MODE_ASSIST);
-			criteria.enableGeolocationWithGPS();
 			criteria.setFailoverMode(GPSInfo.GPS_MODE_AUTONOMOUS, 3, 100);
 			//criteria.setSubsequentMode(GPSInfo.GPS_MODE_CELLSITE);
 			//#else
 			Criteria criteria = new Criteria();
 			// criteria.setMode(GPSInfo.GPS_MODE_AUTONOMOUS);
 			criteria.setCostAllowed(true);
+			//#endif
+			//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0 | VER_5.0.0
+			criteria.enableGeolocationWithGPS();
 			//#endif
 			criteria.setHorizontalAccuracy(5);
 			criteria.setVerticalAccuracy(5);
