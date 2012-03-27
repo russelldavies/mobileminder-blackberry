@@ -75,7 +75,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 	public void addNewLog(final String msg) {
 		UiApplication.getUiApplication().invokeLater(new Runnable() {
 			public void run() {
-				add(new LabelField(msg));
+				add(new LabelField(msg, Field.FOCUSABLE));
 			}
 		});
 	}
