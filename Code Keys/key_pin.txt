@@ -1,3 +1,0 @@
-key pin for code keys: mmtech0
-
-Look for sigtool.csk in eclipse dir.
