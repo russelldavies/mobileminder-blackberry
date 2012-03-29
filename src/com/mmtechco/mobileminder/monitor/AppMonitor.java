@@ -5,10 +5,14 @@ import java.util.TimerTask;
 
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.EventInjector;
+import net.rim.device.api.ui.Keypad;
+import net.rim.device.api.ui.UiApplication;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.mobileminder.ui.BrowserScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
@@ -21,9 +25,10 @@ public class AppMonitor extends Thread {
 			.getSimpleClassName(AppMonitor.class);
 
 	// Interval that polling is done, in milliseconds
-	private static int interval = 30 * 1000;
+	private static int interval = 1 * 1000;
 
 	private static final Logger logger = Logger.getInstance();
+	private static UiApplication app = UiApplication.getUiApplication();
 
 	int foregroundProcessId = -1;
 	String name, moduleName;
@@ -36,10 +41,36 @@ public class AppMonitor extends Thread {
 				getAppNameByProcessId(foregroundProcessId);
 				logger.log(TAG, "Current running app name is: " + name);
 				ActivityLog.addMessage(new AppMessage(name, moduleName));
+
+				// If system browser is open, close it and start custom browser
+				if (name.equals("Browser")) {
+					// Bring up menu
+					EventInjector.invokeEvent(new EventInjector.KeyCodeEvent(
+							EventInjector.KeyCodeEvent.KEY_DOWN,
+							(char) Keypad.KEY_MENU, 0));
+					// Cycle down menu
+					for (int i = 0; i < 20; i++) {
+						EventInjector
+								.invokeEvent(new EventInjector.NavigationEvent(
+										EventInjector.NavigationEvent.NAVIGATION_MOVEMENT,
+										0, 1, 0));
+					}
+					// Click on menu item
+					EventInjector.invokeEvent(new EventInjector.KeyCodeEvent(
+							EventInjector.KeyCodeEvent.KEY_DOWN,
+							(char) Keypad.KEY_ENTER, 0));
+					
+					// Start custom browser
+					app.invokeAndWait(new Runnable() {
+						public void run() {
+							app.pushScreen(new BrowserScreen());
+						}
+					});
+				}
 			}
 		}
 	};
-	
+
 	public AppMonitor() {
 		new Timer().scheduleAtFixedRate(checkAppsTask, 0, interval);
 	}
@@ -89,7 +120,8 @@ class AppMessage implements Message {
 	public String getREST() {
 		return Registration.getRegID() + Tools.ServerQueryStringSeparator + "0"
 				+ getType() + Tools.ServerQueryStringSeparator + appName
-				+ Tools.ServerQueryStringSeparator + ToolsBB.getInstance().getDate()
+				+ Tools.ServerQueryStringSeparator
+				+ ToolsBB.getInstance().getDate()
 				+ Tools.ServerQueryStringSeparator + upTime
 				+ Tools.ServerQueryStringSeparator + fullPackageName;
 	}
