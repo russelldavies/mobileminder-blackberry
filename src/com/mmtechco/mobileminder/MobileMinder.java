@@ -10,7 +10,9 @@ import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
+//#ifdef DEBUG
 import com.mmtechco.mobileminder.ui.DebugScreen;
+//#endif
 import com.mmtechco.mobileminder.ui.InfoScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
