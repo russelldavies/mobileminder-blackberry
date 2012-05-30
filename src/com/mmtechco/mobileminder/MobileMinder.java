@@ -7,7 +7,6 @@ import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.monitor.*;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
 //#ifdef DEBUG
@@ -15,18 +14,18 @@ import com.mmtechco.mobileminder.ui.DebugScreen;
 //#endif
 import com.mmtechco.mobileminder.ui.InfoScreen;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
-
 import net.rim.device.api.i18n.ResourceBundle;
+import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
+import net.rim.device.api.system.GlobalEventListener;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
 
 /**
  * Main entry point of the application.
  */
-class MobileMinder extends UiApplication implements SystemListener2 {
+class MobileMinder extends UiApplication implements SystemListener2, GlobalEventListener {
 	private static final String TAG = "App";
 	public static ResourceBundle r = ResourceBundle.getBundle(
 			MobileMinderResource.BUNDLE_ID, MobileMinderResource.BUNDLE_NAME);
@@ -34,7 +33,6 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	private Logger logger = Logger.getInstance();
 
 	private InfoScreen infoscreen;
-	private Registration reg;
 
 	/**
 	 * Entry point for application
@@ -43,12 +41,22 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 	 *            Alternate entry point arguments.
 	 */
 	public static void main(String[] args) {
-		// Start logging
-		// TODO: implement
-		// Logger.startEventLogger();
-
-		MobileMinder app = new MobileMinder();
-
+		final MobileMinder app = new MobileMinder();
+		
+		// Listen for registration events
+		app.addGlobalEventListener(app);
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+		// Setup listener for removal of app. This needs to be set here before
+		// the app enters the event dispatcher.
+		CodeModuleManager.addListener(app, new UninstallMonitor());
+		//#endif
+		
+		//#ifdef DEBUG
+		// Start logging if in debugging mode
+		// TODO: enable
+		//Logger.startEventLogger();
+		//#endif
+		
 		// If system startup is still in progress when this
 		// application is run.
 		if (ApplicationManager.getApplicationManager().inStartup()) {
@@ -60,14 +68,12 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 			// work now. Note that this work must be completed using
 			// invokeLater because the application has not yet entered the
 			// event dispatcher.
-			app.initializeLater();
+			app.invokeLater(new Runnable() {
+				public void run() {
+					app.initialize();
+				}
+			});
 		}
-
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-		// Setup listener for removal of app. This needs to be set here before
-		// the app enters the event dispatcher.
-		CodeModuleManager.addListener(app, new UninstallMonitor());
-		//#endif
 
 		// Start event thread
 		app.enterEventDispatcher();
@@ -81,15 +87,34 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		pushScreen(infoscreen);
 		//#endif
 
-		logger.log(TAG, "Starting registration");
-		reg = new Registration();
-		reg.start();
+		// This needs to be in a thread as it performs network IO and would run
+		// on the event queue and freeze the interface. Subsequent calls to it
+		// use a separate timer thread
+		Application.getApplication().invokeLater(new Runnable() {
+			public void run() {
+				new Thread() {
+					public void run() {
+						Registration.checkStatus();
+					}
+				}.start();
+			}
+		});
 	}
 
+	public void eventOccurred(long guid, int data0, int data1, Object object0,
+			Object object1) {
+		if (guid == Registration.ID) {
+			logger.log(TAG, "Received event to start components");
+			startComponents();
+		}
+	}
+	
 	/**
 	 * Start components
 	 */
 	public void startComponents() {
+		logger.log(TAG, "Starting components");
+		
 		//#ifndef VER_4.5.0
 		// Register application indicator
 		//infoscreen.registerIndicator();
@@ -102,7 +127,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		// Start monitors
 		logger.log(TAG, "Starting monitors...");
 		new AppMonitor();
-		new MailMonitor();
+		//new MailMonitor();
 		new CallMonitor();
 		new SMSMonitor();
 		try {
@@ -115,7 +140,7 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		components[0] = new ContactPic();
 		FileSync filesync = new FileSync();
 		components[1] = filesync;
-		components[2] = reg;
+		components[2] = new Registration();
 		new Commander(components).start();
 		filesync.start();
 
@@ -123,34 +148,9 @@ class MobileMinder extends UiApplication implements SystemListener2 {
 		new Server().start();
 	}
 
-	/**
-	 * Perform the start up work on a new Runnable using the invokeLater
-	 * construct to ensure that it is executed after the event thread has been
-	 * created.
-	 */
-	private void initializeLater() {
-		invokeLater(new Runnable() {
-			public void run() {
-				initialize();
-			}
-		});
-	}
-
 	public void powerUp() {
 		Logger.getInstance().log(TAG, "Started from powerup");
-
 		removeSystemListener(this);
-		// Wait up to 30 seconds for sdcard to mount
-		for (int i = 0; i < 30; i++) {
-			if (ToolsBB.fsMounted(FILESYSTEM.SDCARD)) {
-				break;
-			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 		initialize();
 	}
 

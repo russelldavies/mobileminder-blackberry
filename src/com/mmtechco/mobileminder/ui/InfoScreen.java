@@ -2,6 +2,8 @@
 package com.mmtechco.mobileminder.ui;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
@@ -101,8 +103,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 		helpButton.setChangeListener(new FieldChangeListener() {
 			public void fieldChanged(Field field, int context) {
-				String[] emergNums = Registration.getEmergNums();
-				if (emergNums[0] != "" && emergNums.length > 0) {
+				if (Registration.getEmergNums().size() > 0) {
 					if (sendHelpMe()) {
 						Dialog.inform(r.getString(i18n_HelpSent));
 					} else {
@@ -184,8 +185,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		};
 
 		// Only display menu if there are emergency numbers
-		String[] emergNums = Registration.getEmergNums();
-		if (emergNums[0] != "" && emergNums.length > 0) {
+		if (Registration.getEmergNums().size() > 0) {
 			menu.add(helpMenu);
 		}
 
@@ -195,12 +195,13 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private boolean sendHelpMe() {
 		String mapLocation = "http://www.mobileminder.net/findme.php?"
 				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
-		String[] emergNums = Registration.getEmergNums();
-		for (int i = 0; i < emergNums.length; i++) {
+		Vector emergNums = Registration.getEmergNums();
+		for (Enumeration e = emergNums.elements(); e.hasMoreElements();) {
 			try {
-				((ToolsBB) ToolsBB.getInstance()).sendSMS(emergNums[i],
-						r.getString(i18n_HelpMsg) + mapLocation);
-			} catch (IOException e) {
+				((ToolsBB) ToolsBB.getInstance()).sendSMS(
+						(String) e.nextElement(), r.getString(i18n_HelpMsg)
+								+ mapLocation);
+			} catch (IOException exception) {
 				return false;
 			}
 		}

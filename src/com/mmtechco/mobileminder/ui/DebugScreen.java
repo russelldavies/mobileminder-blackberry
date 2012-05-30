@@ -1,6 +1,7 @@
 package com.mmtechco.mobileminder.ui;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
@@ -13,6 +14,7 @@ import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
+import net.rim.device.api.system.RuntimeStore;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.MenuItem;
@@ -131,15 +133,15 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				if (regTable == null) {
 					add(new LabelField("No values were in the store"));
 				} else {
-					add(new LabelField(regTable.get(Registration.KEY_STAGE)));
-					add(new LabelField(regTable.get(Registration.KEY_ID)));
-					String num = (String) regTable
-							.get(Registration.KEY_NUMBERS);
-					if (num.equals("")) {
-						add(new LabelField("No emergency numbers stored"));
-					} else {
-						add(new LabelField(num));
-					}
+					String stage = (String) regTable.get(Registration.KEY_STAGE);
+					String id = (String) regTable.get(Registration.KEY_ID);
+					Boolean compStatus = (Boolean) RuntimeStore.getRuntimeStore().get(Registration.ID);
+					Vector nums = (Vector) regTable.get(Registration.KEY_NUMBERS);
+					
+					add(new LabelField("Stage: " + stage));
+					add(new LabelField("ID: " + id.toString()));
+					add(new LabelField("Components started: " + compStatus));
+					add(new LabelField("Emergency nums: " + nums));
 				}
 			}
 
@@ -147,6 +149,9 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 			exitButton.setChangeListener(new FieldChangeListener() {
 				public void fieldChanged(Field field, int context) {
+					// Delete details
+					PersistentStore.destroyPersistentObject(Registration.ID);
+					RuntimeStore.getRuntimeStore().remove(Registration.ID);
 					System.exit(0);
 				}
 			});
