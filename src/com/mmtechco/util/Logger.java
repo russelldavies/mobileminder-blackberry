@@ -46,7 +46,7 @@ public class Logger {
 		return logger;
 	}
 
-	public void log(String tag, String msg) {
+	public static void log(String tag, String msg) {
 		//#ifdef DEBUG
 		out(tag, msg);
 		if (scr != null) {
@@ -68,7 +68,7 @@ public class Logger {
 	 * @param msg
 	 *            the message to log
 	 */
-	public void out(String tag, String msg) {
+	public static void out(String tag, String msg) {
 		System.out.println(setUpMessageString(tag, msg));
 	}
 
@@ -80,19 +80,19 @@ public class Logger {
 	 * @param t
 	 *            the exception to be caught
 	 */
-	public void err(String tag, String msg, Throwable t) {
+	public static void err(String tag, String msg, Throwable t) {
 		System.err.println(setUpMessageString(tag, msg));
 		t.printStackTrace();
 	}
 
-	private String setUpMessageString(String tag, String msg) {
+	private static String setUpMessageString(String tag, String msg) {
 		return "***" + APP_NAME + "*** ["
 				+ dateFormat.format(new Date()) + "] " + tag + "::" + msg;
 	}
 
 	// These methods are for logging to BlackBerry EventLog. Useful for device
 	// debugging.
-	public void startEventLogger() {
+	public static void startEventLogger() {
 		EventLogger.register(GUID, APP_NAME,
 				EventLogger.VIEWER_STRING);
 	}

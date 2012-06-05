@@ -54,7 +54,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		//#ifdef DEBUG
 		// Start logging if in debugging mode
 		// TODO: enable
-		//Logger.startEventLogger();
+		Logger.startEventLogger();
 		//#endif
 		
 		// If system startup is still in progress when this
