@@ -37,7 +37,7 @@ public class Reply {
 		if (null != restMessage) {
 			restString = restMessage;
 			String[] replyArray;
-			replyArray = tools.split(restString, Tools.ServerQueryStringSeparator);
+			replyArray = tools.split(restString, Server.separator);
 			//logger.log(TAG, "rest message: " + restMessage);
 
 			try {

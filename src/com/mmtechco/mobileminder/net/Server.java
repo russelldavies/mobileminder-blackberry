@@ -1,149 +1,169 @@
+//#preprocess
 package com.mmtechco.mobileminder.net;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Random;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
+import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 
 import net.rim.blackberry.api.browser.URLEncodedPostData;
-import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.MIMETypeAssociations;
 import net.rim.device.api.io.http.HttpProtocolConstants;
-import com.mmtechco.mobileminder.MobileMinderResource;
-import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.CRC32;
+import net.rim.device.api.io.transport.ConnectionDescriptor;
+import net.rim.device.api.io.transport.ConnectionFactory;
+import net.rim.device.api.io.transport.TransportInfo;
+import net.rim.device.api.system.DeviceInfo;
+//#ifdef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+import rimx.network.TransportDetective;
+import rimx.network.URLFactory;
+//#endif
+
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
-/**
- * Monitors for new actions stored in the local storage for recording actions
- * and sends them to the web server at specific intervals.
- */
-public class Server extends Thread implements MobileMinderResource {
+public class Server {
 	private static final String TAG = ToolsBB.getSimpleClassName(Server.class);
-	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 
-	private Logger logger = Logger.getInstance();
-	private MMTools tools = ToolsBB.getInstance();
-	private final String URL = "http://www.mobileminder.net/WebService.php?";
-	private int freq = 1000 * 30; // 30 seconds
-	private String serverErrorReply = Tools.ServerQueryStringSeparator
-			+ Tools.ServerQueryStringSeparator + 1
-			+ Tools.ServerQueryStringSeparator
-			+ Tools.ServerQueryStringSeparator;
-	private Security security;
-	private CRC32 crc;
+	private static final String URL = "https://www.mobileminder.net/WebService.php?";
+	public static String separator = ",";
 
-	/**
-	 * Initializes server parameters, creates a new security instance and starts
-	 * the server connection.
-	 */
-	public Server() {
-		security = new Security();
-		crc = new CRC32();
-		logger.log(TAG, "Started");
+	public static Response get(String queryString) throws IOException {
+		Logger.log(TAG, "GET query string: " + queryString);
+		
+		// Setup connection and HTTP headers
+		HttpConnection connection = setupConnection(URL + queryString);
+		connection.setRequestMethod(HttpConnection.GET);
+
+		// Construct reply
+		return new Response(connection);
 	}
 
-	/**
-	 * Monitors the local storage for new messages stored at specific intervals
-	 * and sends them to the server.
-	 */
-	public void run() {
-		while (true) {
-			String[] serverReply = null;
-			int counter = -1;
-			if (tools.isConnected()) {
-				logger.log(TAG,
-						"Checking for new messages to send. Message queue length: "
-								+ ActivityLog.length());
-				// Check is a message is in the local storage
-				while (ActivityLog.length() > 0 && tools.isConnected()) {
-					try {
-						// Send the first message from the queue to the server
-						// and parse reply
-						serverReply = tools.split(
-								get(ActivityLog.getMessage()),
-								Tools.ServerQueryStringSeparator);
-						// No error
-						if (serverReply.length > 2
-								&& (Integer.parseInt(serverReply[2]) == 0)) {
-							// Pop the message off the queue
-							ActivityLog.removeMessage();
-							counter = -1;
-						}
-					} catch (NullPointerException e) {
-						logger.log(TAG, "Could not contact server.");
-					}
+	public static Response post(String queryString, Hashtable keyvalPairs) throws IOException {
+		Logger.log(TAG, "POST data: " + queryString);
+		
+		// Setup connection and HTTP headers
+		HttpConnection connection = setupConnection(URL + queryString);
+		connection.setRequestMethod(HttpConnection.POST);
+		connection.setRequestProperty(
+						HttpProtocolConstants.HEADER_CONTENT_TYPE,
+						HttpProtocolConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
 
-					if (null == serverReply) {
-						logger.log(TAG,
-								"Did not receive server reply, sleeping");
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					} else {
-						// Check network: server timeout, does not return type
-						if (0 < serverReply[1].length()) {
-							counter++;
-							if (counter == 2) {
-								ActivityLog.removeMessage();
-								counter = -1;
-							}
-						} else {
-							// No network
-							ActivityLog.removeMessage();
-							break;
-						}
-					}
-				}
-			}
-			// Sleep so loop doesn't spin
-			try {
-				Thread.sleep(freq);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		// Add message body and set Content-Length
+		URLEncodedPostData encPostData = new URLEncodedPostData("UTF-8", false);
+		for (Enumeration e = keyvalPairs.keys(); e.hasMoreElements();) {
+			String key = (String) e.nextElement();
+			encPostData.append(key, (String) keyvalPairs.get(key));
 		}
+		byte[] postData = encPostData.toString().getBytes("UTF-8");
+		connection.setRequestProperty(
+				HttpProtocolConstants.HEADER_CONTENT_LENGTH,
+				String.valueOf(postData.length));
+
+		// Send data via POST
+		OutputStream output = connection.openOutputStream();
+		output.write(postData);
+		output.flush();
+
+		// Construct reply
+		return new Response(connection);
 	}
 
-	public Reply contactServer(Message inputMessage) {
-		return contactServer(inputMessage.getREST());
+	public static Response postMultiPart(String queryString,
+			FileConnection file, String controlName) throws IOException {
+		Logger.log(TAG, "POST multipart query string: " + queryString);
+		
+		// Setup connection and HTTP headers
+		HttpConnection connection = setupConnection(URL + queryString);
+		connection.setRequestMethod(HttpConnection.POST);
+		String boundary = Long.toString(System.currentTimeMillis());
+		connection.setRequestProperty(
+				HttpProtocolConstants.HEADER_CONTENT_TYPE,
+				HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
+						+ ";boundary=" + boundary);
+
+		// Send data via POST
+		OutputStream output = connection.openOutputStream();
+		output.write(("\r\n--" + boundary + "\r\n").getBytes());
+		output.write(("Content-Disposition: form-data; name=\"" + controlName + "\"; filename=\""
+				+ file.getName() + "\"\r\n").getBytes());
+		output.write(("Content-Type: "
+				+ MIMETypeAssociations.getNormalizedType(file.getPath()
+						+ file.getName()) + "\r\n\r\n").getBytes());
+		output.write(IOUtilities.streamToBytes(file.openInputStream()));
+		output.write(("\r\n--" + boundary + "--\r\n").getBytes());
+
+		/*
+		// Other, less manual, method
+		// Note: This doesn't work as setData overwrites all post data
+		MultipartPostData postData = new MultipartPostData(
+				MultipartPostData.DEFAULT_CHARSET, true);
+		postData.setData(IOUtilities.streamToBytes(file.openInputStream());
+		postData.append("name", controlName);
+		postData.append("filename", file.getName());
+		output.write(postData.getBytes());
+		*/
+		output.flush();
+
+		// Construct reply
+		return new Response(connection);
 	}
 
-	public Reply contactServer(String inputMessage) {
-		return new Reply(get(inputMessage));
+	private static  HttpConnection setupConnection(String url) throws IOException {
+		if (DeviceInfo.isSimulator()) {
+			// If running the MDS simulator append ";deviceside=false"
+			return (HttpConnection) Connector.open(url + ";deviceside=true",
+					Connector.READ_WRITE);
+		}
+		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
+		ConnectionFactory cf = new ConnectionFactory();
+		// Ordered list of preferred transports
+		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
+				TransportInfo.TRANSPORT_TCP_CELLULAR,
+				TransportInfo.TRANSPORT_WAP2, TransportInfo.TRANSPORT_WAP,
+				TransportInfo.TRANSPORT_MDS, TransportInfo.TRANSPORT_BIS_B };
+		cf.setPreferredTransportTypes(transportPrefs);
+		ConnectionDescriptor cd = cf.getConnection(url);
+		return (HttpConnection) cd.getConnection();
+		//#else
+		TransportDetective td = new TransportDetective();
+		URLFactory urlFactory = new URLFactory(url);
+		String connectionUrl;
+		if(td.isCoverageAvailable(TransportDetective.TRANSPORT_TCP_WIFI)) {
+		   connectionUrl = urlFactory.getHttpTcpWiFiUrl();
+		} else if (td.isCoverageAvailable(TransportDetective.DEFAULT_TCP_CELLULAR)) {
+			connectionUrl = urlFactory.getHttpDefaultTcpCellularUrl(td.getDefaultTcpCellularServiceRecord());
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_WAP2)) {
+			connectionUrl = urlFactory.getHttpWap2Url(td.getWap2ServiceRecord());
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_MDS)) {
+			connectionUrl = urlFactory.getHttpMdsUrl(false);
+		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_BIS_B)) {
+			connectionUrl = urlFactory.getHttpBisUrl();
+		} else {
+			connectionUrl = urlFactory.getHttpDefaultUrl();
+		}
+		return (HttpConnection)Connector.open(connectionUrl, Connector.READ_WRITE);
+		//#endif
 	}
-
-	public Reply contactServer(String inputBody, String crc, String pic) {
-		return new Reply(post(inputBody, crc, pic));
-	}
-
-	public Reply contactServer(String inputBody, FileConnection pic) {
-		return new Reply(postMultiPart(inputBody, pic));
-	}
-
+	
 	/**
-	 * Performs a HTTP GET request
+	 * Checks if there is a valid internet connection.
 	 * 
-	 * @param queryString
-	 *            - the query string that is appended to the URL that contains
-	 *            data to be passed to the server.
-	 * @return the server reply.
+	 * @return true if connected.
 	 */
-	public String get(String queryString) {
-		logger.log(TAG, "GET query string: " + queryString);
+	public static boolean isConnected() {
+		String url = "http://www.msftncsi.com/ncsi.txt";
+		String expectedResponse = "Microsoft NCSI";
+		
+		Logger.log(TAG, "Checking connectivity");
+		
 		try {
-			HttpConnection connection = setupConnection(URL
-					+ encodeQueryString(queryString));
+			HttpConnection connection = setupConnection(url);
 			connection.setRequestMethod(HttpConnection.GET);
 
 			int status = connection.getResponseCode();
@@ -152,229 +172,11 @@ public class Server extends Thread implements MobileMinderResource {
 				byte[] reply = IOUtilities.streamToBytes(input);
 				input.close();
 				connection.close();
-				return processReply(new String(reply));
-			} else {
-				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
+				return expectedResponse.equals(new String(reply));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.log(TAG, e.toString());
-			return serverErrorReply + r.getString(i18n_ErrorServer);
+			Logger.log(TAG, "Connectivity test failed");
 		}
-	}
-
-	/**
-	 * Performs a HTTP POST request passing the data in the message body URL
-	 * encoded.
-	 * 
-	 * @param queryString
-	 *            - the query string that is appended to the URL that contains
-	 *            data to be passed to the server.he
-	 * @param crc
-	 *            - CRC of the file.
-	 * @param pic
-	 *            - picture file converted to a hex stream.
-	 * @return the server reply.
-	 */
-	private String post(String queryString, String crc, String pic) {
-		if (!tools.isConnected()) {
-			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-		}
-		logger.log(TAG, "POST query string: " + queryString);
-		try {
-			HttpConnection connection = setupConnection(URL
-					+ encodeQueryString(queryString));
-			connection.setRequestMethod(HttpConnection.POST);
-			connection
-					.setRequestProperty(
-							HttpProtocolConstants.HEADER_CONTENT_TYPE,
-							HttpProtocolConstants.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
-
-			URLEncodedPostData encPostData = new URLEncodedPostData("UTF-8",
-					false);
-			encPostData.append("crc", crc);
-			encPostData.append("pic", pic);
-			byte[] postData = encPostData.toString().getBytes("UTF-8");
-			connection.setRequestProperty(
-					HttpProtocolConstants.HEADER_CONTENT_LENGTH,
-					String.valueOf(postData.length));
-
-			// Send data via POST
-			OutputStream output = connection.openOutputStream();
-			output.write(postData);
-			output.flush();
-
-			// Read response
-			if (connection.getResponseCode() == HttpConnection.HTTP_OK) {
-				InputStream input = connection.openInputStream();
-				byte[] reply = IOUtilities.streamToBytes(input);
-				input.close();
-				connection.close();
-				return processReply(new String(reply));
-			} else {
-				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.log(TAG, e.toString());
-			return serverErrorReply + r.getString(i18n_ErrorServer);
-		}
-	}
-
-	/**
-	 * Performs a HTTP POST request passing the data in the message body using
-	 * multipart MIME.
-	 * 
-	 * @param queryString
-	 *            - the query string that is appended to the URL that contains
-	 *            data to be passed to the server.he
-	 * @param pic
-	 *            - the picture file.
-	 * @return the server reply.
-	 */
-	private String postMultiPart(String queryString, FileConnection pic) {
-		// Don't start if no connection
-		if (!tools.isConnected()) {
-			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-		}
-		logger.log(TAG, "POST multipart query string: " + queryString);
-		try {
-			// Open file and stream to byte stream
-			InputStream is = pic.openInputStream();
-			byte[] fileData = IOUtilities.streamToBytes(is);
-			// Setup connection
-			HttpConnection connection = setupConnection(URL
-					+ encodeQueryString(queryString));
-
-			// Specify connection properties
-			connection.setRequestMethod(HttpConnection.POST);
-			String boundary = "--------------------"
-					+ System.currentTimeMillis();
-			connection.setRequestProperty(
-					HttpProtocolConstants.HEADER_CONTENT_TYPE,
-					HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
-							+ ";boundary=" + boundary);
-
-			// Send data via POST
-			OutputStream output = connection.openOutputStream();
-			output.write(("\r\n--" + boundary + "\r\n").getBytes());
-			output.write(("Content-Disposition: form-data; name=\"userfile\"; filename=\""
-					+ pic.getName() + "\"\r\n").getBytes());
-			output.write(("Content-Type: "
-					+ MIMETypeAssociations.getNormalizedType(pic.getPath()
-							+ pic.getName()) + "\r\n\r\n").getBytes());
-			output.write(fileData);
-			output.write(("\r\n--" + boundary + "--\r\n").getBytes());
-
-			// Create payload
-			/*
-			// Note: This doesn't work as setData overwrites all post data
-			MultipartPostData postData = new MultipartPostData(
-					MultipartPostData.DEFAULT_CHARSET, true);
-			postData.setData(fileData);
-			postData.append("name", "userfile");
-			postData.append("filename", pic.getName());
-			output.write(postData.getBytes());
-			*/
-
-			output.flush();
-
-			// Read response
-			if (connection.getResponseCode() == HttpConnection.HTTP_OK) {
-				InputStream input = connection.openInputStream();
-				byte[] reply = IOUtilities.streamToBytes(input);
-				input.close();
-				connection.close();
-				return processReply(new String(reply));
-			} else {
-				return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.log(TAG, e.toString());
-			return serverErrorReply + r.getString(i18n_ErrorServer);
-		}
-	}
-
-	private String encodeQueryString(String queryString) {
-		// Encrypt and convert to hex
-		return tools.topAndTail(
-				tools.stringToHex(encrypt(tools.safeRangeTextUTF(queryString
-						.trim())))).toUpperCase();
-	}
-
-	private String processReply(String reply) {
-		if (reply != null && tools.isHex(reply)) {
-			return decrypt(reply);
-		} else {
-			return serverErrorReply + r.getString(i18n_ErrorCorruptedMsg);
-		}
-	}
-
-	public long getCrcValue(String inputText) {
-		return getCrcValue(inputText.getBytes());
-	}
-
-	public long getCrcValue(byte[] inputText) {
-		crc.reset();
-		crc.update(inputText);
-		return crc.getValue();
-	}
-
-	/**
-	 * Encrypts the message.
-	 * 
-	 * @param inputText
-	 *            - message to be encrypted.
-	 * @return an encrypted message.
-	 */
-	private String encrypt(String inputText) {
-		// Add random text and CRC
-		inputText = tools.getRandomString(new Random().nextInt(10))
-				+ Tools.ServerQueryStringSeparator + getCrcValue(inputText)
-				+ Tools.ServerQueryStringSeparator + inputText;
-		return security.cryptFull(inputText, true);
-	}
-
-	/**
-	 * Decrypts the message which was encrypted.
-	 * 
-	 * @param inputText
-	 *            - message to be decrypted.
-	 * @return an decrypted message.
-	 */
-	private String decrypt(String inputText) {
-		String text = "";
-		// Messages with bad checksums will return blank
-		if (null == inputText || 0 == inputText.length()) {
-			return null;
-		}
-
-		crc.reset();
-		String[] replyArray = tools.split(security.cryptFull(
-				tools.hexToString(tools.reverseTopAndTail(inputText)), false),
-				",");
-
-		// rebuild message
-		for (int count = 2; count < replyArray.length; count++) {
-			text += replyArray[count];
-			if ((replyArray.length - 1) > count) {
-				text += Tools.ServerQueryStringSeparator;
-			}
-		}
-		crc.update(text.getBytes());
-		// logger.log(TAG, "Server CRC: " + Long.parseLong(replyArray[1]));
-		// logger.log(TAG, "Client CRC: " + crc.getValue());
-		logger.log(TAG, "Decrypted server reply: " + text);
-		// Check CRC
-		if (Long.parseLong(replyArray[1]) == crc.getValue()) {
-			return text;
-		} else {
-			return null;
-		}
-	}
-
-	private HttpConnection setupConnection(String url) throws IOException {
-		return ((ToolsBB) ToolsBB.getInstance()).setupConnection(url);
+		return false;
 	}
 }

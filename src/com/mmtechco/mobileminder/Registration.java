@@ -50,21 +50,20 @@ public class Registration implements Controllable, MobileMinderResource {
 	private static String status = r.getString(i18n_RegRequesting);
 	private static Vector emergNums;
 
-	private static Logger logger = Logger.getInstance();
 	private static Vector observers = new Vector();
 
 	
 	public static void checkStatus() {
-		logger.log(TAG, "Checking registration status");
+		Logger.log(TAG, "Checking registration status");
 		
 		readDetails();
 		
 		// Contact server and get new values, if any
-		logger.log(TAG, "Requesting reg details from server");
+		Logger.log(TAG, "Requesting reg details from server");
 		Reply response = new Server().contactServer(new RegistrationMessage(stage));
-		logger.log(TAG, "Server response: " + response.getREST());
+		Logger.log(TAG, "Server response: " + response.getREST());
 		if (response.isError()) {
-			logger.log(TAG, "Bad server response. Scheduling short run");
+			Logger.log(TAG, "Bad server response. Scheduling short run");
 			scheduleRun(intervalShort);
 			return;
 		}
@@ -75,11 +74,11 @@ public class Registration implements Controllable, MobileMinderResource {
 		
 		// Schedule a registration check based on stage
 		if (stage < 2) {
-			logger.log(TAG, "Scheduling short run");
+			Logger.log(TAG, "Scheduling short run");
 			scheduleRun(intervalShort);
 		} else {
 			startComponents();
-			logger.log(TAG, "Scheduling long run");
+			Logger.log(TAG, "Scheduling long run");
 			scheduleRun(intervalLong);
 		}
 	}
@@ -98,7 +97,7 @@ public class Registration implements Controllable, MobileMinderResource {
 		synchronized (regData) {
 			Hashtable regTable = (Hashtable) regData.getContents();
 			if (regTable == null) {
-				logger.log(TAG, "Populating with default values");
+				Logger.log(TAG, "Populating with default values");
 				// Populate with default values
 				regTable = new Hashtable();
 				regTable.put(KEY_STAGE, "0"); stage = 0;
@@ -108,7 +107,7 @@ public class Registration implements Controllable, MobileMinderResource {
 				regData.setContents(regTable);
 				regData.commit();
 			} else {
-				logger.log(TAG, "Reading details from storage");
+				Logger.log(TAG, "Reading details from storage");
 				// Read values from storage
 				stage = Integer.parseInt((String) regTable.get(KEY_STAGE));
 				id = (String) regTable.get(KEY_ID);
@@ -128,7 +127,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			regData.setContents(regTable);
 			regData.commit();
 		}
-		logger.log(TAG, "Stored details");
+		Logger.log(TAG, "Stored details");
 	}
 
 	private static void startComponents() {
@@ -137,9 +136,9 @@ public class Registration implements Controllable, MobileMinderResource {
 		// static class variables properly
 		Boolean started = (Boolean) RuntimeStore.getRuntimeStore().get(ID);
 		if (started == null || !started.booleanValue()) {
-			logger.log(TAG, "Components not started");
+			Logger.log(TAG, "Components not started");
 			if (ApplicationManager.getApplicationManager().postGlobalEvent(ID)) {
-				logger.log(TAG, "Fired event to start components");
+				Logger.log(TAG, "Fired event to start components");
 				RuntimeStore.getRuntimeStore().put(ID, new Boolean(true));
 			}
 		}
@@ -162,7 +161,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			status = r.getString(i18n_RegActive);
 			break;
 		}
-		logger.log(TAG, "Update status: " + stage + ";" + id + ";" + status);
+		Logger.log(TAG, "Update status: " + stage + ";" + id + ";" + status);
 		
 		// Tell screens to update themselves
 		notifyObservers();
@@ -209,14 +208,14 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 
 	public boolean processCommand(String[] inputArgs) {
-		logger.log(TAG, "Processing Owner Number Command...");
+		Logger.log(TAG, "Processing Owner Number Command...");
 		boolean complete = false;
 		if (inputArgs[0].equalsIgnoreCase("lost")
 				&& inputArgs[1].equalsIgnoreCase("number")) {
 
-			logger.log(TAG, "args[0] :" + inputArgs[0]);
-			logger.log(TAG, "args[1] :" + inputArgs[1]);
-			logger.log(TAG, "args[2] :" + inputArgs[2]);
+			Logger.log(TAG, "args[0] :" + inputArgs[0]);
+			Logger.log(TAG, "args[1] :" + inputArgs[1]);
+			Logger.log(TAG, "args[2] :" + inputArgs[2]);
 			try {
 				String[] nums = ToolsBB.getInstance().split(inputArgs[2], "&");
 				for (int i = 0; i < nums.length; i++) {

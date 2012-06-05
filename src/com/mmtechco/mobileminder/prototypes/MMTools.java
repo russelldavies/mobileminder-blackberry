@@ -145,6 +145,4 @@ public interface MMTools {
 	public String getRandomString(int length);
 	
 	public String[] split(String strString, String strDelimiter);
-	
-	public boolean isConnected();
 }

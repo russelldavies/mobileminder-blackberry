@@ -5,7 +5,6 @@ import javax.microedition.location.LocationException;
 
 import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.monitor.*;
-import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
@@ -143,9 +142,6 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		components[2] = new Registration();
 		new Commander(components).start();
 		filesync.start();
-
-		// Monitor activity log
-		new Server().start();
 	}
 
 	public void powerUp() {
