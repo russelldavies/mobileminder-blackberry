@@ -3,7 +3,6 @@ package com.mmtechco.mobileminder.net;
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
@@ -14,65 +13,48 @@ public class Reply {
 	
 	private static final MMTools tools = ToolsBB.getInstance();
 	
-	private String regID;
-	private String restString;
+	private String replyStr;
+	
+	private String id;
 	private boolean error;
-	private String callingCODE;
+	private String type;
 	private String info;
-	private Logger logger = Logger.getInstance();
 
 	// Command Reply Class Variables
 	private int index;
 	private String target;
 	private String args;
 
-	/**
-	 * Constructor: transforms the data from the web server into easier-access
-	 * form for the registration class to use.
-	 * 
-	 * @param restMessage
-	 *            a String contains the data from the web server.
-	 */
-	public Reply(String restMessage) {
-		if (null != restMessage) {
-			restString = restMessage;
-			String[] replyArray;
-			replyArray = tools.split(restString, Server.separator);
-			//logger.log(TAG, "rest message: " + restMessage);
+	public Reply(String replyStr) throws Exception {
+		if (null == replyStr) {
+			return;
+		}
+		this.replyStr = replyStr;
+		String[] replyArray;
+		replyArray = tools.split(replyStr, Server.separator);
 
-			try {
-				if (0 < replyArray[1].length() // check if string is blank
-						&& Integer.parseInt(replyArray[1]) == 0) // command
-				{ // id,type,index,target,args
-					int commandID = Integer.parseInt(replyArray[2]);
+		// not blank and command
+		if (0 < replyArray[1].length() && Integer.parseInt(replyArray[1]) == 0) {
+			// id,type,index,target,args
+			int commandID = Integer.parseInt(replyArray[2]);
 
-					if (0 == commandID)// id,type,comID,tag,arg -> 12345,00,0,,
-					{
-						initializeComReg(replyArray[0], replyArray[1],
-								commandID, "", "");
-					} else {
-						initializeComReg(replyArray[0], replyArray[1],
-								commandID, replyArray[3], replyArray[4]);
-					}
-				} else { // all others
-					// id,calling code,error,info
-					if (replyArray.length == 3) {
-						//logger.log(TAG, "ReplyArray length=3");
-						initialize(replyArray[0], replyArray[1],
-								Integer.parseInt(replyArray[2]) != 0, "");
-					} else {
-						try {
-							//logger.log(TAG, "ReplyArray length=4");
-							initialize(replyArray[0], replyArray[1],
-									Integer.parseInt(replyArray[2]) != 0,
-									replyArray[3]);
-						} catch (NumberFormatException e) {
-							logger.log(TAG, "Reply: NumberFormatException: " + e);
-						}
-					}
+			if (0 == commandID) {
+				// id,type,comID,tag,arg -> 12345,00,0,,
+				initializeComReg(replyArray[0], replyArray[1], commandID, "", "");
+			} else {
+				initializeComReg(replyArray[0], replyArray[1], commandID, replyArray[3], replyArray[4]);
+			}
+		} else {
+			// all others
+			// id,type,error,info
+			if (replyArray.length == 3) {
+				initialize(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2]) != 0, "");
+			} else {
+				try {
+					initialize(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2]) != 0, replyArray[3]);
+				} catch (NumberFormatException e) {
+					Logger.log(TAG, "Reply: NumberFormatException: " + e);
 				}
-			} catch (ArrayIndexOutOfBoundsException e) {
-				logger.log(TAG, "Reply: ArrayIndexOutOfBoundsException: " + e);
 			}
 		}
 	}
@@ -80,45 +62,42 @@ public class Reply {
 	/**
 	 * Sets the value for Reply.
 	 * 
-	 * @param inputRegID
+	 * @param regid
 	 *            RegID for the device.
-	 * @param inputError
+	 * @param error
 	 *            error status.
-	 * @param inputCallingCode
+	 * @param type
 	 *            the event type.
-	 * @param inputInfo
+	 * @param info
 	 *            the body of the message.
 	 */
-	private void initialize(String inputRegID, String inputCallingCode,
-			boolean inputError, String inputInfo) {
-		regID = inputRegID;
-		error = inputError;
-		callingCODE = inputCallingCode;
-		//logger.log(TAG, "ReplyInfo: " + inputInfo);
-		info = inputInfo;
+	private void initialize(String id, String type, boolean error, String info) {
+		this.id = id;
+		this.type = type;
+		this.error = error;
+		this.info = info;
 	}
 
 	/**
 	 * Initializes a command message from the server.
 	 * 
-	 * @param inputRegID
+	 * @param id
 	 *            device ID
-	 * @param inputCallingCode
+	 * @param type
 	 *            Type of message
-	 * @param inputIndex
+	 * @param index
 	 *            Index for command message
-	 * @param indexTarget
+	 * @param target
 	 *            target for command execution
-	 * @param inputArgs
+	 * @param args
 	 *            command to be executed
 	 */
-	private void initializeComReg(String inputRegID, String inputCallingCode,
-			int inputIndex, String indexTarget, String inputArgs) {
-		regID = inputRegID;
-		callingCODE = inputCallingCode;
-		index = inputIndex;
-		target = indexTarget;
-		args = inputArgs;
+	private void initializeComReg(String id, String type, int index, String target, String args) {
+		this.id = id;
+		this.type = type;
+		this.index = index;
+		this.target = target;
+		this.args = args;
 	}
 
 	/**
@@ -137,7 +116,7 @@ public class Reply {
 	 * @return a single integer value representing the type of event.
 	 */
 	public String getCallingCode() {
-		return callingCODE;
+		return type;
 	}
 
 	/**
@@ -155,7 +134,7 @@ public class Reply {
 	 * @return a single string containing the entire reply message.
 	 */
 	public String getREST() {
-		return restString;
+		return replyStr;
 	}
 
 	/**
@@ -164,7 +143,7 @@ public class Reply {
 	 * @return the regID. Returns the device identification number
 	 */
 	public String getRegID() {
-		return regID;
+		return id;
 	}
 
 	/**

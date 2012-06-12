@@ -1,120 +1,95 @@
 package com.mmtechco.mobileminder;
 
-import com.mmtechco.mobileminder.data.ActivityLog;
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.ErrorMessage;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
  * Responsible for contacting the server and getting responses. It is also
  * responsible for processing responses.
  */
-public class Commander extends Thread {
+public class Commander {
 	private static final String TAG = ToolsBB.getSimpleClassName(Commander.class);
 
-	private Server server;
-	private Controllable componentList[];
-	private final int time;
-	private final int commandSignal = 0;
-	private Logger logger = Logger.getInstance();
-	private MMTools tools = ToolsBB.getInstance();
+	private static final int time = 1000 * 60 * 5; // 5 mins
+	private static final int commandSignal = 0;
+	
+	private static Controllable components[];
+	
+	private static MMTools tools = ToolsBB.getInstance();
 
-	/**
-	 * Used by Controller to initialises the {@link LogDb} object and
-	 * {@link Controllable} objects.
-	 */
 	public Commander(Controllable[] components) {
-		server = new Server();
-		time = 1000 * 60 * 5; // 5mins
-		componentList = components;
+		Commander.components = components;
+		new Timer().schedule(new CommandTask(), time);
+		
 	}
 
 	/**
 	 * Contacts to server and gets reply from server. Process reply if valid.
 	 */
-	public void run() {
-		while (true) {
-			boolean commandQueued = true;
-			while (commandQueued && tools.isConnected()) {
-				CommandMessage commandMessageFirst = new CommandMessage();
-				commandMessageFirst.setMessage(commandSignal);
-
-				// Sample reply. Enable for debugging:
-				// Reply reply = new
-				// Reply("12349,0,32,FILES,FILE_DEL_/sdcard/download/images.jpeg");
-				Reply reply = server.contactServer(commandMessageFirst);
-				logger.log(TAG, "Reply Index:" + reply.getIndex());
+	private class CommandTask extends TimerTask {
+		public void run() {
+			while (true) {
+				Response response;
+				Reply reply;
+				try {
+					response = Server.get(new CommandMessage().toString());
+					reply = new Reply(response.getContent());
+				//} catch (IOException e) {
+				} catch (Exception e) {
+					Logger.log(TAG, e.getMessage());
+					return;
+				}
+				
+				//Logger.log(TAG, "Reply Index:" + reply.getIndex());
 
 				// No more commands to process
 				if (commandSignal == reply.getIndex() || reply.isError()) {
-					commandQueued = false;
-					logger.log(TAG, "No Commands to Process");
+					Logger.log(TAG, "No Commands to Process");
 					break;
-				} else {
+				}
+				
+				for (int count = 0; count < components.length; count++) {
 					CommandMessage commandMessage = new CommandMessage();
-					for (int count = 0; count < componentList.length; count++) {
-						Controllable aTarget = componentList[count];
-						if (aTarget.isTarget(reply.getTarget())) {
-							commandMessage.setStartTime();
-							if (aTarget.processCommand(reply.getArgs())) {
-								// Ran fine
-								commandMessage.setEndTime();
-								commandMessage.setMessage(reply.getIndex(),
-										true);
-								logger.log(TAG,
-										"Ran fine. Sending Command Reply Message: Index="
-												+ reply.getIndex() + " REST:"
-												+ commandMessage.getREST());
-								server.contactServer(commandMessage);
-							} else {
-								logger.log(TAG,
-										"No joy. Sending Command Reply. Index:"
-												+ reply.getIndex());
-								commandMessage.setEndTime();
-								commandMessage.setMessage(reply.getIndex(),
-										false);
-								server.contactServer(commandMessage);
-							}
-							logger.log(TAG,
-									"Out of command reply= clearing data. Index:"
-											+ reply.getIndex());
-							commandMessage.clearData();
+					Controllable aTarget = components[count];
+					if (aTarget.isTarget(reply.getTarget())) {
+						commandMessage.setStartTime();
+						if (aTarget.processCommand(reply.getArgs())) {
+							// Ran fine
+							commandMessage.setEndTime();
+							commandMessage.setMessage(reply.getIndex(), true);
+							Logger.log(TAG, "Ran fine. Sending Command Reply Message: Index="
+											+ reply.getIndex() + " REST:"
+											+ commandMessage);
+							//server.contactServer(commandMessage);
+						} else {
+							Logger.log(TAG, "No joy. Sending Command Reply. Index:" + reply.getIndex());
+							commandMessage.setEndTime();
+							commandMessage.setMessage(reply.getIndex(), false);
+							//server.contactServer(commandMessage);
 						}
+						Logger.log(TAG, "Out of command reply= clearing data. Index:" + reply.getIndex());
 					}
 				}
-			}
-			try {
-				Thread.sleep(time);
-			} catch (InterruptedException e) {
-				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}
 
-	/**
-	 * 
-	 * Implements the message interface to hold command message.
-	 */
-	class CommandMessage implements Message {
+	class CommandMessage {
 		private final int type = 0;
-		private int index;
-		private boolean completed;
-		private String startTime;
-		private String endTime;
-		private MMTools tools = ToolsBB.getInstance();
-
-		/**
-		 * Initialises all the command message parameters
-		 */
-		public CommandMessage() {
-			clearData();
-		}
+		
+		private int index = 0;
+		private boolean completed = false;
+		private String startTime = "0";
+		private String endTime = "0";
 
 		/**
 		 * Adds command message information to command message.
@@ -127,42 +102,6 @@ public class Commander extends Thread {
 		public void setMessage(int index, boolean completed) {
 			this.index = index;
 			this.completed = completed;
-		}
-
-		/**
-		 * Adds command message information to command message.
-		 * 
-		 * @param _index
-		 *            index of command message
-		 */
-		public void setMessage(int _index) {
-			this.index = _index;
-		}
-
-		/**
-		 * Initialises all the command message parameters.
-		 */
-		public void clearData() {
-			index = 0;
-			completed = false;
-			startTime = "0";
-			endTime = "0";
-		}
-
-		/**
-		 * Returns the type of the command message.
-		 * 
-		 * @return type of the command message
-		 */
-		public int getType() {
-			return type;
-		}
-
-		/**
-		 * Retrieves the time when command processing starts.
-		 */
-		public String getTime() {
-			return startTime;
 		}
 
 		/**
@@ -179,12 +118,14 @@ public class Commander extends Thread {
 		 * 
 		 * @return a single string containing the entire message.
 		 */
-		public String getREST() {
-			return Registration.getRegID() + Tools.ServerQueryStringSeparator
-					+ "0" + type + Tools.ServerQueryStringSeparator + index
-					+ Tools.ServerQueryStringSeparator + (completed ? 1 : 0)
-					+ Tools.ServerQueryStringSeparator + startTime
-					+ Tools.ServerQueryStringSeparator + endTime;
+		public String toString() {
+			return
+					Registration.getRegID() + Server.separator +
+					type + Server.separator +
+					index + Server.separator +
+					(completed ? 1 : 0) + Server.separator +
+					startTime + Server.separator +
+					endTime;
 		}
 
 		/**
@@ -195,28 +136,10 @@ public class Commander extends Thread {
 		}
 
 		/**
-		 * Retrieves the time when the command started to be processed.
-		 * 
-		 * @return Time when the command started to be processed.
-		 */
-		public String getStartTime() {
-			return startTime;
-		}
-
-		/**
 		 * Sets the current time when the command finished processing.
 		 */
 		public void setEndTime() {
 			endTime = tools.getDate();
-		}
-
-		/**
-		 * Gets the current time when the command finished processing.
-		 * 
-		 * @return Time when the command finished processing
-		 */
-		public String getEndTime() {
-			return endTime;
 		}
 	}
 }
