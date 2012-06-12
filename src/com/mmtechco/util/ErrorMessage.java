@@ -1,6 +1,7 @@
 package com.mmtechco.util;
 
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 
@@ -89,21 +90,21 @@ public class ErrorMessage implements Message {
 	public String getREST() {
 		return
 			Registration.getRegID() +
-			Tools.ServerQueryStringSeparator + 
+			Server.separator + 
 			"0" +
 			type + 
-			Tools.ServerQueryStringSeparator + 
+			Server.separator + 
 			tools.getDate()+
-			Tools.ServerQueryStringSeparator + 
-			Tools.ServerQueryStringSeparator + 
+			Server.separator + 
+			Server.separator + 
 			errorClass +
-			Tools.ServerQueryStringSeparator +
+			Server.separator +
 			errorPackage +
-			Tools.ServerQueryStringSeparator +
+			Server.separator +
 			errorLineNumber +
-			Tools.ServerQueryStringSeparator +
+			Server.separator +
 			errorType +
-			Tools.ServerQueryStringSeparator +
+			Server.separator +
 			deviceUpTime;
 	}
 

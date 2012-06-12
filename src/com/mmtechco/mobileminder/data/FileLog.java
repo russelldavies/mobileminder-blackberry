@@ -353,12 +353,12 @@ class FileMessage implements Message {
 	}
 
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator
-				+ type + Tools.ServerQueryStringSeparator + tools.getDate()
-				+ Tools.ServerQueryStringSeparator + action
-				+ Tools.ServerQueryStringSeparator + path
-				+ Tools.ServerQueryStringSeparator + modtimeORoldpath
-				+ Tools.ServerQueryStringSeparator + md5;
+		return Registration.getRegID() + Server.separator
+				+ type + Server.separator + tools.getDate()
+				+ Server.separator + action
+				+ Server.separator + path
+				+ Server.separator + modtimeORoldpath
+				+ Server.separator + md5;
 	}
 
 	public String getTime() {

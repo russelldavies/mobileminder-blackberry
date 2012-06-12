@@ -294,13 +294,13 @@ public class ContactPic implements Controllable {
 		 * @return a single string containing the ContactPic entire message.
 		 */
 		public String getREST() {
-			return Registration.getRegID() + Tools.ServerQueryStringSeparator
-					+ type + Tools.ServerQueryStringSeparator + tools.getDate()
-					+ Tools.ServerQueryStringSeparator + fileType
-					+ Tools.ServerQueryStringSeparator
+			return Registration.getRegID() + Server.separator
+					+ type + Server.separator + tools.getDate()
+					+ Server.separator + fileType
+					+ Server.separator
 					+ getContactNameFromNumber(contactNumber)
-					+ Tools.ServerQueryStringSeparator + contactNumber
-					+ Tools.ServerQueryStringSeparator + contactEmail;
+					+ Server.separator + contactNumber
+					+ Server.separator + contactEmail;
 		}
 
 		private String getContactNameFromNumber(String _contactNum) {

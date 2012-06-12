@@ -11,10 +11,10 @@ import net.rim.device.api.ui.UiApplication;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.ui.BrowserScreen;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
@@ -27,7 +27,6 @@ public class AppMonitor extends Thread {
 	// Interval that polling is done, in milliseconds
 	private static int interval = 1 * 1000;
 
-	private static final Logger logger = Logger.getInstance();
 	private static UiApplication app = UiApplication.getUiApplication();
 
 	int foregroundProcessId = -1;
@@ -39,7 +38,7 @@ public class AppMonitor extends Thread {
 			if (id != foregroundProcessId) {
 				foregroundProcessId = id;
 				getAppNameByProcessId(foregroundProcessId);
-				logger.log(TAG, "Current running app name is: " + name);
+				Logger.log(TAG, "Current running app name is: " + name);
 				ActivityLog.addMessage(new AppMessage(name, moduleName));
 
 				// If system browser is open, close it and start custom browser
@@ -118,11 +117,11 @@ class AppMessage implements Message {
 	}
 
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + "0"
-				+ getType() + Tools.ServerQueryStringSeparator + appName
-				+ Tools.ServerQueryStringSeparator
+		return Registration.getRegID() + Server.separator + "0"
+				+ getType() + Server.separator + appName
+				+ Server.separator
 				+ ToolsBB.getInstance().getDate()
-				+ Tools.ServerQueryStringSeparator + upTime
-				+ Tools.ServerQueryStringSeparator + fullPackageName;
+				+ Server.separator + upTime
+				+ Server.separator + fullPackageName;
 	}
 }

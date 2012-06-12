@@ -10,8 +10,8 @@ import org.w3c.dom.Document;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.device.api.browser.field.ContentReadEvent;
@@ -278,15 +278,15 @@ class WebMessage implements Message {
 	public String getREST() {
 		return
 				Registration.getRegID() +
-				Tools.ServerQueryStringSeparator +
+				Server.separator +
 				"0" + type +
-				Tools.ServerQueryStringSeparator +
+				Server.separator +
 				ToolsBB.getInstance().getDate() +
-				Tools.ServerQueryStringSeparator +
+				Server.separator +
 				viewTime +
-				Tools.ServerQueryStringSeparator +
+				Server.separator +
 				pageTitle +
-				Tools.ServerQueryStringSeparator +
+				Server.separator +
 				url;
 	}
 }

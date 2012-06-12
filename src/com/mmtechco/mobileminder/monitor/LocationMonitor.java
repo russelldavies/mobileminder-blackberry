@@ -20,10 +20,10 @@ import net.rim.device.api.gps.LocationInfo;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.ErrorMessage;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
@@ -182,11 +182,11 @@ class LocationMessage implements Message {
 	 * @return a single string containing the entire message.
 	 */
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + '0'
-				+ type + Tools.ServerQueryStringSeparator + deviceTime
-				+ Tools.ServerQueryStringSeparator + latitude
-				+ Tools.ServerQueryStringSeparator + longitude
-				+ Tools.ServerQueryStringSeparator + speed;
+		return Registration.getRegID() + Server.separator + '0'
+				+ type + Server.separator + deviceTime
+				+ Server.separator + latitude
+				+ Server.separator + longitude
+				+ Server.separator + speed;
 	}
 
 	public String getTime() {

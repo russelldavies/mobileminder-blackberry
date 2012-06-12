@@ -2,9 +2,9 @@ package com.mmtechco.mobileminder.monitor;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.mail.Address;
@@ -275,15 +275,15 @@ class MailMessage implements com.mmtechco.mobileminder.prototypes.Message {
 	 * @return a single string containing the entire message.
 	 */
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator
-				+ type + Tools.ServerQueryStringSeparator + deviceTime
-				+ Tools.ServerQueryStringSeparator + contactEmail
-				+ Tools.ServerQueryStringSeparator + contactName
-				+ Tools.ServerQueryStringSeparator + emailSubject
-				+ Tools.ServerQueryStringSeparator + emailBody
-				+ Tools.ServerQueryStringSeparator + sentTime
-				+ Tools.ServerQueryStringSeparator + sentDirection
-				+ Tools.ServerQueryStringSeparator
+		return Registration.getRegID() + Server.separator
+				+ type + Server.separator + deviceTime
+				+ Server.separator + contactEmail
+				+ Server.separator + contactName
+				+ Server.separator + emailSubject
+				+ Server.separator + emailBody
+				+ Server.separator + sentTime
+				+ Server.separator + sentDirection
+				+ Server.separator
 				+ String.valueOf((hasAttachment) ? (byte) 1 : (byte) 0);
 	}
 

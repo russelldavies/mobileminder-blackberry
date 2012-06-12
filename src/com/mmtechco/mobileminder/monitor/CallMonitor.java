@@ -5,10 +5,10 @@ import java.util.Date;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.phone.Phone;
@@ -154,13 +154,13 @@ public class CallMonitor extends AbstractPhoneListener {
 		 * @return a single string containing the entire message.
 		 */
 		public String getREST() {
-			return Registration.getRegID() + Tools.ServerQueryStringSeparator
-					+ type + Tools.ServerQueryStringSeparator + callTimeStamp
-					+ Tools.ServerQueryStringSeparator + number
-					+ Tools.ServerQueryStringSeparator + contactName
-					+ Tools.ServerQueryStringSeparator + callDuration
-					+ Tools.ServerQueryStringSeparator + outgoing
-					+ Tools.ServerQueryStringSeparator + endStatus;
+			return Registration.getRegID() + Server.separator
+					+ type + Server.separator + callTimeStamp
+					+ Server.separator + number
+					+ Server.separator + contactName
+					+ Server.separator + callDuration
+					+ Server.separator + outgoing
+					+ Server.separator + endStatus;
 		}
 
 		public String getTime() {

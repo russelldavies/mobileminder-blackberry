@@ -10,9 +10,9 @@ import javax.wireless.messaging.TextMessage;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
@@ -222,13 +222,13 @@ class SMSMessage implements com.mmtechco.mobileminder.prototypes.Message {
 	 * @return a single string containing the entire message.
 	 */
 	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator
-				+ type + Tools.ServerQueryStringSeparator + deviceTime
-				+ Tools.ServerQueryStringSeparator + number
-				+ Tools.ServerQueryStringSeparator + contactName
-				+ Tools.ServerQueryStringSeparator + startStatus
-				+ Tools.ServerQueryStringSeparator + endStatus
-				+ Tools.ServerQueryStringSeparator + messageBody;
+		return Registration.getRegID() + Server.separator
+				+ type + Server.separator + deviceTime
+				+ Server.separator + number
+				+ Server.separator + contactName
+				+ Server.separator + startStatus
+				+ Server.separator + endStatus
+				+ Server.separator + messageBody;
 	}
 
 	/**
