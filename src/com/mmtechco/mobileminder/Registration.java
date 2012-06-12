@@ -1,5 +1,6 @@
 package com.mmtechco.mobileminder;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,15 +18,13 @@ import net.rim.device.api.system.RuntimeStore;
 import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.util.ErrorMessage;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
@@ -51,26 +50,34 @@ public class Registration implements Controllable, MobileMinderResource {
 	private static Vector emergNums;
 
 	private static Vector observers = new Vector();
-
 	
 	public static void checkStatus() {
 		Logger.log(TAG, "Checking registration status");
 		
+		// Read details from storage to have something to display in case there
+		// is no connectivity
 		readDetails();
 		
-		// Contact server and get new values, if any
+		// Contact server and get new values, if any, otherwise sleep
 		Logger.log(TAG, "Requesting reg details from server");
-		Reply response = new Server().contactServer(new RegistrationMessage(stage));
-		Logger.log(TAG, "Server response: " + response.getREST());
-		if (response.isError()) {
-			Logger.log(TAG, "Bad server response. Scheduling short run");
+		Response response;
+		try {
+			response = Server.get(new RegistrationMessage(stage).toString());
+		} catch (IOException e) {
+			Logger.log(TAG, e.getMessage());
 			scheduleRun(intervalShort);
 			return;
 		}
-		stage = Integer.parseInt(response.getInfo());
-		id = response.getRegID();
+		RegistrationReply reply = new RegistrationReply(response.getContent());
+		if (reply.error) {
+			scheduleRun(intervalShort);
+			return;
+		}
+		
+		// Read and process registration data
+		stage = reply.stage;
+		id = reply.id;
 		storeDetails();
-		updateStatus();
 		
 		// Schedule a registration check based on stage
 		if (stage < 2) {
@@ -84,6 +91,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 
 	private static void scheduleRun(int sleepTime) {
+		updateStatus();
 		new Timer().schedule(new TimerTask() {
 			public void run() {
 				checkStatus();
@@ -240,7 +248,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 }
 
-class RegistrationMessage implements Message {
+class RegistrationMessage {
 	private final static int type = 9;
 	private final String appVersion = ApplicationDescriptor
 			.currentApplicationDescriptor().getVersion();
@@ -248,7 +256,7 @@ class RegistrationMessage implements Message {
 	private int stage;
 	private String phoneNum;
 	private String deviceID;
-	private String info;
+	private String info = "BlackBerry";
 	private String manufacturer;
 	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
 
@@ -258,28 +266,37 @@ class RegistrationMessage implements Message {
 		manufacturer = String.valueOf(Branding.getVendorId());
 		phoneNum = Phone.getDevicePhoneNumber(false);
 		deviceID = Integer.toHexString(DeviceInfo.getDeviceId());
-		info = "BlackBerry";
 	}
 
-	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + '0'
-				+ type + Tools.ServerQueryStringSeparator + deviceTime
-				+ Tools.ServerQueryStringSeparator + stage
-				+ Tools.ServerQueryStringSeparator + phoneNum
-				+ Tools.ServerQueryStringSeparator + deviceID
-				+ Tools.ServerQueryStringSeparator + manufacturer
-				+ Tools.ServerQueryStringSeparator + DeviceInfo.getDeviceName()
-				+ Tools.ServerQueryStringSeparator
+	public String toString() {
+		return Registration.getRegID() + Server.separator + '0'
+				+ type + Server.separator + deviceTime
+				+ Server.separator + stage
+				+ Server.separator + phoneNum
+				+ Server.separator + deviceID
+				+ Server.separator + manufacturer
+				+ Server.separator + DeviceInfo.getDeviceName()
+				+ Server.separator
 				+ DeviceInfo.getSoftwareVersion()
-				+ Tools.ServerQueryStringSeparator + appVersion
-				+ Tools.ServerQueryStringSeparator + info;
+				+ Server.separator + appVersion
+				+ Server.separator + info;
 	}
+}
 
-	public String getTime() {
-		return deviceTime;
-	}
-
-	public int getType() {
-		return type;
+class RegistrationReply {
+	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
+	
+	public String id;
+	public boolean error;
+	public String type;
+	public int stage;
+	
+	public RegistrationReply(String content) {
+		String[] fields = tools.split(content, Server.separator);
+		
+		id = fields[0];
+		type = fields[1];
+		error = Integer.parseInt(fields[2]) != 0;
+		stage = Integer.parseInt(fields[3]);
 	}
 }
