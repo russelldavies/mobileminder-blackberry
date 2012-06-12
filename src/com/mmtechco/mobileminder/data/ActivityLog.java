@@ -1,5 +1,7 @@
 package com.mmtechco.mobileminder.data;
 
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
 import net.rim.device.api.system.PersistentObject;
@@ -7,7 +9,9 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Response;
+import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
@@ -29,11 +33,10 @@ public class ActivityLog {
 		log = (ContentProtectedVector) store.getContents();
 	}
 
-	private static Logger logger = Logger.getInstance();
-
 	public static synchronized void addMessage(Object message) {
 		log.addElement(message.toString());
 		commit();
+		sendMessages();
 	}
 
 	public static synchronized boolean removeMessage() {
@@ -51,7 +54,7 @@ public class ActivityLog {
 		try {
 			msg = (String) log.firstElement();
 		} catch (NoSuchElementException e) {
-			logger.log(TAG, e.getMessage());
+			Logger.log(TAG, e.getMessage());
 		}
 		return msg;
 	}
@@ -71,5 +74,24 @@ public class ActivityLog {
 	private static void commit() {
 		store.setContents(log);
 		store.commit();
+	}
+	
+	public static void sendMessages() {
+		new Thread() {
+			public void run() {
+				for (Enumeration enum = log.elements(); enum.hasMoreElements();) {
+					Response response;
+					try {
+						response = Server.get((String) enum.nextElement());
+						Reply reply = new Reply(response.getContent());
+						if (!reply.isError()) {
+							log.removeElement(enum.nextElement());
+						}
+					} catch (Exception e) {
+						Logger.log(TAG, e.getMessage());
+					}
+				}
+			}
+		}.start();
 	}
 }
