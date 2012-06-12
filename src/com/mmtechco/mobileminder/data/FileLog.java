@@ -18,11 +18,10 @@ import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 public class FileLog {
@@ -32,8 +31,6 @@ public class FileLog {
 
 	private static PersistentObject store;
 	private static ContentProtectedVector files;
-
-	protected static Logger logger = Logger.getInstance();
 
 	public static boolean mobileSync = false;
 
@@ -75,11 +72,11 @@ public class FileLog {
 
 		// Check if file exists in db
 		if (exists(path)) {
-			logger.log(TAG, "File already in DB: " + path);
+			Logger.log(TAG, "File already in DB: " + path);
 			return;
 		}
-		logger.log(TAG, "Adding file to DB: " + path);
-		logger.log(TAG, "Number of files in log: " + files.size());
+		Logger.log(TAG, "Adding file to DB: " + path);
+		Logger.log(TAG, "Number of files in log: " + files.size());
 
 		FileConnection fc = null;
 		try {
@@ -93,14 +90,14 @@ public class FileLog {
 				commit();
 			}
 		} catch (IOException e) {
-			logger.log(TAG, e.toString());
+			Logger.log(TAG, e.toString());
 		} finally {
 			try {
 				if (fc != null) {
 					fc.close();
 				}
 			} catch (Exception e) {
-				logger.log(TAG, e.toString());
+				Logger.log(TAG, e.toString());
 			}
 		}
 	}
@@ -143,7 +140,7 @@ public class FileLog {
 			throw new IllegalArgumentException();
 		}
 
-		logger.log(TAG, newPath + " has been renamed from: " + oldPath);
+		Logger.log(TAG, newPath + " has been renamed from: " + oldPath);
 
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
@@ -195,14 +192,14 @@ public class FileLog {
 					ObjectGroup.createGroup(fileholder);
 					commit();
 				} catch (IOException e) {
-					logger.log(TAG, e.toString());
+					Logger.log(TAG, e.toString());
 				} finally {
 					try {
 						if (fc != null) {
 							fc.close();
 						}
 					} catch (Exception e) {
-						logger.log(TAG, e.toString());
+						Logger.log(TAG, e.toString());
 					}
 				}
 				break;
@@ -232,7 +229,8 @@ public class FileLog {
 						FileMessage fm = new FileMessage();
 						fm.add(path, fileholder.getModTime(),
 								fileholder.getMd5());
-						Reply reply = new Server().contactServer(fm.getREST(), fc);
+						Response response = Server.postMultiPart(fm.toString(), fc, "userfile");
+						Reply reply = new Reply(response.getContent());
 						// If server successfully processed mark as uploaded
 						if (!reply.isError()) {
 							// Object must be ungrouped to modify it
@@ -245,14 +243,16 @@ public class FileLog {
 							ObjectGroup.createGroup(fileholder);
 						}
 					} catch (IOException e1) {
-						logger.log(TAG, e1.getMessage());
+						Logger.log(TAG, e1.getMessage());
+					} catch (Exception replyException) {
+						Logger.log(TAG, replyException.getMessage());
 					} finally {
 						try {
 							if (fc != null) {
 								fc.close();
 							}
 						} catch (IOException e1) {
-							logger.log(TAG, e1.getMessage());
+							Logger.log(TAG, e1.getMessage());
 						}
 					}
 				}
@@ -311,21 +311,21 @@ public class FileLog {
 						.substring(1);
 			}
 		} catch (Exception e) {
-			logger.log(TAG, e.toString());
+			Logger.log(TAG, e.toString());
 		} finally {
 			try {
 				if (dis != null) {
 					dis.close();
 				}
 			} catch (IOException e) {
-				logger.log(TAG, e.toString());
+				Logger.log(TAG, e.toString());
 			}
 		}
 		return md5;
 	}
 }
 
-class FileMessage implements Message {
+class FileMessage {
 	private final int type = 22;
 	private String action;
 	private String path;
@@ -352,20 +352,14 @@ class FileMessage implements Message {
 		add(path, modTime, md5);
 	}
 
-	public String getREST() {
-		return Registration.getRegID() + Server.separator
-				+ type + Server.separator + tools.getDate()
-				+ Server.separator + action
-				+ Server.separator + path
-				+ Server.separator + modtimeORoldpath
-				+ Server.separator + md5;
-	}
-
-	public String getTime() {
-		return modtimeORoldpath;
-	}
-
-	public int getType() {
-		return type;
+	public String toString() {
+		return
+				Registration.getRegID() + Server.separator +
+				type + Server.separator +
+				tools.getDate() + Server.separator +
+				action + Server.separator +
+				path + Server.separator +
+				modtimeORoldpath + Server.separator +
+				md5;
 	}
 }

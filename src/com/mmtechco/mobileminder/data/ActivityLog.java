@@ -31,8 +31,8 @@ public class ActivityLog {
 
 	private static Logger logger = Logger.getInstance();
 
-	public static synchronized void addMessage(Message message) {
-		log.addElement(message.getREST());
+	public static synchronized void addMessage(Object message) {
+		log.addElement(message.toString());
 		commit();
 	}
 

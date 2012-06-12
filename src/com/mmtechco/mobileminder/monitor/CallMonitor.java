@@ -7,7 +7,6 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
@@ -22,16 +21,15 @@ public class CallMonitor extends AbstractPhoneListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(CallMonitor.class);
 
-	private Logger logger = Logger.getInstance();
 	private CallMessage callMessage;
 
 	public CallMonitor() {
 		Phone.addPhoneListener(this);
-		logger.log(TAG, "Started");
+		Logger.log(TAG, "Started");
 	}
 
 	public void callAnswered(int callId) {
-		logger.log(TAG, "Call answered");
+		Logger.log(TAG, "Call answered");
 
 		callMessage = new CallMessage();
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
@@ -44,7 +42,7 @@ public class CallMonitor extends AbstractPhoneListener {
 	}
 
 	public void callInitiated(int callId) {
-		logger.log(TAG, "Call initiated");
+		Logger.log(TAG, "Call initiated");
 		
 		callMessage = new CallMessage();
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
@@ -57,25 +55,25 @@ public class CallMonitor extends AbstractPhoneListener {
 	}
 
 	public void callEndedByUser(int callId) {
-		logger.log(TAG, "Call ended by user");
+		Logger.log(TAG, "Call ended by user");
 
 		callMessage.callEnded(CallEndStatus.FINISHED);
 		ActivityLog.addMessage(callMessage);
-		logger.log(TAG, "Call message added to log");
+		Logger.log(TAG, "Call message added to log");
 	}
 
 	public void callDisconnected(int callId) {
-		logger.log(TAG, "Call disconnected");
+		Logger.log(TAG, "Call disconnected");
 
 		callMessage.callEnded(CallEndStatus.DROPPED);
 		ActivityLog.addMessage(callMessage);
-		logger.log(TAG, "Call message added to log");
+		Logger.log(TAG, "Call message added to log");
 	}
 
 	/**
 	 * Holds call events in Message format.
 	 */
-	public static class CallMessage implements Message {
+	public static class CallMessage {
 		private MMTools tools = ToolsBB.getInstance();
 		private final String type;
 		private String callTimeStamp;
@@ -153,7 +151,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		 * 
 		 * @return a single string containing the entire message.
 		 */
-		public String getREST() {
+		public String toString() {
 			return Registration.getRegID() + Server.separator
 					+ type + Server.separator + callTimeStamp
 					+ Server.separator + number
@@ -161,14 +159,6 @@ public class CallMonitor extends AbstractPhoneListener {
 					+ Server.separator + callDuration
 					+ Server.separator + outgoing
 					+ Server.separator + endStatus;
-		}
-
-		public String getTime() {
-			return callTimeStamp;
-		}
-
-		public int getType() {
-			return Integer.parseInt(type);
 		}
 	}
 

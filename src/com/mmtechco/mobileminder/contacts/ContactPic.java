@@ -1,17 +1,20 @@
 package com.mmtechco.mobileminder.contacts;
 
+import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Hashtable;
+
 import javax.microedition.pim.PIM;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.IMAGE_TYPES;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.util.CRC32;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
@@ -25,17 +28,10 @@ import net.rim.device.api.system.EncodedImage;
  * specified phone number that is sent in a command.
  */
 public class ContactPic implements Controllable {
-	public static final String TAG = ToolsBB.getSimpleClassName(ContactPic.class);
+	public static final String TAG = ToolsBB
+			.getSimpleClassName(ContactPic.class);
 
-	private Server server;
 	private MMTools tools = ToolsBB.getInstance();
-	private ContactPicMessage flyContactPicMessage;
-	static Logger logger = Logger.getInstance();
-
-	public ContactPic() {
-		server = new Server();
-		flyContactPicMessage = new ContactPicMessage();
-	}
 
 	/**
 	 * This method extracts the contact picture stored on the device
@@ -60,44 +56,44 @@ public class ContactPic implements Controllable {
 					BlackBerryContact.TEL);
 
 			while (contacts.hasMoreElements()) {
-				logger.log(TAG, "ContactPic::enum not empty");
+				Logger.log(TAG, "ContactPic::enum not empty");
 
 				BlackBerryContact contact = (BlackBerryContact) contacts
 						.nextElement();
 				// byte[] byteStream = c.getBinary(BlackBerryContact.PHOTO,
 				// BlackBerryContact.ATTR_NONE);
-				logger.log(TAG, "Counting number of contact photos");
+				Logger.log(TAG, "Counting number of contact photos");
 				if (contact.countValues(BlackBerryContact.PHOTO) > 0) {
-					logger.log(TAG, "ContactPic amount > 0");
+					Logger.log(TAG, "ContactPic amount > 0");
 					byte[] photoEncoded = contact.getBinary(
 							BlackBerryContact.PHOTO, 0);
-					logger.log(TAG, "Decoding image...");
+					Logger.log(TAG, "Decoding image...");
 					byte[] photoDecoded = Base64InputStream.decode(
 							photoEncoded, 0, photoEncoded.length);
-					logger.log(TAG, "Creating pic to upload...");
+					Logger.log(TAG, "Creating pic to upload...");
 					EncodedImage contactPic = EncodedImage.createEncodedImage(
 							photoDecoded, 0, photoDecoded.length);
-					logger.log(TAG, "Getting pic type");
+					Logger.log(TAG, "Getting pic type");
 					String picType = String.valueOf(contactPic.getImageType());
 
-					logger.log(TAG,
+					Logger.log(TAG,
 							"Setting photo in ContactPhotoContainer object...");
 					photoObject.setPhoto(byteArrayToHexString(photoDecoded));
-					logger.log(TAG,
+					Logger.log(TAG,
 							"Setting photo type in ContactPhotoContainer object...");
 					photoObject.setPhotoType(getFileType(picType));
-					logger.log(TAG, "FileType=:" + photoObject.photoType);
+					Logger.log(TAG, "FileType=:" + photoObject.photoType);
 				}
 				if (contact.countValues(BlackBerryContact.EMAIL) > 0) {
-					logger.log(TAG,
+					Logger.log(TAG,
 							"Setting email in ContactPhotoContainer object...");
 					photoObject.setEmail(contact.getString(
 							BlackBerryContact.EMAIL, 0));
-					logger.log(TAG, "Email=:" + photoObject.email);
+					Logger.log(TAG, "Email=:" + photoObject.email);
 				}
 				// get the last line of the hex string
 				int length = photoObject.photoStream.length();
-				logger.log(
+				Logger.log(
 						TAG,
 						"Last values = Hex:"
 								+ photoObject.photoStream.substring(
@@ -108,7 +104,7 @@ public class ContactPic implements Controllable {
 				int count = 0, num = 100;
 				while (count < len) {
 					if (count == num) {
-						logger.log(
+						Logger.log(
 								TAG,
 								"Hex:"
 										+ photoObject.photoStream.substring(
@@ -119,7 +115,7 @@ public class ContactPic implements Controllable {
 				}
 			}
 		} catch (Exception e) {
-			logger.log(TAG, e.getMessage());
+			Logger.log(TAG, e.getMessage());
 		}
 		return photoObject;
 	}
@@ -169,29 +165,18 @@ public class ContactPic implements Controllable {
 		return typeToReturn;
 	}
 
-	/**
-	 * This method has been overridden from the Controllable interface. By
-	 * implementing this interface this class can receive command arguments.
-	 * These commands are then processed within this method.
-	 * 
-	 * @param inputArgs
-	 *            arguments sent specifying the command instructions from the
-	 *            server.
-	 * @return true if the command has been processed with out any errors.
-	 */
 	public boolean processCommand(String[] inputArgs) {
-		logger.log(TAG, "Processing Contact Photo Command...");
+		Logger.log(TAG, "Processing Contact Photo Command...");
 
-		Reply resultREST;
 		boolean complete = false;
 
 		// check for valid command message
 		if (true == tools.containsOnlyNumbers(inputArgs[2])) {
-			logger.log(TAG, "args[0] :" + inputArgs[0]);
+			Logger.log(TAG, "args[0] :" + inputArgs[0]);
 			if (inputArgs[0].equalsIgnoreCase("pic")) {
 				if (inputArgs[1].equalsIgnoreCase("call")) {
-					logger.log(TAG, "args[1] :" + inputArgs[1]);
-					logger.log(TAG, "args[2] :" + inputArgs[2]);
+					Logger.log(TAG, "args[1] :" + inputArgs[1]);
+					Logger.log(TAG, "args[2] :" + inputArgs[2]);
 
 					String contactNumber = inputArgs[2];
 
@@ -199,22 +184,30 @@ public class ContactPic implements Controllable {
 					ContactPhotoContainer photoPackage = getContactPhotoFromNumber(contactNumber);
 
 					if (null != photoPackage.photoStream) {
-						flyContactPicMessage.setMessage(photoPackage.photoType,
-								contactNumber, photoPackage.email);
+						ContactPicMessage message = new ContactPicMessage(
+								photoPackage.photoType, contactNumber,
+								photoPackage.email);
 
-						logger.log(TAG, "ADDING CONTACT PIC DATA");
+						Logger.log(TAG, "ADDING CONTACT PIC DATA");
 
 						// send picture message
-						logger.log(TAG, "Sending Contact Photo Command...");
-						resultREST = server.contactServer(flyContactPicMessage
-								.getREST(), String.valueOf(server
-								.getCrcValue(photoPackage.photoStream)),
-								photoPackage.photoStream);
-
-						if (resultREST.isError() == false) {
-							complete = true;
+						Logger.log(TAG, "Sending Contact Photo Command...");
+						Hashtable keyvalPairs = new Hashtable();
+						CRC32 crc = new CRC32();
+						crc.update(photoPackage.photoStream.getBytes());
+						keyvalPairs.put("crc", String.valueOf(crc.getValue()));
+						keyvalPairs.put("pic", photoPackage.photoStream);
+						Response response;
+						try {
+							response = Server.post(message.toString(), keyvalPairs);
+							Reply reply = new Reply(response.getContent());
+							if(!reply.isError()) {
+								complete = true;
+							}
+						//} catch (IOException e) {
+						} catch (Exception e) {
+							Logger.log(TAG, e.getMessage());
 						}
-						flyContactPicMessage.clearData();
 					} else {
 						complete = true;
 					}
@@ -235,72 +228,28 @@ public class ContactPic implements Controllable {
 		}
 	}
 
-	/**
-	 * This class implements the message interface to hold ContactPic messages.
-	 */
-	class ContactPicMessage implements Message {
+	class ContactPicMessage {
 		private final int type = 28;
 		private String fileType;
 		private String contactNumber;
 		private String contactEmail;
 
-		public ContactPicMessage() {
-			clearData();
+		public ContactPicMessage(String fileType, String contactNumber,
+				String contactEmail) {
+			this.fileType = fileType;
+			this.contactNumber = contactNumber;
+			this.contactEmail = contactEmail;
 		}
 
-		/**
-		 * This method sets the parameters for the ContactPic message to be sent
-		 * 
-		 * @param inputFileType
-		 *            file type of the picture
-		 * @param inputContactNumber
-		 *            number of the contact
-		 * @param inputContactEmail
-		 *            email address stored in the contact information
-		 */
-		public void setMessage(String inputFileType, String inputContactNumber,
-				String inputContactEmail) {
-			fileType = inputFileType;
-			contactNumber = inputContactNumber;
-			contactEmail = inputContactEmail;
-		}
-
-		public void clearData() {
-			fileType = null;
-			contactNumber = null;
-			contactEmail = null;
-		}
-
-		public int getType() {
-			return type;
-		}
-
-		public String getTime() {
-			return "?";
-		}
-
-		/**
-		 * This method retrieves the ContactPic message formatted into a single
-		 * string value. Web message consists of:
-		 * <ul>
-		 * <li>Registration Serial number.
-		 * <li>ContactPic message type which is '28' (two digits number).
-		 * <li>Contact picture file type. (e.g; JPEG, PNG, BMP etc )
-		 * <li>Contact Name.
-		 * <li>Contact Number.
-		 * <li>Contact Email.
-		 * </ul>
-		 * 
-		 * @return a single string containing the ContactPic entire message.
-		 */
-		public String getREST() {
-			return Registration.getRegID() + Server.separator
-					+ type + Server.separator + tools.getDate()
-					+ Server.separator + fileType
-					+ Server.separator
-					+ getContactNameFromNumber(contactNumber)
-					+ Server.separator + contactNumber
-					+ Server.separator + contactEmail;
+		public String toString() {
+			return
+					Registration.getRegID() + Server.separator +
+					type + Server.separator +
+					tools.getDate() + Server.separator +
+					fileType + Server.separator +
+					getContactNameFromNumber(contactNumber) + Server.separator +
+					contactNumber + Server.separator
+					+ contactEmail;
 		}
 
 		private String getContactNameFromNumber(String _contactNum) {
