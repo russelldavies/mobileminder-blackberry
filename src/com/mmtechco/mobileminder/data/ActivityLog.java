@@ -91,6 +91,7 @@ public class ActivityLog {
 						Logger.log(TAG, e.getMessage());
 					}
 				}
+				commit();
 			}
 		}.start();
 	}
