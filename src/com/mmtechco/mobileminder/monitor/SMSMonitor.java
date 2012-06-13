@@ -1,6 +1,6 @@
 package com.mmtechco.mobileminder.monitor;
 
-import java.util.Date;
+import java.io.IOException;
 
 import javax.microedition.io.Connector;
 import javax.wireless.messaging.Message;
@@ -8,9 +8,7 @@ import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.MessageListener;
 import javax.wireless.messaging.TextMessage;
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
@@ -30,7 +28,6 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	private static Logger logger = Logger.getInstance();
 	private static MessageConnection receiver;
 	private MMTools tools = ToolsBB.getInstance();
-	private SMSMessage smsMessage;
 
 	/**
 	 * The constructor initialises the action store location and registers a
@@ -42,14 +39,12 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	public SMSMonitor() {
 		logger.log(TAG, "Started");
 		
-		smsMessage = new SMSMessage();
-
 		try {
 			receiver = (MessageConnection)Connector.open("sms://:0");
 			if (receiver != null) {
 				receiver.setMessageListener(this);
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.log(TAG, e.getMessage());
 		}
 	}
@@ -68,9 +63,9 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 			String date, String messageBody) {
 		logger.log(TAG, "Adding message to log");
 
-		smsMessage.clearData();
 		boolean isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true
 				: false;
+		boolean delivered = false;
 
 		logger.log(TAG, "inputStatus is: " + inputStatus);
 		logger.log(TAG, "SMS Address: " + contactNumber);
@@ -79,13 +74,14 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 		logger.log(TAG, "Date: " + date);
 		logger.log(TAG, "SMS Body: " + messageBody);
 
-		smsMessage.setMessage(contactNumber, isOutgoing, date, messageBody);
 		// set contact name seperately
 		String contactName = new PhoneCallLogID(contactNumber).getName();
-		smsMessage.setContactName((null == contactName ? "" : contactName));
+		contactName= (null == contactName) ? "" : contactName;
+		
 
 		logger.log(TAG, "Adding message to log...");
-		ActivityLog.addMessage(smsMessage);
+		ActivityLog.addMessage(new SMSMessage(contactNumber, contactName,
+				isOutgoing, delivered, date, messageBody));
 		logger.log(TAG, "Message added to log...");
 	}
 
@@ -123,134 +119,26 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	}
 }
 
-/**
- * Implements the message interface to hold SMS event messages.
- */
-class SMSMessage implements com.mmtechco.mobileminder.prototypes.Message {
-	private final String type;
-	private String number;
-	private String contactName;
-	private String messageBody;
-	private String deviceTime;
-	private boolean startStatus;// 0:Incoming/1:Outgoing
-	private boolean endStatus; // 0:bounced /1:delivered
-
-	public SMSMessage() {
-		this(false);
-	}
-
-	public SMSMessage(boolean sync) {
-		if (sync) {
-			type = "12";
-		} else {
-			type = "02";
-		}
-		clearData();
-	}
-
+class SMSMessage extends com.mmtechco.mobileminder.net.Message {
 	/**
-	 * Adds the SMS event information to the SMS message object
-	 * 
-	 * @param _number
-	 *            the phone number of the incoming or outgoing message
-	 * @param _outgoing
-	 *            states whether the SMS was outgoing or incoming
-	 * @param _date
-	 * @param _inputBody
-	 *            The body of the SMS message
-	 */
-	public void setMessage(String _number, boolean _outgoing, Date _date,
-			String _inputBody) {
-		setMessage(_number, _outgoing, _date, _inputBody);
-	}
-
-	/**
-	 * Adds the SMS event information to the SMS message object
-	 * 
-	 * @param _number
-	 *            the phone number of the incoming or outgoing message
-	 * @param _outgoing
-	 *            states whether the SMS was outgoing or incoming
-	 * @param _deviceTime
-	 *            Time when the SMS is being made.
-	 * @param inputBody
-	 *            The body of the SMS message
-	 */
-	public void setMessage(String _number, boolean _outgoing,
-			String _deviceTime, String inputBody) {
-		clearData();
-		startStatus = _outgoing;// 0:Incoming/1:Outgoing
-		number = _number;
-		deviceTime = _deviceTime;
-		messageBody = inputBody;
-	}
-
-	/**
-	 * This method removes the current data in the message and initialises the
-	 * parameters.
-	 */
-	public void clearData() {
-		startStatus = false;// Incoming
-		endStatus = true; // delivered
-		messageBody = "";
-		contactName = "";
-	}
-
-	/**
-	 * This method retrieves the information in the body of the message
-	 * 
-	 * @return the message body
-	 */
-	public String getMessageBody() {
-		return messageBody;
-	}
-
-	/**
-	 * This method retrieves the message formatted in to a single string value.
-	 * <p>
-	 * SMS message consists of:
+	 * Message format:
 	 * <ul>
-	 * <li>Registration Serial number.
-	 * <li>Type of SMS message.
-	 * <li>Device time.
-	 * <li>Phone number
-	 * <li>Status ( Incoming or outgoing ).
-	 * <li>Status ( Delivered or Bounced )
-	 * <li>The body of the SMS message.
+	 * <li>Device time
+	 * <li>Number of SMS recipient or sender
+	 * <li>Contact Name
+	 * <li>Start status: 0 = incoming, 1 = outgoing
+	 * <li>End status: 0 = bounced, 1 = delivered
+	 * <li>SMS content
 	 * </ul>
-	 * 
-	 * @return a single string containing the entire message.
 	 */
-	public String getREST() {
-		return Registration.getRegID() + Server.separator
-				+ type + Server.separator + deviceTime
-				+ Server.separator + number
-				+ Server.separator + contactName
-				+ Server.separator + startStatus
-				+ Server.separator + endStatus
-				+ Server.separator + messageBody;
+	public SMSMessage(String number, String name, boolean outgoing,
+			boolean delivered, String time, String content) {
+		super(com.mmtechco.mobileminder.net.Message.SMS, new String[] {
+				number,
+				name,
+				(outgoing ? "1" : "0"),
+				(delivered ? "1" : "0"),
+				content
+		});
 	}
-
-	/**
-	 * This method retrieves the time that is set on the device.
-	 * 
-	 * @return the device time
-	 */
-	public String getTime() {
-		return deviceTime;
-	}
-
-	/**
-	 * This method retrieves the type number for the SMS message
-	 * 
-	 * @return the type number corresponding to a SMS message
-	 */
-	public int getType() {
-		return Integer.parseInt(type);
-	}
-
-	public void setContactName(String theName) {
-		contactName = theName;
-	}
-
 }

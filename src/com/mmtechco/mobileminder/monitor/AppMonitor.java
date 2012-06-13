@@ -9,10 +9,8 @@ import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.UiApplication;
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.ui.BrowserScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
@@ -58,7 +56,7 @@ public class AppMonitor extends Thread {
 					EventInjector.invokeEvent(new EventInjector.KeyCodeEvent(
 							EventInjector.KeyCodeEvent.KEY_DOWN,
 							(char) Keypad.KEY_ENTER, 0));
-					
+
 					// Start custom browser
 					app.invokeAndWait(new Runnable() {
 						public void run() {
@@ -90,38 +88,24 @@ public class AppMonitor extends Thread {
 			}
 		}
 	}
-
 }
 
-/**
- * Implements the message interface to hold application information.
- * 
- **/
-class AppMessage implements Message {
-	private final int type = 5;
-	private int upTime = 0;
-	private String appName;
-	private String fullPackageName;
-
+class AppMessage extends Message {
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>App name
+	 * <li>device date
+	 * <li>device uptime
+	 * <li>app package name
+	 * </ul>
+	 */
 	public AppMessage(String appName, String packageName) {
-		this.appName = appName;
-		fullPackageName = packageName;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public String getTime() {
-		return "";
-	}
-
-	public String getREST() {
-		return Registration.getRegID() + Server.separator + "0"
-				+ getType() + Server.separator + appName
-				+ Server.separator
-				+ ToolsBB.getInstance().getDate()
-				+ Server.separator + upTime
-				+ Server.separator + fullPackageName;
+		super(Message.APP_USAGE, new String[]{
+				appName,
+				ToolsBB.getInstance().getDate(),
+				String.valueOf(ToolsBB.getInstance().getUptimeInSec()),
+				packageName
+		});
 	}
 }

@@ -8,6 +8,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneLogs;
 
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.monitor.CallMonitor;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
@@ -22,12 +23,7 @@ public class CallSync implements Runnable {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(CallSync.class);
 
-	private int type = 11;
 	private MMTools tools = ToolsBB.getInstance();
-
-	public CallSync() {
-		Logger.log(TAG, "Started");
-	}
 
 	/**
 	 * Matches the device call time with the server call time. If the value the
@@ -37,10 +33,10 @@ public class CallSync implements Runnable {
 	public void run() {
 		Logger.log(TAG, "Running");
 		Response response;
-		Reply reply;
+		Reply.Regular reply;
 		try {
-			response = Server.get(Registration.getRegID() + Server.separator + type);
-			reply = new Reply(response.getContent());
+			response = Server.get(Registration.getRegID() + Message.SEPARATOR + Message.CALL_SYNC);
+			reply = new Reply.Regular(response.getContent());
 		} catch (IOException e) {
 			Logger.log(TAG, e.getMessage());
 			return;
@@ -48,17 +44,16 @@ public class CallSync implements Runnable {
 			Logger.log(TAG, e.getMessage());
 			return;
 		}
-		Logger.log(TAG, "Contacted server. Reply: " + reply.getREST());
-		Logger.log(TAG, "Calling code" + reply.getCallingCode());
+		Logger.log(TAG, "Contacted server. Reply: " + reply.content);
+		Logger.log(TAG, "Calling code" + reply.type);
 
 		// Check if the reply contained a valid server command
-		if (tools.isNumber(reply.getCallingCode())
-				&& Integer.parseInt(reply.getCallingCode()) == type) {
+		if (reply.type == Message.CALL_SYNC) {
 			Logger.log(TAG, "Valid reply received");
 			long serverTimestamp = 0;
 			try {
 				// Convert server timestamp to unix time
-				serverTimestamp = tools.getDate(reply.getInfo());
+				serverTimestamp = tools.getDate(reply.info);
 			} catch (Exception e) {
 				Logger.log(TAG, e.getMessage());
 				return;
@@ -72,8 +67,6 @@ public class CallSync implements Runnable {
 			// Loop through call list
 			Logger.log(TAG, "Looping through call log");
 			for (int index = 0; index < numCalls; index++) {
-				// Create object to store details of each call
-				CallMonitor.CallMessage callMessageHolder = new CallMonitor.CallMessage(true);
 				// Get particular call and unix timestamp
 				PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog.callAt(
 						index, PhoneLogs.FOLDER_NORMAL_CALLS);
@@ -96,20 +89,18 @@ public class CallSync implements Runnable {
 						if (PhoneCallLog.TYPE_PLACED_CALL == callType) {
 							outgoing = true;
 						}
-						// Add data to object, and subsequently the database.
-						callMessageHolder
-								.setMessage(
-										tools.getDate(callTimestamp),
-										callParticipant
-												.getAddressBookFormattedNumber(),
-										callParticipant.getName(), callLogEntry
-												.getDuration(), outgoing);
-						Logger.log(TAG, callMessageHolder.toString());
+						CallMonitor.CallMessage message = new CallMonitor.CallMessage(
+
+								tools.getDate(callTimestamp),
+								callParticipant.getAddressBookFormattedNumber(),
+								callParticipant.getName(), callLogEntry
+										.getDuration(), outgoing);
+ 
 						// Contact server with the call log entry
 						try {
-							response = Server.get(callMessageHolder.toString());
+							response = Server.get(message.toString());
 						} catch (IOException e) {
-							Logger.log(TAG, e.getMessage());
+							Logger.log(TAG, "Connection problem: " + e.getMessage());
 						}
 					}
 				}

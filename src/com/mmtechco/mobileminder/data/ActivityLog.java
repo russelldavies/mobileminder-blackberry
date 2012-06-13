@@ -9,7 +9,10 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.util.Logger;
@@ -33,7 +36,7 @@ public class ActivityLog {
 		log = (ContentProtectedVector) store.getContents();
 	}
 
-	public static synchronized void addMessage(Object message) {
+	public static synchronized void addMessage(Message message) {
 		log.addElement(message.toString());
 		commit();
 		sendMessages();
@@ -75,23 +78,28 @@ public class ActivityLog {
 		store.setContents(log);
 		store.commit();
 	}
-	
-	public static void sendMessages() {
+
+	private static synchronized void sendMessages() {
 		new Thread() {
 			public void run() {
-				for (Enumeration enum = log.elements(); enum.hasMoreElements();) {
-					Response response;
-					try {
-						response = Server.get((String) enum.nextElement());
-						Reply reply = new Reply(response.getContent());
-						if (!reply.isError()) {
+				try {
+					for (Enumeration enum = log.elements(); enum
+							.hasMoreElements();) {
+						String msg = (String) enum.nextElement();
+						// response = Server.get((String) enum.nextElement());
+						Response response = Server.get(msg);
+						Reply.Regular reply = new Reply.Regular(
+								response.getContent());
+						if (!reply.error) {
 							log.removeElement(enum.nextElement());
 						}
-					} catch (Exception e) {
-						Logger.log(TAG, e.getMessage());
 					}
+					commit();
+				} catch (IOException e) {
+					Logger.log(TAG, "Connection problem: " + e.getMessage());
+				} catch (ParseException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
 				}
-				commit();
 			}
 		}.start();
 	}

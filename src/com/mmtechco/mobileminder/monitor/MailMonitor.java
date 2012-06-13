@@ -1,9 +1,6 @@
 package com.mmtechco.mobileminder.monitor;
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
@@ -25,15 +22,11 @@ public class MailMonitor implements FolderListener, StoreListener {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(MailMonitor.class);
 
-	MailMessage messageObject;
-	Message emailMessage;
 	Logger logger = Logger.getInstance();
 	boolean _hasSupportedAttachment = false;
 	boolean _hasUnsupportedAttachment = false;
 
 	public MailMonitor() {
-		messageObject = new MailMessage();
-
 		// Recursively search all folders on device and search for Inbox/Outbox.
 		// This is more flexible than specifying a path.
 		ServiceBook sb = ServiceBook.getSB();
@@ -81,14 +74,13 @@ public class MailMonitor implements FolderListener, StoreListener {
 	// Folders and listeners should all be taken care of at this stage
 	// Now we get onto handling the incoming message
 	public void messagesAdded(FolderEvent e) {
-		messageObject.clearData();
 		logger.log(TAG, "Email message "
 				+ (e.getMessage().isInbound() ? "received" : "sent"));
-		emailMessage = e.getMessage();
+		Message emailMessage = e.getMessage();
 
 		boolean isInbound = (e.getMessage().isInbound() ? true : false);
-		messageObject.setMailDirection(isInbound);
 
+		MailMessage message = null;
 		try {
 			logger.log(TAG, "Setting Message");
 			if (isInbound) {
@@ -98,10 +90,10 @@ public class MailMonitor implements FolderListener, StoreListener {
 				name = name.substring(1, emailMessage.getFrom().getName()
 						.length() - 1);
 
-				messageObject.setMessage(emailMessage.getFrom().getAddr(),
+				message = new MailMessage(emailMessage.getFrom().getAddr(),
 						name, emailMessage.getSubject(), emailMessage
 								.getBodyText(),
-						emailMessage.isInbound() ? (byte) 1 : (byte) 0,
+						emailMessage.isInbound(),
 						emailMessage.getSentDate().toString(),
 						_hasSupportedAttachment || _hasUnsupportedAttachment);
 			} else {
@@ -141,25 +133,17 @@ public class MailMonitor implements FolderListener, StoreListener {
 					// allRecipientsNames.append(";"); // This "name" substring
 					// is seperated by a ";"
 				}
-
-				messageObject.setMessage(
-						allRecipientsEmails.toString(),
-						"", // No names on outbound emails, just the email
-							// address itself
+				message = new MailMessage("", allRecipientsEmails.toString(),
 						emailMessage.getSubject(), emailMessage.getBodyText(),
-						emailMessage.isInbound() ? (byte) 1 : (byte) 0,
-						emailMessage.getSentDate().toString(),
-						_hasSupportedAttachment || _hasUnsupportedAttachment);
+						emailMessage.isInbound(), emailMessage.getSentDate().toString(), 
+						_hasSupportedAttachment);
 			}
-
-			logger.log(TAG, "Message set");
-			logger.log(TAG, "RESTstring: " + messageObject.getREST());
 		} catch (MessagingException e1) {
 			logger.log( TAG, e1.getMessage());
 			e1.printStackTrace();
 		}
 		logger.log(TAG, "Adding message to log");
-		ActivityLog.addMessage(messageObject);
+		ActivityLog.addMessage(message);
 	}
 
 	public void messagesRemoved(FolderEvent e) {
@@ -171,172 +155,27 @@ public class MailMonitor implements FolderListener, StoreListener {
 	}
 }
 
-class MailDirectionStatus {
-	private MailDirectionStatus() {
-	}
-
-	public static final byte INBOUND = 0;
-	public static final byte OUTBOUND = 1;
-}
-
-/**
- * Implements the message interface to hold mail event messages.
- */
-class MailMessage implements com.mmtechco.mobileminder.prototypes.Message {
-	private final String type = "3"; // 3 = Email message
-	private String contactEmail;
-	private String contactName;
-	private String emailSubject;
-	private String emailBody;
-	private String deviceTime;
-	private byte sentDirection; // 0:Incoming/1:Outgoing
-	private boolean hasAttachment;
-	private String sentTime;
-	private MMTools tools;
-
+class MailMessage extends com.mmtechco.mobileminder.net.Message {
 	/**
-	 * The constructor initialises a normal mail message -> "01"
-	 */
-	public MailMessage() {
-		clearData();
-	}
-
-	/**
-	 * This method adds the email event information to the mail message object.
-	 * 
-	 * @param _address
-	 *            the email was sent to or received from
-	 * @param _outgoing
-	 *            states whether the mail was outgoing or incoming
-	 */
-	public void setMessage(String _email, byte _outgoing) {
-		contactEmail = _email;
-		sentDirection = _outgoing;
-		deviceTime = tools.getDate();
-	}
-
-	/**
-	 * This method adds the mail event information to the mail message object.
-	 * 
-	 * @param _email
-	 *            the contacts email address
-	 * @param _outgoing
-	 *            states whether the mail was outgoing or incoming.
-	 * @param _deviceTime
-	 *            Time when the mail was sent.
-	 * @param _hasAttachment
-	 *            boolean indicating if the email had an attachment or not
-	 */
-	public void setMessage(String _email, String _contact,
-			String _emailSubject, String _mailBody, byte _outgoing,
-			String _sentTime, boolean _hasAttachment) {
-		deviceTime = tools.getDate();
-		contactEmail = _email;
-		contactName = _contact;
-		emailSubject = _emailSubject;
-		emailBody = _mailBody;
-		sentDirection = _outgoing;
-		sentTime = _sentTime;
-		hasAttachment = _hasAttachment;
-	}
-
-	/**
-	 * This method removes the current data in the message and initialises the
-	 * parameters.
-	 * 
-	 */
-	public void clearData()// This is used to ensure good practices and save
-							// resources on the device.
-	{
-		deviceTime = null;
-		contactEmail = null;
-		contactName = null;
-		hasAttachment = false;
-		sentTime = null;
-	}
-
-	/**
-	 * This method retrieves the message formatted in to a single string value.
-	 * <p>
-	 * Mail message consists of:
+	 * Message format:
 	 * <ul>
-	 * <li>Registration Serial number.
-	 * <li>Mail message type (two digits number).<br>
-	 * '11' is used If call message is synchronised and '01' is used if message
-	 * is not synchronised.
-	 * <li>Time on the device when the mail was sent.
-	 * <li>Contact Email address.
-	 * <li>Contact Name.
-	 * <li>Sent Time of the mail itself
-	 * <li>Mail sent status ( Incoming or outgoing )
-	 * <li>Attachment present (true,false)
+	 * <li>Device time
+	 * <li>Contact email address
+	 * <li>Contact name
+	 * <li>Email timestamp
+	 * <li>Direction: 0 = Incoming, 1 = Outgoing
+	 * <li>Attachment: 0 = false, 1 = true
 	 * </ul>
-	 * 
-	 * @return a single string containing the entire message.
 	 */
-	public String getREST() {
-		return Registration.getRegID() + Server.separator
-				+ type + Server.separator + deviceTime
-				+ Server.separator + contactEmail
-				+ Server.separator + contactName
-				+ Server.separator + emailSubject
-				+ Server.separator + emailBody
-				+ Server.separator + sentTime
-				+ Server.separator + sentDirection
-				+ Server.separator
-				+ String.valueOf((hasAttachment) ? (byte) 1 : (byte) 0);
-	}
-
-	/**
-	 * This method records the sent time of the email.
-	 */
-	public void setSentTime(String _sentTime) {
-		sentTime = _sentTime;
-	}
-
-	/**
-	 * This method records the contacts name from the phone call.
-	 */
-	public void setContactName(String name) {
-		contactName = name;
-	}
-
-	/**
-	 * This method retrieves the time that is set on the device.
-	 * 
-	 * @return the device time
-	 */
-	public String getTime() {
-		return deviceTime;
-	}
-
-	/**
-	 * Returns the time at which the message was sent
-	 * 
-	 * @return The time the email was sent
-	 */
-	public String getSentTime() {
-		return sentTime;
-	}
-
-	/**
-	 * This method retrieves the type number for the call message
-	 * 
-	 * @return the type number corresponding to a call message
-	 */
-	public int getType() {
-		return Integer.parseInt(type);
-	}
-
-	/**
-	 * Sets the direction of the email, ie inbound (received), or outbound
-	 * (sent).
-	 * 
-	 * @param isInbound
-	 *            true for inbound, false for outbound
-	 */
-	public void setMailDirection(boolean isInbound) {
-		sentDirection = (isInbound ? MailDirectionStatus.INBOUND
-				: MailDirectionStatus.OUTBOUND);
+	public MailMessage(String email, String contact, String subject,
+			String body, boolean outgoing, String timestamp, boolean attachment) {
+		super(com.mmtechco.mobileminder.net.Message.CALL, new String[] {
+				ToolsBB.getInstance().getDate(),
+				email,
+				contact,
+				timestamp,
+				(outgoing ? "1" : "0"),
+				(attachment ? "1" : "0")
+		});
 	}
 }

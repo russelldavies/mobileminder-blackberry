@@ -31,7 +31,6 @@ public class Server {
 	private static final String TAG = ToolsBB.getSimpleClassName(Server.class);
 
 	private static final String URL = "https://www.mobileminder.net/WebService.php?";
-	public static String separator = ",";
 
 	public static Response get(String queryString) throws IOException {
 		Logger.log(TAG, "GET query string: " + queryString);

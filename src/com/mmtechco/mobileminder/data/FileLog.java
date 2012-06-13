@@ -16,8 +16,10 @@ import net.rim.device.api.system.WLANInfo;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
@@ -217,8 +219,8 @@ public class FileLog {
 				|| (WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED)
 				|| DeviceInfo.isSimulator()) {
 			// Get all files that have no been uploaded
-			for (Enumeration e = files.elements(); e.hasMoreElements();) {
-				FileHolder fileholder = (FileHolder) e.nextElement();
+			for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
+				FileHolder fileholder = (FileHolder) enum.nextElement();
 				if (!fileholder.isUploaded()) {
 					FileConnection fc = null;
 					try {
@@ -229,30 +231,37 @@ public class FileLog {
 						FileMessage fm = new FileMessage();
 						fm.add(path, fileholder.getModTime(),
 								fileholder.getMd5());
-						Response response = Server.postMultiPart(fm.toString(), fc, "userfile");
-						Reply reply = new Reply(response.getContent());
-						// If server successfully processed mark as uploaded
-						if (!reply.isError()) {
-							// Object must be ungrouped to modify it
-							if (ObjectGroup.isInGroup(fileholder)) {
-								fileholder = (FileHolder) ObjectGroup
-										.expandGroup(fileholder);
+						try {
+							Response response = Server.postMultiPart(
+									fm.toString(), fc, "userfile");
+							Reply.Regular reply = new Reply.Regular(
+									response.getContent());
+							// If server successfully processed mark as uploaded
+							if (!reply.error) {
+								// Object must be ungrouped to modify it
+								if (ObjectGroup.isInGroup(fileholder)) {
+									fileholder = (FileHolder) ObjectGroup
+											.expandGroup(fileholder);
+								}
+								fileholder.setUploaded(true);
+								// Regroup object
+								ObjectGroup.createGroup(fileholder);
 							}
-							fileholder.setUploaded(true);
-							// Regroup object
-							ObjectGroup.createGroup(fileholder);
+						} catch (IOException e) {
+							Logger.log(TAG,
+									"Connection problem: " + e.getMessage());
+						} catch (ParseException e) {
+							ActivityLog.addMessage(new ErrorMessage(e));
 						}
-					} catch (IOException e1) {
-						Logger.log(TAG, e1.getMessage());
-					} catch (Exception replyException) {
-						Logger.log(TAG, replyException.getMessage());
+					} catch (IOException e) {
+						ActivityLog.addMessage(new ErrorMessage(e));
 					} finally {
 						try {
 							if (fc != null) {
 								fc.close();
 							}
 						} catch (IOException e1) {
-							Logger.log(TAG, e1.getMessage());
+							ActivityLog.addMessage(new ErrorMessage(e1));
 						}
 					}
 				}
@@ -325,41 +334,42 @@ public class FileLog {
 	}
 }
 
-class FileMessage {
-	private final int type = 22;
-	private String action;
-	private String path;
-	private String modtimeORoldpath;
-	private String md5;
-	private MMTools tools = ToolsBB.getInstance();
+class FileMessage extends Message {
+	private static MMTools tools = ToolsBB.getInstance();
+
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>Device time
+	 * <li>Action: ADD, UPD or DEL
+	 * <li>File path
+	 * <li>File modification time or old path (if renamed)
+	 * <li>File MD5 hex checksum
+	 * </ul>
+	 */
+	public FileMessage() {
+		super(Message.FILE);
+		add(tools.getDate());
+	}
 
 	public void add(String path, long modTime, String md5) {
-		action = "ADD";
-		this.path = path;
-		this.modtimeORoldpath = tools.getDate(modTime);
-		this.md5 = md5;
+		add("ADD");
+		fill(path, String.valueOf(modTime), md5);
 	}
 
 	public void update(String path, String oldPath, String md5) {
-		action = "UPD";
-		this.path = path;
-		this.modtimeORoldpath = oldPath;
-		this.md5 = md5;
+		add("UPD");
+		fill(path, oldPath, md5);
 	}
 
 	public void delete(String path, long modTime, String md5) {
-		action = "DEL";
-		add(path, modTime, md5);
+		add("DEL");
+		fill(path, String.valueOf(modTime), md5);
 	}
 
-	public String toString() {
-		return
-				Registration.getRegID() + Server.separator +
-				type + Server.separator +
-				tools.getDate() + Server.separator +
-				action + Server.separator +
-				path + Server.separator +
-				modtimeORoldpath + Server.separator +
-				md5;
+	private void fill(String path, String pathORmodtime, String md5) {
+		add(path);
+		add(pathORmodtime);
+		add(md5);
 	}
 }

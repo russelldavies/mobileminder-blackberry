@@ -18,11 +18,9 @@ import net.rim.device.api.gps.GPSInfo;
 import net.rim.device.api.gps.LocationInfo;
 //#endif
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.ErrorMessage;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
@@ -151,49 +149,22 @@ public class LocationMonitor implements LocationListener {
 	}
 }
 
-/**
- * Holds GPS messages
- */
-class LocationMessage implements Message {
-	private final int type = 6;
-	private double latitude, longitude;
-	private String deviceTime;
-	private float speed;
-
-	public LocationMessage(double lat, double lon, float speed) {
-		latitude = lat;
-		longitude = lon;
-		this.speed = speed;
-		deviceTime = ToolsBB.getInstance().getDate();
-	}
-
+class LocationMessage extends Message {
 	/**
-	 * Retrieves the message formatted in to a single string value. Location
-	 * message consists of:
+	 * Message format:
 	 * <ul>
-	 * <li>Registration Serial number.
-	 * <li>Location message type which is '06' (two digits number).
-	 * <li>Device time.
-	 * <li>Latitude.
-	 * <li>Longitude.
-	 * <li>Speed. *<i>Warning</i> not implemented
+	 * <li>Device time
+	 * <li>Latitude
+	 * <li>Longitude
+	 * <li>Speed
 	 * </ul>
-	 * 
-	 * @return a single string containing the entire message.
 	 */
-	public String getREST() {
-		return Registration.getRegID() + Server.separator + '0'
-				+ type + Server.separator + deviceTime
-				+ Server.separator + latitude
-				+ Server.separator + longitude
-				+ Server.separator + speed;
-	}
-
-	public String getTime() {
-		return deviceTime;
-	}
-
-	public int getType() {
-		return type;
+	public LocationMessage(double lat, double lon, float speed) {
+		super(Message.LOCATION, new String[] {
+				ToolsBB.getInstance().getDate(),
+				String.valueOf(lat),
+				String.valueOf(lon),
+				String.valueOf(speed)
+		});
 	}
 }

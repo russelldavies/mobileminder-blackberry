@@ -2,176 +2,91 @@ package com.mmtechco.mobileminder.net;
 
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
-/**
- * Transforms the data into easier accessible form.
- */
-public class Reply {
-	private static final String TAG = ToolsBB.getSimpleClassName(Reply.class);
-	
+public abstract class Reply {
 	private static final MMTools tools = ToolsBB.getInstance();
-	
-	private String replyStr;
-	
-	private String id;
-	private boolean error;
-	private String type;
-	private String info;
 
-	// Command Reply Class Variables
-	private int index;
-	private String target;
-	private String args;
+	String[] fields;
+	public String content;
+	// Shared fields
+	public String id;
+	public int type;
 
-	public Reply(String replyStr) throws Exception {
-		if (null == replyStr) {
-			return;
+	public Reply(String content) throws ParseException {
+		if (content == null || content.length() == 0) {
+			throw new ParseException("Content is null or empty");
 		}
-		this.replyStr = replyStr;
-		String[] replyArray;
-		replyArray = tools.split(replyStr, Server.separator);
+		try {
+			this.content = content;
+			fields = tools.split(content, Message.SEPARATOR);
 
-		// not blank and command
-		if (0 < replyArray[1].length() && Integer.parseInt(replyArray[1]) == 0) {
-			// id,type,index,target,args
-			int commandID = Integer.parseInt(replyArray[2]);
+			id = fields[0];
+			type = Integer.valueOf(fields[1]).intValue();
+		} catch (RuntimeException e) {
+			throw new ParseException(e);
+		}
+	}
 
-			if (0 == commandID) {
-				// id,type,comID,tag,arg -> 12345,00,0,,
-				initializeComReg(replyArray[0], replyArray[1], commandID, "", "");
-			} else {
-				initializeComReg(replyArray[0], replyArray[1], commandID, replyArray[3], replyArray[4]);
+	public static class Regular extends Reply {
+		public boolean error;
+		public String info;
+
+		public Regular(String content) throws ParseException {
+			super(content);
+			if (type == Message.COMMAND) {
+				throw new ParseException(
+						"Received a Command message but did not expect one");
 			}
-		} else {
-			// all others
-			// id,type,error,info
-			if (replyArray.length == 3) {
-				initialize(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2]) != 0, "");
-			} else {
-				try {
-					initialize(replyArray[0], replyArray[1], Integer.parseInt(replyArray[2]) != 0, replyArray[3]);
-				} catch (NumberFormatException e) {
-					Logger.log(TAG, "Reply: NumberFormatException: " + e);
+			try {
+				error = Integer.parseInt(fields[2]) != 0;
+				info = fields[3];
+			} catch (RuntimeException e) {
+				throw new ParseException(e);
+			}
+		}
+	}
+
+	public static class Command extends Reply {
+		public int index;
+		private String target;
+		private String args;
+
+		public Command(String content) throws ParseException {
+			super(content);
+			if (type != Message.COMMAND) {
+				throw new ParseException(
+						"Expected Command message but did not receive one");
+			}
+			try {
+				index = Integer.parseInt(fields[2]);
+				// Message contains additional fields
+				if (index != 0) {
+					target = fields[3];
+					args = fields[4];
 				}
+			} catch (RuntimeException e) {
+				throw new ParseException(e);
 			}
+		}
+
+		public COMMAND_TARGETS getTarget() {
+			return COMMAND_TARGETS.from(target);
+		}
+
+		public String[] getArgs() {
+			String[] processedArgs = tools.split(args, "|");
+			return processedArgs;
 		}
 	}
 
-	/**
-	 * Sets the value for Reply.
-	 * 
-	 * @param regid
-	 *            RegID for the device.
-	 * @param error
-	 *            error status.
-	 * @param type
-	 *            the event type.
-	 * @param info
-	 *            the body of the message.
-	 */
-	private void initialize(String id, String type, boolean error, String info) {
-		this.id = id;
-		this.type = type;
-		this.error = error;
-		this.info = info;
-	}
+	public static class ParseException extends Exception {
+		public ParseException(String s) {
+			super(s);
+		}
 
-	/**
-	 * Initializes a command message from the server.
-	 * 
-	 * @param id
-	 *            device ID
-	 * @param type
-	 *            Type of message
-	 * @param index
-	 *            Index for command message
-	 * @param target
-	 *            target for command execution
-	 * @param args
-	 *            command to be executed
-	 */
-	private void initializeComReg(String id, String type, int index, String target, String args) {
-		this.id = id;
-		this.type = type;
-		this.index = index;
-		this.target = target;
-		this.args = args;
-	}
-
-	/**
-	 * This method retrieves the error status of a reply message
-	 * 
-	 * @return true if an error occurred
-	 */
-	public boolean isError() {
-		return error;
-	}
-
-	/**
-	 * This method retrieves the type of event message that was sent to the
-	 * server
-	 * 
-	 * @return a single integer value representing the type of event.
-	 */
-	public String getCallingCode() {
-		return type;
-	}
-
-	/**
-	 * This method retrieves the information in the body of the message
-	 * 
-	 * @return the message body
-	 */
-	public String getInfo() {
-		return info;
-	}
-
-	/**
-	 * Retrieves the reply message formatted in to a single string value.
-	 * 
-	 * @return a single string containing the entire reply message.
-	 */
-	public String getREST() {
-		return replyStr;
-	}
-
-	/**
-	 * Retrieves the regID from the reply message
-	 * 
-	 * @return the regID. Returns the device identification number
-	 */
-	public String getRegID() {
-		return id;
-	}
-
-	/**
-	 * Retrieves the Index from the reply message
-	 * 
-	 * @return the regID. Returns the index for the command message
-	 */
-	public int getIndex() {
-		return index;
-	}
-
-	/**
-	 * Retrieves the Target from the reply message
-	 * 
-	 * @return the regID. Returns the target for the command message
-	 */
-	public COMMAND_TARGETS getTarget() {
-		return COMMAND_TARGETS.from(target);
-	}
-
-	/**
-	 * Retrieves the Arguments from the reply message
-	 * 
-	 * @return the regID. Returns the argument of the command message
-	 */
-	public String[] getArgs() {
-		//logger.log(TAG, "Processing the args :" + args);
-		String[] processedArgs = tools.split(args, "|");
-		return processedArgs;
+		public ParseException(Exception e) {
+			super(e.getClass().getName() + ":" + e.getMessage());
+		}
 	}
 }

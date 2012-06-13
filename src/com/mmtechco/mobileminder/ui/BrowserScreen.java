@@ -8,11 +8,8 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.ToolsBB;
+import com.mmtechco.mobileminder.net.Message;
 
 import net.rim.device.api.browser.field.ContentReadEvent;
 import net.rim.device.api.browser.field2.BrowserField;
@@ -249,44 +246,29 @@ class BrowserFieldLoadProgressTracker {
 	}
 }
 
-class WebMessage implements Message {
-	private final int type = 4;
-	private String pageTitle;
-	private String url;
-	private int viewTime;
+class WebMessage extends Message {
 	private Date startTime;
 	
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>Device time
+	 * <li>Time page was viewed
+	 * <li>Page title
+	 * <li>Page URL
+	 * </ul>
+	 */
 	public WebMessage(String url, String pageTitle) {
-		this.url = url;
-		this.pageTitle = pageTitle;
+		super(Message.WEB_HISTORY);
+		add(url);
+		add(pageTitle);
 		startTime = new Date();
 	}
 	
 	public void finished() {
-		viewTime = (int) (new Date().getTime() - startTime.getTime()) / 1000;
+		int viewTime = (int) (new Date().getTime() - startTime.getTime()) / 1000;
+		add(String.valueOf(viewTime));
+		
 		ActivityLog.addMessage(this);
-	}
-	
-	public int getType() {
-		return type;
-	}
-	
-	public String getTime() {
-		return ToolsBB.getInstance().getDate();
-	}
-
-	public String getREST() {
-		return
-				Registration.getRegID() +
-				Server.separator +
-				"0" + type +
-				Server.separator +
-				ToolsBB.getInstance().getDate() +
-				Server.separator +
-				viewTime +
-				Server.separator +
-				pageTitle +
-				Server.separator +
-				url;
 	}
 }

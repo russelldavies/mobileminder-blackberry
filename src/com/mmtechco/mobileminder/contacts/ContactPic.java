@@ -5,8 +5,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.microedition.pim.PIM;
-import com.mmtechco.mobileminder.Registration;
+
+import net.rim.blackberry.api.pdap.BlackBerryContact;
+import net.rim.blackberry.api.pdap.BlackBerryContactList;
+import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
+import net.rim.device.api.io.Base64InputStream;
+import net.rim.device.api.system.EncodedImage;
+
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
@@ -16,12 +26,6 @@ import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.CRC32;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
-
-import net.rim.blackberry.api.pdap.BlackBerryContact;
-import net.rim.blackberry.api.pdap.BlackBerryContactList;
-import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
-import net.rim.device.api.io.Base64InputStream;
-import net.rim.device.api.system.EncodedImage;
 
 /**
  * Used to retrieve the contact picture stored on the device based on a
@@ -197,16 +201,19 @@ public class ContactPic implements Controllable {
 						crc.update(photoPackage.photoStream.getBytes());
 						keyvalPairs.put("crc", String.valueOf(crc.getValue()));
 						keyvalPairs.put("pic", photoPackage.photoStream);
-						Response response;
 						try {
-							response = Server.post(message.toString(), keyvalPairs);
-							Reply reply = new Reply(response.getContent());
-							if(!reply.isError()) {
+							Response response = Server.post(message.toString(),
+									keyvalPairs);
+							Reply.Regular reply = new Reply.Regular(
+									response.getContent());
+							if (!reply.error) {
 								complete = true;
 							}
-						//} catch (IOException e) {
-						} catch (Exception e) {
-							Logger.log(TAG, e.getMessage());
+						} catch (IOException e) {
+							Logger.log(TAG,
+									"Connection problem: " + e.getMessage());
+						} catch (ParseException e) {
+							ActivityLog.addMessage(new ErrorMessage(e));
 						}
 					} else {
 						complete = true;
@@ -228,33 +235,18 @@ public class ContactPic implements Controllable {
 		}
 	}
 
-	class ContactPicMessage {
-		private final int type = 28;
-		private String fileType;
-		private String contactNumber;
-		private String contactEmail;
-
+	static class ContactPicMessage extends Message {
 		public ContactPicMessage(String fileType, String contactNumber,
 				String contactEmail) {
-			this.fileType = fileType;
-			this.contactNumber = contactNumber;
-			this.contactEmail = contactEmail;
+			super(Message.CONTACT_PIC, new String[] {
+					ToolsBB.getInstance().getDate(), fileType,
+					getContactNameFromNumber(contactNumber), contactNumber,
+					contactEmail });
 		}
 
-		public String toString() {
-			return
-					Registration.getRegID() + Server.separator +
-					type + Server.separator +
-					tools.getDate() + Server.separator +
-					fileType + Server.separator +
-					getContactNameFromNumber(contactNumber) + Server.separator +
-					contactNumber + Server.separator
-					+ contactEmail;
-		}
-
-		private String getContactNameFromNumber(String _contactNum) {
-			String thePhoneNumber = null;
-			PhoneCallLogID callLog = new PhoneCallLogID(_contactNum);
+		private static String getContactNameFromNumber(String contactNum) {
+			String thePhoneNumber = "<no name>";
+			PhoneCallLogID callLog = new PhoneCallLogID(contactNum);
 			if (callLog.getName() != null) {
 				thePhoneNumber = callLog.getName();
 			}
@@ -268,9 +260,7 @@ public class ContactPic implements Controllable {
 	 * of image and the email address stored in the contact information.
 	 */
 	class ContactPhotoContainer {
-		// TODO: replace with file not hex string
-		public String photoStream; // This is the photo itself, stored in HEX
-									// characters
+		public String photoStream; // Photo data base64 encoded
 		public String photoType;
 		public String email;
 

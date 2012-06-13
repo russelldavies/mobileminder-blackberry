@@ -10,20 +10,24 @@ import net.rim.device.api.ui.component.Dialog;
 
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
-public class UninstallMonitor implements CodeModuleListener, MobileMinderResource {
+public class UninstallMonitor implements CodeModuleListener,
+		MobileMinderResource {
 	private static final String TAG = ToolsBB
 			.getSimpleClassName(UninstallMonitor.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
-	
+
 	private static final int messageType = 33;
-	
+
 	private MMTools tools = ToolsBB.getInstance();
 
 	public void modulesDeleted(String[] moduleNames) {
@@ -32,17 +36,19 @@ public class UninstallMonitor implements CodeModuleListener, MobileMinderResourc
 		for (int i = 0; i < moduleNames.length; i++) {
 			if (moduleNames[i].equalsIgnoreCase(r.getString(i18n_AppName))) {
 				Logger.log(TAG, "Sending Uninstall Notification to Server...");
-				Response response;
 				try {
-					response = Server.get(Registration.getRegID() + "," + messageType + "," + tools.getDate() + "," + true);
-					Reply reply = new Reply(response.getContent());
-					if (reply.isError() == true) {
+					Response response = Server.get(Registration.getRegID()
+							+ "," + messageType + "," + tools.getDate() + ","
+							+ true);
+					Reply.Regular reply = new Reply.Regular(
+							response.getContent());
+					if (reply.error == true) {
 						Logger.log(TAG, "Error Sending Uninstall Notification");
 					}
 				} catch (IOException e) {
-					Logger.log(TAG, e.getMessage());
-				} catch (Exception e) {
-					Logger.log(TAG, e.getMessage());
+					Logger.log(TAG, "Connection problem: " + e.getMessage());
+				} catch (ParseException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
 				}
 				Dialog.inform(r.getString(i18n_Uninstall));
 			}

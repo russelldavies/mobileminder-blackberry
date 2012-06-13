@@ -18,12 +18,15 @@ import net.rim.device.api.system.RuntimeStore;
 import net.rim.device.api.util.StringUtilities;
 
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
+import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
 import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.util.ErrorMessage;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
@@ -40,53 +43,56 @@ public class Registration implements Controllable, MobileMinderResource {
 	public final static String KEY_STAGE = "registration_stage";
 	public final static String KEY_ID = "registration_id";
 	public final static String KEY_NUMBERS = "emergency_numbers";
-	
+
 	private final static int intervalShort = 1000 * 60 * 2; // 2 min
 	private final static int intervalLong = 1000 * 60 * 60 * 24; // 24h
-	
+
 	private static int stage;
 	private static String id;
 	private static String status = r.getString(i18n_RegRequesting);
 	private static Vector emergNums;
 
 	private static Vector observers = new Vector();
-	
+
 	public static void checkStatus() {
 		Logger.log(TAG, "Checking registration status");
-		
+
 		// Read details from storage to have something to display in case there
 		// is no connectivity
 		readDetails();
-		
-		// Contact server and get new values, if any, otherwise sleep
-		Logger.log(TAG, "Requesting reg details from server");
-		Response response;
+
 		try {
-			response = Server.get(new RegistrationMessage(stage).toString());
+			// Contact server and get new values, if any, otherwise sleep
+			Logger.log(TAG, "Requesting reg details from server");
+
+			Response response = Server.get(new RegistrationMessage(stage)
+					.toString());
+			Reply.Regular reply = new Reply.Regular(response.getContent());
+			if (reply.error) {
+				scheduleRun(intervalShort);
+				return;
+			}
+
+			// Read and process registration data
+			stage = Integer.parseInt(reply.info);
+			id = reply.id;
+			storeDetails();
+
+			// Schedule a registration check based on stage
+			if (stage < 2) {
+				Logger.log(TAG, "Scheduling short run");
+				scheduleRun(intervalShort);
+			} else {
+				startComponents();
+				Logger.log(TAG, "Scheduling long run");
+				scheduleRun(intervalLong);
+			}
 		} catch (IOException e) {
-			Logger.log(TAG, e.getMessage());
+			Logger.log(TAG, "Connection problem: " + e.getMessage());
 			scheduleRun(intervalShort);
-			return;
-		}
-		RegistrationReply reply = new RegistrationReply(response.getContent());
-		if (reply.error) {
+		} catch (ParseException e) {
+			ActivityLog.addMessage(new ErrorMessage(e));
 			scheduleRun(intervalShort);
-			return;
-		}
-		
-		// Read and process registration data
-		stage = reply.stage;
-		id = reply.id;
-		storeDetails();
-		
-		// Schedule a registration check based on stage
-		if (stage < 2) {
-			Logger.log(TAG, "Scheduling short run");
-			scheduleRun(intervalShort);
-		} else {
-			startComponents();
-			Logger.log(TAG, "Scheduling long run");
-			scheduleRun(intervalLong);
 		}
 	}
 
@@ -98,7 +104,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			}
 		}, sleepTime);
 	}
-	
+
 	private static void readDetails() {
 		// Read registration data or set to default values
 		PersistentObject regData = PersistentStore.getPersistentObject(ID);
@@ -108,7 +114,8 @@ public class Registration implements Controllable, MobileMinderResource {
 				Logger.log(TAG, "Populating with default values");
 				// Populate with default values
 				regTable = new Hashtable();
-				regTable.put(KEY_STAGE, "0"); stage = 0;
+				regTable.put(KEY_STAGE, "0");
+				stage = 0;
 				regTable.put(KEY_ID, id = "");
 				regTable.put(KEY_NUMBERS, emergNums = new Vector());
 				// Store to device
@@ -123,7 +130,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			}
 		}
 	}
-	
+
 	private static void storeDetails() {
 		PersistentObject regData = PersistentStore.getPersistentObject(ID);
 		synchronized (regData) {
@@ -151,7 +158,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			}
 		}
 	}
-	
+
 	private static void updateStatus() {
 		switch (stage) {
 		case 0: // Initialization state
@@ -170,17 +177,17 @@ public class Registration implements Controllable, MobileMinderResource {
 			break;
 		}
 		Logger.log(TAG, "Update status: " + stage + ";" + id + ";" + status);
-		
+
 		// Tell screens to update themselves
 		notifyObservers();
 	}
-	
+
 	private static void notifyObservers() {
 		for (int i = 0; i < observers.size(); i++) {
 			((ObserverScreen) observers.elementAt(i)).update();
 		}
 	}
-	
+
 	public static void addObserver(ObserverScreen screen) {
 		observers.addElement(screen);
 	}
@@ -190,7 +197,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 
 	/**
-	 * Get the device registration ID. 
+	 * Get the device registration ID.
 	 * 
 	 * @return registration ID string. <strong>"0"</strong> if not available.
 	 */
@@ -201,7 +208,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			return id;
 		}
 	}
-	
+
 	public static String getStatus() {
 		return status;
 	}
@@ -248,55 +255,30 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 }
 
-class RegistrationMessage {
-	private final static int type = 9;
-	private final String appVersion = ApplicationDescriptor
-			.currentApplicationDescriptor().getVersion();
-	private String deviceTime;
-	private int stage;
-	private String phoneNum;
-	private String deviceID;
-	private String info = "BlackBerry";
-	private String manufacturer;
-	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
-
+class RegistrationMessage extends Message {
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>Registration stage
+	 * <li>Phone number of device
+	 * <li>device id: unique hardware id
+	 * <li>manufacturer
+	 * <li>device model
+	 * <li>OS version
+	 * <li>app version
+	 * <li>platform tag
+	 * </ul>
+	 */
 	public RegistrationMessage(int stage) {
-		this.stage = stage;
-		deviceTime = tools.getDate();
-		manufacturer = String.valueOf(Branding.getVendorId());
-		phoneNum = Phone.getDevicePhoneNumber(false);
-		deviceID = Integer.toHexString(DeviceInfo.getDeviceId());
-	}
-
-	public String toString() {
-		return Registration.getRegID() + Server.separator + '0'
-				+ type + Server.separator + deviceTime
-				+ Server.separator + stage
-				+ Server.separator + phoneNum
-				+ Server.separator + deviceID
-				+ Server.separator + manufacturer
-				+ Server.separator + DeviceInfo.getDeviceName()
-				+ Server.separator
-				+ DeviceInfo.getSoftwareVersion()
-				+ Server.separator + appVersion
-				+ Server.separator + info;
-	}
-}
-
-class RegistrationReply {
-	private ToolsBB tools = (ToolsBB) ToolsBB.getInstance();
-	
-	public String id;
-	public boolean error;
-	public String type;
-	public int stage;
-	
-	public RegistrationReply(String content) {
-		String[] fields = tools.split(content, Server.separator);
-		
-		id = fields[0];
-		type = fields[1];
-		error = Integer.parseInt(fields[2]) != 0;
-		stage = Integer.parseInt(fields[3]);
+		super(Message.REGISTRATION, new String[] {
+			ToolsBB.getInstance().getDate(),
+			String.valueOf(stage),
+			Phone.getDevicePhoneNumber(false),
+			Integer.toHexString(DeviceInfo.getDeviceId()),
+			String.valueOf(Branding.getVendorId()),
+			DeviceInfo.getDeviceName(),
+			DeviceInfo.getSoftwareVersion(),
+			ApplicationDescriptor.currentApplicationDescriptor()
+			.getVersion(), "BlackBerry" });
 	}
 }
