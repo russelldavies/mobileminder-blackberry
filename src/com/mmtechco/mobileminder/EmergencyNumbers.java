@@ -22,6 +22,9 @@ public class EmergencyNumbers implements Controllable {
 	private static PersistentObject store;
 	private static ContentProtectedVector numbers;
 
+	private static final String TYPE = "LOST";
+	private static final String VERB = "NUMBER";
+
 	static {
 		store = PersistentStore.getPersistentObject(ID);
 		if (store.getContents() == null) {
@@ -45,37 +48,40 @@ public class EmergencyNumbers implements Controllable {
 		return numbers;
 	}
 
-	public boolean processCommand(String[] inputArgs) {
-		logger.info("Processing Owner Number Command...");
-		boolean complete = false;
-		if (inputArgs[0].equalsIgnoreCase("lost")
-				&& inputArgs[1].equalsIgnoreCase("number")) {
+	public boolean processCommand(String[] args) {
+		logger.info("Processing emergency number command");
+		try {
+			String type = args[0];
+			String verb = args[1];
+			String[] nums = ToolsBB.getInstance().split(args[2], "&");
 
-			logger.debug("args[0] :" + inputArgs[0]);
-			logger.debug("args[1] :" + inputArgs[1]);
-			logger.debug("args[2] :" + inputArgs[2]);
-			try {
-				String[] nums = ToolsBB.getInstance().split(inputArgs[2], "&");
-				for (int i = 0; i < nums.length; i++) {
-					numbers.addElement(nums[i]);
-				}
-				// Store details
-				store.setContents(numbers);
-				store.commit();
-				complete = true;
-			} catch (Exception e) {
-				ActivityLog.addMessage(new ErrorMessage(e));
-				complete = false;
+			// Check type and verb are matching
+			if (!(type.equalsIgnoreCase(TYPE) && verb.equalsIgnoreCase(VERB))) {
+				return false;
 			}
+
+			for (int i = 0; i < nums.length; i++) {
+				numbers.addElement(nums[i]);
+			}
+			// Store details
+			store.setContents(numbers);
+			store.commit();
+
+			return true;
+		} catch (IndexOutOfBoundsException e) {
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not parse command args", e));
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not process emergency number list", e));
 		}
-		return complete;
+		return false;
 	}
 
 	public boolean isTarget(COMMAND_TARGETS targets) {
 		if (targets == COMMAND_TARGETS.OWNER) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 }
