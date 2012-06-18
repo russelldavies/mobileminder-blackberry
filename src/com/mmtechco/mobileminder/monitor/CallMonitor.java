@@ -103,13 +103,13 @@ public class CallMonitor extends AbstractPhoneListener {
 
 		// Called from CallSync
 		public CallMessage(String callTimeStamp, String number,
-				String contactName, int callDuration, boolean outgoing) {
+				String contactName, int callDuration, int status) {
 			super(Message.CALL_SYNC, new String[] {
 					callTimeStamp,
 					number,
 					(contactName == null) ? "Unknown" : contactName,
 					String.valueOf(callDuration),
-					(outgoing ? "1" : "0"),
+					String.valueOf(status),
 					String.valueOf(OTHER)
 			});
 		}
