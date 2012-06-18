@@ -22,11 +22,11 @@ public class CallMonitor extends AbstractPhoneListener {
 
 	public CallMonitor() {
 		Phone.addPhoneListener(this);
-		logger.debug("Started");
+		logger.info("Started");
 	}
 
 	public void callAnswered(int callId) {
-		logger.debug("Call answered");
+		logger.info("Call answered");
 
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
@@ -34,13 +34,13 @@ public class CallMonitor extends AbstractPhoneListener {
 		String number = Phone.getCall(callId).getDisplayPhoneNumber();
 		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
-		contactName = (contactName == null ? "" : contactName);
+		contactName = (contactName == null ? "Unknown" : contactName);
 		
 		callMessage = new CallMessage(number, contactName, true);
 	}
 
 	public void callInitiated(int callId) {
-		logger.debug("Call initiated");
+		logger.info("Call initiated");
 		
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
@@ -48,25 +48,23 @@ public class CallMonitor extends AbstractPhoneListener {
 		String number = Phone.getCall(callId).getDisplayPhoneNumber();
 		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
-		contactName = (contactName == null ? "" : contactName);
+		contactName = (contactName == null ? "Unknown" : contactName);
 		
 		callMessage = new CallMessage(number, contactName, true);
 	}
 
 	public void callEndedByUser(int callId) {
-		logger.debug("Call ended by user");
+		logger.info("Call ended by user");
 
 		callMessage.callEnded(CallMessage.FINISHED);
 		ActivityLog.addMessage(callMessage);
-		logger.debug("Call message added to log");
 	}
 
 	public void callDisconnected(int callId) {
-		logger.debug("Call disconnected");
+		logger.info("Call disconnected");
 
 		callMessage.callEnded(CallMessage.DROPPED);
 		ActivityLog.addMessage(callMessage);
-		logger.debug("Call message added to log");
 	}
 
 	public static class CallMessage extends Message {
@@ -109,7 +107,7 @@ public class CallMonitor extends AbstractPhoneListener {
 			super(Message.CALL_SYNC, new String[] {
 					callTimeStamp,
 					number,
-					(contactName == null) ? "" : contactName,
+					(contactName == null) ? "Unknown" : contactName,
 					String.valueOf(callDuration),
 					(outgoing ? "1" : "0"),
 					String.valueOf(OTHER)
