@@ -75,8 +75,7 @@ public abstract class Reply {
 		}
 
 		public String[] getArgs() {
-			String[] processedArgs = tools.split(args, "|");
-			return processedArgs;
+			return tools.split(args, "|");
 		}
 	}
 

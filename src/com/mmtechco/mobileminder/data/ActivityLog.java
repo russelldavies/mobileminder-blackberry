@@ -36,6 +36,7 @@ public class ActivityLog {
 	}
 
 	public static synchronized void addMessage(Message message) {
+		logger.debug(message.toString());
 		log.addElement(message.toString());
 		commit();
 		sendMessages();

@@ -65,6 +65,7 @@ public class Registration implements MobileMinderResource {
 			Response response = Server.get(new RegistrationMessage(stage)
 					.toString());
 			Reply.Regular reply = new Reply.Regular(response.getContent());
+			logger.debug("Registration reply: " + reply.content);
 			if (reply.error) {
 				scheduleRun(intervalShort);
 				return;
