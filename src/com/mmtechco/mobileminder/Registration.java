@@ -45,6 +45,8 @@ public class Registration implements Controllable, MobileMinderResource {
 
 	private final static int intervalShort = 1000 * 60 * 2; // 2 min
 	private final static int intervalLong = 1000 * 60 * 60 * 24; // 24h
+	
+	private static final int REGISTERED = 2;
 
 	private static int stage;
 	private static String id;
@@ -54,7 +56,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	private static Vector observers = new Vector();
 
 	public static void checkStatus() {
-		logger.debug("Checking registration status");
+		logger.info("Checking registration status");
 
 		// Read details from storage to have something to display in case there
 		// is no connectivity
@@ -78,7 +80,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			storeDetails();
 
 			// Schedule a registration check based on stage
-			if (stage < 2) {
+			if (stage < REGISTERED) {
 				logger.debug("Scheduling short run");
 				scheduleRun(intervalShort);
 			} else {
@@ -115,7 +117,7 @@ public class Registration implements Controllable, MobileMinderResource {
 				regTable = new Hashtable();
 				regTable.put(KEY_STAGE, "0");
 				stage = 0;
-				regTable.put(KEY_ID, id = "");
+				regTable.put(KEY_ID, id = "0");
 				regTable.put(KEY_NUMBERS, emergNums = new Vector());
 				// Store to device
 				regData.setContents(regTable);
@@ -141,6 +143,10 @@ public class Registration implements Controllable, MobileMinderResource {
 			regData.setContents(regTable);
 			regData.commit();
 		}
+		// Also store id in RuntimeStore so different processes can read it
+		// since the BB class loader doesn't handle static class variables
+		// properly
+		RuntimeStore.getRuntimeStore().put(ID + 32, id);
 		logger.debug("Stored details");
 	}
 
@@ -175,7 +181,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			status = r.getString(i18n_RegActive);
 			break;
 		}
-		logger.debug("Update status: " + stage + ";" + id + ";" + status);
+		logger.info("Update status: " + stage + ";" + id + ";" + status);
 
 		// Tell screens to update themselves
 		notifyObservers();
@@ -201,11 +207,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	 * @return registration ID string. <strong>"0"</strong> if not available.
 	 */
 	public static String getRegID() {
-		if (id.length() == 0) {
-			return "0";
-		} else {
-			return id;
-		}
+		return (String) RuntimeStore.getRuntimeStore().get(ID + 32);
 	}
 
 	public static String getStatus() {
@@ -222,7 +224,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 
 	public boolean processCommand(String[] inputArgs) {
-		logger.debug("Processing Owner Number Command...");
+		logger.info("Processing Owner Number Command...");
 		boolean complete = false;
 		if (inputArgs[0].equalsIgnoreCase("lost")
 				&& inputArgs[1].equalsIgnoreCase("number")) {
