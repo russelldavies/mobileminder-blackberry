@@ -1,8 +1,8 @@
 package com.mmtechco.mobileminder.ui;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
+import com.mmtechco.mobileminder.EmergencyNumbers;
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
@@ -106,7 +106,6 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				PersistentStore.destroyPersistentObject(FileLog.ID);
 				System.exit(0);
 			}
-
 		};
 		
 		MenuItem eventloggerMenu = new MenuItem("Event Logger", 0x100040, 3) {
@@ -115,12 +114,19 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					Dialog.alert("Sorry, couldn't start Event Logger. Don't know why...");
 				}
 			}
-
+		};
+		
+		MenuItem emergnumsMenu = new MenuItem("View Emergency Numbers", 0x100040, 3) {
+			public void run() {
+				Dialog.inform(EmergencyNumbers.getNumbers().toString());
+			}
 		};
 		
 		menu.add(clearMenu);
 		menu.add(delRegMenu);
 		menu.add(delStoreMenu);
+		menu.add(eventloggerMenu);
+		menu.add(emergnumsMenu);
 
 		super.makeMenu(menu, instance);
 	}
@@ -148,12 +154,10 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					String stage = (String) regTable.get(Registration.KEY_STAGE);
 					String id = (String) regTable.get(Registration.KEY_ID);
 					Boolean compStatus = (Boolean) RuntimeStore.getRuntimeStore().get(Registration.ID);
-					Vector nums = (Vector) regTable.get(Registration.KEY_NUMBERS);
 					
 					add(new LabelField("Stage: " + stage));
 					add(new LabelField("ID: " + id.toString()));
 					add(new LabelField("Components started: " + compStatus));
-					add(new LabelField("Emergency nums: " + nums));
 				}
 			}
 

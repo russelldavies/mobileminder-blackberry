@@ -24,8 +24,6 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
@@ -33,7 +31,7 @@ import com.mmtechco.util.ToolsBB;
 /**
  * Checks the registration stage that currently the device is in.
  */
-public class Registration implements Controllable, MobileMinderResource {
+public class Registration implements MobileMinderResource {
 	private static Logger logger = Logger.getLogger(Registration.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 	public static final long ID = StringUtilities
@@ -41,7 +39,6 @@ public class Registration implements Controllable, MobileMinderResource {
 
 	public final static String KEY_STAGE = "registration_stage";
 	public final static String KEY_ID = "registration_id";
-	public final static String KEY_NUMBERS = "emergency_numbers";
 
 	private final static int intervalShort = 1000 * 60 * 2; // 2 min
 	private final static int intervalLong = 1000 * 60 * 60 * 24; // 24h
@@ -51,7 +48,6 @@ public class Registration implements Controllable, MobileMinderResource {
 	private static int stage;
 	private static String id;
 	private static String status = r.getString(i18n_RegRequesting);
-	private static Vector emergNums;
 
 	private static Vector observers = new Vector();
 
@@ -118,7 +114,6 @@ public class Registration implements Controllable, MobileMinderResource {
 				regTable.put(KEY_STAGE, "0");
 				stage = 0;
 				regTable.put(KEY_ID, id = "0");
-				regTable.put(KEY_NUMBERS, emergNums = new Vector());
 				// Store to device
 				regData.setContents(regTable);
 				regData.commit();
@@ -127,7 +122,6 @@ public class Registration implements Controllable, MobileMinderResource {
 				// Read values from storage
 				stage = Integer.parseInt((String) regTable.get(KEY_STAGE));
 				id = (String) regTable.get(KEY_ID);
-				emergNums = (Vector) regTable.get(KEY_NUMBERS);
 			}
 		}
 	}
@@ -138,7 +132,6 @@ public class Registration implements Controllable, MobileMinderResource {
 			Hashtable regTable = (Hashtable) regData.getContents();
 			regTable.put(KEY_STAGE, String.valueOf(stage));
 			regTable.put(KEY_ID, id);
-			regTable.put(KEY_NUMBERS, emergNums);
 			// Store to device
 			regData.setContents(regTable);
 			regData.commit();
@@ -212,47 +205,6 @@ public class Registration implements Controllable, MobileMinderResource {
 
 	public static String getStatus() {
 		return status;
-	}
-
-	/**
-	 * Gets the emergency numbers associated with the account.
-	 * 
-	 * @return Vector with each element a string containing a number
-	 */
-	public static Vector getEmergNums() {
-		return emergNums;
-	}
-
-	public boolean processCommand(String[] inputArgs) {
-		logger.info("Processing Owner Number Command...");
-		boolean complete = false;
-		if (inputArgs[0].equalsIgnoreCase("lost")
-				&& inputArgs[1].equalsIgnoreCase("number")) {
-
-			logger.debug("args[0] :" + inputArgs[0]);
-			logger.debug("args[1] :" + inputArgs[1]);
-			logger.debug("args[2] :" + inputArgs[2]);
-			try {
-				String[] nums = ToolsBB.getInstance().split(inputArgs[2], "&");
-				for (int i = 0; i < nums.length; i++) {
-					emergNums.addElement(nums[i]);
-				}
-				storeDetails();
-				complete = true;
-			} catch (Exception e) {
-				ActivityLog.addMessage(new ErrorMessage(e));
-				complete = false;
-			}
-		}
-		return complete;
-	}
-
-	public boolean isTarget(COMMAND_TARGETS targets) {
-		if (targets == COMMAND_TARGETS.OWNER) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 }
 

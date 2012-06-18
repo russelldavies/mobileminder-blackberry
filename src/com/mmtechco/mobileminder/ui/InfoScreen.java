@@ -31,6 +31,7 @@ import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
 
+import com.mmtechco.mobileminder.EmergencyNumbers;
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
@@ -98,7 +99,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 		helpButton.setChangeListener(new FieldChangeListener() {
 			public void fieldChanged(Field field, int context) {
-				if (Registration.getEmergNums().size() > 0) {
+				if (EmergencyNumbers.getNumbers().size() > 0) {
 					if (sendHelpMe()) {
 						Dialog.inform(r.getString(i18n_HelpSent));
 					} else {
@@ -180,7 +181,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		};
 
 		// Only display menu if there are emergency numbers
-		if (Registration.getEmergNums().size() > 0) {
+		if (EmergencyNumbers.getNumbers().size() > 0) {
 			menu.add(helpMenu);
 		}
 
@@ -190,7 +191,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private boolean sendHelpMe() {
 		String mapLocation = "http://www.mobileminder.net/findme.php?"
 				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
-		Vector emergNums = Registration.getEmergNums();
+		Vector emergNums = EmergencyNumbers.getNumbers();
 		for (Enumeration e = emergNums.elements(); e.hasMoreElements();) {
 			try {
 				((ToolsBB) ToolsBB.getInstance()).sendSMS(

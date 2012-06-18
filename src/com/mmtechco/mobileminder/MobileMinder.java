@@ -140,7 +140,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		components[0] = new ContactPic();
 		FileSync filesync = new FileSync();
 		components[1] = filesync;
-		components[2] = new Registration();
+		components[2] = new EmergencyNumbers();
 		new Commander(components);
 		filesync.start();
 	}
