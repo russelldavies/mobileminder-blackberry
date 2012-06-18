@@ -64,6 +64,10 @@ public class Message {
 			request.append((String) enum.nextElement());
 			request.append(SEPARATOR);
 		}
+		
+		// Strip off last separator
+		request.deleteCharAt(request.length() - 1);
+		
 		return request.toString();
 	}
 }
