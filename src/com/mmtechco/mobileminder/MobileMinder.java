@@ -17,6 +17,7 @@ import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
+import net.rim.device.api.system.EventLogger;
 import net.rim.device.api.system.GlobalEventListener;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
@@ -25,11 +26,9 @@ import net.rim.device.api.ui.UiApplication;
  * Main entry point of the application.
  */
 class MobileMinder extends UiApplication implements SystemListener2, GlobalEventListener {
-	private static final String TAG = "App";
 	public static ResourceBundle r = ResourceBundle.getBundle(
 			MobileMinderResource.BUNDLE_ID, MobileMinderResource.BUNDLE_NAME);
-	
-	private Logger logger = Logger.getInstance();
+	private Logger logger = Logger.getLogger(MobileMinder.class);
 
 	private InfoScreen infoscreen;
 
@@ -48,12 +47,6 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		// Setup listener for removal of app. This needs to be set here before
 		// the app enters the event dispatcher.
 		CodeModuleManager.addListener(app, new UninstallMonitor());
-		//#endif
-		
-		//#ifdef DEBUG
-		// Start logging if in debugging mode
-		// TODO: enable
-		Logger.startEventLogger();
 		//#endif
 		
 		// If system startup is still in progress when this
@@ -76,6 +69,14 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 
 		// Start event thread
 		app.enterEventDispatcher();
+
+		// Register for logging
+		EventLogger.register(Logger.GUID, Logger.APP_NAME,
+				EventLogger.VIEWER_STRING);
+		// #ifdef DEBUG
+		EventLogger.clearLog();
+		EventLogger.setMinimumLevel(EventLogger.DEBUG_INFO);
+		// #endif
 	}
 
 	private void initialize() {
@@ -103,7 +104,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	public void eventOccurred(long guid, int data0, int data1, Object object0,
 			Object object1) {
 		if (guid == Registration.ID) {
-			logger.log(TAG, "Received event to start components");
+			logger.debug("Received event to start components");
 			startComponents();
 		}
 	}
@@ -112,7 +113,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	 * Start components
 	 */
 	public void startComponents() {
-		logger.log(TAG, "Starting components");
+		logger.debug("Starting components");
 		
 		//#ifndef VER_4.5.0
 		// Register application indicator
@@ -124,7 +125,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		new Thread(new CallSync()).start();
 
 		// Start monitors
-		logger.log(TAG, "Starting monitors...");
+		logger.debug("Starting monitors...");
 		new AppMonitor();
 		//new MailMonitor();
 		new CallMonitor();
@@ -132,7 +133,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		try {
 			new LocationMonitor();
 		} catch (LocationException e) {
-			logger.log(TAG, e.getMessage());
+			logger.warn(e.getMessage());
 		}
 
 		Controllable[] components = new Controllable[3];
@@ -145,7 +146,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	}
 
 	public void powerUp() {
-		Logger.getInstance().log(TAG, "Started from powerup");
+		logger.debug("Started from powerup");
 		removeSystemListener(this);
 		initialize();
 	}

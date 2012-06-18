@@ -28,10 +28,7 @@ import com.mmtechco.util.ToolsBB;
  * Monitors and registers location based events.
  */
 public class LocationMonitor implements LocationListener {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(LocationMonitor.class);
-
-	private Logger logger = Logger.getInstance();
+	private static Logger logger = Logger.getLogger(LocationMonitor.class);
 
 	// Represents the period of the position query, in seconds
 	private static int interval = 120;
@@ -54,11 +51,10 @@ public class LocationMonitor implements LocationListener {
 		//#endif
 			// Attempt to start the listening thread
 			if (startLocationUpdate()) {
-				logger.log(TAG,
-						"Location status: " + locationProvider.getState());
+				logger.info("Location status: " + locationProvider.getState());
 			}
 		} else {
-			logger.log(TAG, "Could not start location services");
+			logger.info("Could not start location services");
 			return;
 		}
 
@@ -105,10 +101,10 @@ public class LocationMonitor implements LocationListener {
 				locationProvider.setLocationListener(this, interval, -1, -1);
 				started = true;
 			} else {
-				logger.log(TAG, "Failed to obtain a location provider.");
+				logger.warn("Failed to obtain a location provider.");
 			}
 		} catch (final LocationException le) {
-			logger.log(TAG, "Failed to instantiate LocationProvider object:"
+			logger.warn("Failed to instantiate LocationProvider object:"
 					+ le.toString());
 			ActivityLog.addMessage(new ErrorMessage(le));
 		}
@@ -135,7 +131,7 @@ public class LocationMonitor implements LocationListener {
 	}
 
 	public void providerStateChanged(LocationProvider provider, int newState) {
-		logger.log(TAG, "GPS Provider changed");
+		logger.debug("GPS Provider changed");
 		if (newState == LocationProvider.TEMPORARILY_UNAVAILABLE) {
 			provider.reset();
 		}

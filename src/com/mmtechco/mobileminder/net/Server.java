@@ -25,15 +25,14 @@ import rimx.network.URLFactory;
 //#endif
 
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
 
 public class Server {
-	private static final String TAG = ToolsBB.getSimpleClassName(Server.class);
-
 	private static final String URL = "https://www.mobileminder.net/WebService.php?";
+	
+	private static Logger logger = Logger.getLogger(Server.class);
 
 	public static Response get(String queryString) throws IOException {
-		Logger.log(TAG, "GET query string: " + queryString);
+		logger.debug("GET query string: " + queryString);
 		
 		// Setup connection and HTTP headers
 		HttpConnection connection = setupConnection(URL + queryString);
@@ -44,7 +43,7 @@ public class Server {
 	}
 
 	public static Response post(String queryString, Hashtable keyvalPairs) throws IOException {
-		Logger.log(TAG, "POST data: " + queryString);
+		logger.debug("POST data: " + queryString);
 		
 		// Setup connection and HTTP headers
 		HttpConnection connection = setupConnection(URL + queryString);
@@ -75,7 +74,7 @@ public class Server {
 
 	public static Response postMultiPart(String queryString,
 			FileConnection file, String controlName) throws IOException {
-		Logger.log(TAG, "POST multipart query string: " + queryString);
+		logger.debug("POST multipart query string: " + queryString);
 		
 		// Setup connection and HTTP headers
 		HttpConnection connection = setupConnection(URL + queryString);
@@ -159,7 +158,7 @@ public class Server {
 		String url = "http://www.msftncsi.com/ncsi.txt";
 		String expectedResponse = "Microsoft NCSI";
 		
-		Logger.log(TAG, "Checking connectivity");
+		logger.debug("Checking connectivity");
 		
 		try {
 			HttpConnection connection = setupConnection(url);
@@ -174,7 +173,7 @@ public class Server {
 				return expectedResponse.equals(new String(reply));
 			}
 		} catch (Exception e) {
-			Logger.log(TAG, "Connectivity test failed");
+			logger.warn("Connectivity test failed");
 		}
 		return false;
 	}

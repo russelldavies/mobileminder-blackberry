@@ -67,7 +67,7 @@ public class ToolsBB extends Tools {
 		return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(date));
 	}
 
-	public long getDate(String date) throws Exception {
+	public long getDate(String date) throws RuntimeException {
 		date = date.trim();
 		if (!(date.equals("0") || date.equals(""))) {
 			// Yes this is horrible but so is RIM's SimpleDateFormat
@@ -217,7 +217,7 @@ public class ToolsBB extends Tools {
 			msg.setSubject("Mobile Minder Registration Info");
 			inbox.appendMessage(msg);
 		} catch (MessagingException e) {
-			logger.log(TAG, "Could not add message to inbox");
+			Logger.getLogger(getClass()).info("Could not add message to inbox");
 		}
 	}
 

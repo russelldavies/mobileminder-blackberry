@@ -8,14 +8,11 @@ import javax.microedition.pim.PIM;
 import javax.microedition.pim.PIMException;
 
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
 
 import net.rim.blackberry.api.pdap.BlackBerryContact;
 
 public class ContactsReader {
-	private static final String TAG = ToolsBB.getSimpleClassName(ContactsReader.class);
-	
-	Logger logger = Logger.getInstance();
+	private static Logger logger = Logger.getLogger(ContactsReader.class);
 
 	public ContactsReader() throws PIMException {
 		// Create list of contact
@@ -38,7 +35,7 @@ public class ContactsReader {
 
 		// Get an array of all populated contact fields.
 		int fieldsWithData[] = bbContact.getFields();
-		logger.log(TAG, String.valueOf(fieldsWithData.length));
+		logger.debug(String.valueOf(fieldsWithData.length));
 	}
 
 	// Convert the list of contacts from an Enumeration to a Vector

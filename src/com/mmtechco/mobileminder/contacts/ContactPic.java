@@ -32,9 +32,7 @@ import com.mmtechco.util.ToolsBB;
  * specified phone number that is sent in a command.
  */
 public class ContactPic implements Controllable {
-	public static final String TAG = ToolsBB
-			.getSimpleClassName(ContactPic.class);
-
+	private static Logger logger = Logger.getLogger(ContactPic.class);
 	private MMTools tools = ToolsBB.getInstance();
 
 	/**
@@ -60,66 +58,55 @@ public class ContactPic implements Controllable {
 					BlackBerryContact.TEL);
 
 			while (contacts.hasMoreElements()) {
-				Logger.log(TAG, "ContactPic::enum not empty");
+				logger.debug("ContactPic::enum not empty");
 
 				BlackBerryContact contact = (BlackBerryContact) contacts
 						.nextElement();
 				// byte[] byteStream = c.getBinary(BlackBerryContact.PHOTO,
 				// BlackBerryContact.ATTR_NONE);
-				Logger.log(TAG, "Counting number of contact photos");
+				logger.debug("Counting number of contact photos");
 				if (contact.countValues(BlackBerryContact.PHOTO) > 0) {
-					Logger.log(TAG, "ContactPic amount > 0");
+					logger.debug("ContactPic amount > 0");
 					byte[] photoEncoded = contact.getBinary(
 							BlackBerryContact.PHOTO, 0);
-					Logger.log(TAG, "Decoding image...");
+					logger.debug("Decoding image...");
 					byte[] photoDecoded = Base64InputStream.decode(
 							photoEncoded, 0, photoEncoded.length);
-					Logger.log(TAG, "Creating pic to upload...");
+					logger.debug("Creating pic to upload...");
 					EncodedImage contactPic = EncodedImage.createEncodedImage(
 							photoDecoded, 0, photoDecoded.length);
-					Logger.log(TAG, "Getting pic type");
+					logger.debug("Getting pic type");
 					String picType = String.valueOf(contactPic.getImageType());
 
-					Logger.log(TAG,
-							"Setting photo in ContactPhotoContainer object...");
+					logger.debug("Setting photo in ContactPhotoContainer object...");
 					photoObject.setPhoto(byteArrayToHexString(photoDecoded));
-					Logger.log(TAG,
-							"Setting photo type in ContactPhotoContainer object...");
+					logger.debug("Setting photo type in ContactPhotoContainer object...");
 					photoObject.setPhotoType(getFileType(picType));
-					Logger.log(TAG, "FileType=:" + photoObject.photoType);
+					logger.debug("FileType=:" + photoObject.photoType);
 				}
 				if (contact.countValues(BlackBerryContact.EMAIL) > 0) {
-					Logger.log(TAG,
-							"Setting email in ContactPhotoContainer object...");
+					logger.debug("Setting email in ContactPhotoContainer object...");
 					photoObject.setEmail(contact.getString(
 							BlackBerryContact.EMAIL, 0));
-					Logger.log(TAG, "Email=:" + photoObject.email);
+					logger.debug("Email=:" + photoObject.email);
 				}
 				// get the last line of the hex string
 				int length = photoObject.photoStream.length();
-				Logger.log(
-						TAG,
-						"Last values = Hex:"
-								+ photoObject.photoStream.substring(
-										(length - 100), length) + ":");
+				logger.debug("Last values = Hex:" + photoObject.photoStream.substring( (length - 100), length) + ":");
 
 				// get hex input stream string split into 100 character pieces
 				int len = photoObject.photoStream.length();
 				int count = 0, num = 100;
 				while (count < len) {
 					if (count == num) {
-						Logger.log(
-								TAG,
-								"Hex:"
-										+ photoObject.photoStream.substring(
-												(count - 100), count) + ":");
+						logger.debug("Hex:" + photoObject.photoStream.substring( (count - 100), count) + ":");
 						num += 100;
 					}
 					count++;
 				}
 			}
 		} catch (Exception e) {
-			Logger.log(TAG, e.getMessage());
+			logger.warn(e.getMessage());
 		}
 		return photoObject;
 	}
@@ -170,17 +157,17 @@ public class ContactPic implements Controllable {
 	}
 
 	public boolean processCommand(String[] inputArgs) {
-		Logger.log(TAG, "Processing Contact Photo Command...");
+		logger.debug("Processing Contact Photo Command...");
 
 		boolean complete = false;
 
 		// check for valid command message
 		if (true == tools.containsOnlyNumbers(inputArgs[2])) {
-			Logger.log(TAG, "args[0] :" + inputArgs[0]);
+			logger.debug("args[0] :" + inputArgs[0]);
 			if (inputArgs[0].equalsIgnoreCase("pic")) {
 				if (inputArgs[1].equalsIgnoreCase("call")) {
-					Logger.log(TAG, "args[1] :" + inputArgs[1]);
-					Logger.log(TAG, "args[2] :" + inputArgs[2]);
+					logger.debug("args[1] :" + inputArgs[1]);
+					logger.debug("args[2] :" + inputArgs[2]);
 
 					String contactNumber = inputArgs[2];
 
@@ -192,10 +179,10 @@ public class ContactPic implements Controllable {
 								photoPackage.photoType, contactNumber,
 								photoPackage.email);
 
-						Logger.log(TAG, "ADDING CONTACT PIC DATA");
+						logger.debug("ADDING CONTACT PIC DATA");
 
 						// send picture message
-						Logger.log(TAG, "Sending Contact Photo Command...");
+						logger.debug("Sending Contact Photo Command...");
 						Hashtable keyvalPairs = new Hashtable();
 						CRC32 crc = new CRC32();
 						crc.update(photoPackage.photoStream.getBytes());
@@ -210,8 +197,7 @@ public class ContactPic implements Controllable {
 								complete = true;
 							}
 						} catch (IOException e) {
-							Logger.log(TAG,
-									"Connection problem: " + e.getMessage());
+							logger.warn("Connection problem: " + e.getMessage());
 						} catch (ParseException e) {
 							ActivityLog.addMessage(new ErrorMessage(e));
 						}

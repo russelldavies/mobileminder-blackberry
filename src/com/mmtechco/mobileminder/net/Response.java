@@ -12,7 +12,7 @@ import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpProtocolConstants;
 
 public class Response {
-	private final static String TAG = Response.class.getName();
+	private static Logger logger = Logger.getLogger(Response.class);
 	
 	int responseCode;
 	String responseMessage;
@@ -41,13 +41,13 @@ public class Response {
 			content = new String(reply);
 			input.close();
 		} catch (IOException e) {
-			Logger.log(TAG, e.getMessage());
+			logger.error(e.getMessage());
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (IOException e) {
-					Logger.log(TAG, "Could not close connection");
+					logger.error("Could not close connection");
 				}
 			}
 		}

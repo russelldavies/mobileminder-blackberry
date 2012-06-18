@@ -17,6 +17,10 @@ public class ErrorMessage extends Message {
 	 * </ul>
 	 */
 	public ErrorMessage(Exception e) {
+		this(null, e);
+	}
+
+	public ErrorMessage(String message, Exception e) {
 		super(Message.ERROR, new String[] {
 				ToolsBB.getInstance().getDate(),
 				e.getClass().getName(),
@@ -26,7 +30,11 @@ public class ErrorMessage extends Message {
 				String.valueOf(ToolsBB.getInstance().getUptimeInSec())
 		});
 		
-		Logger.log(e.getClass().getName(), e.getMessage());
+		if (message == null) {
+			Logger.getLogger(e.getClass()).error(e.getMessage());
+		} else {
+			Logger.getLogger(e.getClass()).error(message + ": " + e.getMessage());
+		}
 		
 		//#ifdef DEBUG
 		e.printStackTrace();

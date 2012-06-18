@@ -16,16 +16,15 @@ import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
 
 public class ActivityLog {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(ActivityLog.class);
 	public static final long ID = StringUtilities
 			.stringHashToLong(ActivityLog.class.getName());
 
 	private static PersistentObject store;
 	private static ContentProtectedVector log;
+	
+	private static Logger logger = Logger.getLogger(ActivityLog.class);
 
 	static {
 		store = PersistentStore.getPersistentObject(ID);
@@ -57,7 +56,7 @@ public class ActivityLog {
 		try {
 			msg = (String) log.firstElement();
 		} catch (NoSuchElementException e) {
-			Logger.log(TAG, e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return msg;
 	}
@@ -96,7 +95,7 @@ public class ActivityLog {
 					}
 					commit();
 				} catch (IOException e) {
-					Logger.log(TAG, "Connection problem: " + e.getMessage());
+					logger.warn("Connection problem: " + e.getMessage());
 				} catch (ParseException e) {
 					ActivityLog.addMessage(new ErrorMessage(e));
 				}

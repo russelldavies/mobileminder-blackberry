@@ -34,8 +34,7 @@ import com.mmtechco.util.ToolsBB;
  * Checks the registration stage that currently the device is in.
  */
 public class Registration implements Controllable, MobileMinderResource {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(Registration.class);
+	private static Logger logger = Logger.getLogger(Registration.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
 	public static final long ID = StringUtilities
 			.stringHashToLong(Registration.class.getName());
@@ -55,7 +54,7 @@ public class Registration implements Controllable, MobileMinderResource {
 	private static Vector observers = new Vector();
 
 	public static void checkStatus() {
-		Logger.log(TAG, "Checking registration status");
+		logger.debug("Checking registration status");
 
 		// Read details from storage to have something to display in case there
 		// is no connectivity
@@ -63,7 +62,7 @@ public class Registration implements Controllable, MobileMinderResource {
 
 		try {
 			// Contact server and get new values, if any, otherwise sleep
-			Logger.log(TAG, "Requesting reg details from server");
+			logger.debug("Requesting reg details from server");
 
 			Response response = Server.get(new RegistrationMessage(stage)
 					.toString());
@@ -80,15 +79,15 @@ public class Registration implements Controllable, MobileMinderResource {
 
 			// Schedule a registration check based on stage
 			if (stage < 2) {
-				Logger.log(TAG, "Scheduling short run");
+				logger.debug("Scheduling short run");
 				scheduleRun(intervalShort);
 			} else {
 				startComponents();
-				Logger.log(TAG, "Scheduling long run");
+				logger.debug("Scheduling long run");
 				scheduleRun(intervalLong);
 			}
 		} catch (IOException e) {
-			Logger.log(TAG, "Connection problem: " + e.getMessage());
+			logger.warn("Connection problem: " + e.getMessage());
 			scheduleRun(intervalShort);
 		} catch (ParseException e) {
 			ActivityLog.addMessage(new ErrorMessage(e));
@@ -111,7 +110,7 @@ public class Registration implements Controllable, MobileMinderResource {
 		synchronized (regData) {
 			Hashtable regTable = (Hashtable) regData.getContents();
 			if (regTable == null) {
-				Logger.log(TAG, "Populating with default values");
+				logger.debug("Populating with default values");
 				// Populate with default values
 				regTable = new Hashtable();
 				regTable.put(KEY_STAGE, "0");
@@ -122,7 +121,7 @@ public class Registration implements Controllable, MobileMinderResource {
 				regData.setContents(regTable);
 				regData.commit();
 			} else {
-				Logger.log(TAG, "Reading details from storage");
+				logger.debug("Reading details from storage");
 				// Read values from storage
 				stage = Integer.parseInt((String) regTable.get(KEY_STAGE));
 				id = (String) regTable.get(KEY_ID);
@@ -142,7 +141,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			regData.setContents(regTable);
 			regData.commit();
 		}
-		Logger.log(TAG, "Stored details");
+		logger.debug("Stored details");
 	}
 
 	private static void startComponents() {
@@ -151,9 +150,9 @@ public class Registration implements Controllable, MobileMinderResource {
 		// static class variables properly
 		Boolean started = (Boolean) RuntimeStore.getRuntimeStore().get(ID);
 		if (started == null || !started.booleanValue()) {
-			Logger.log(TAG, "Components not started");
+			logger.debug("Components not started");
 			if (ApplicationManager.getApplicationManager().postGlobalEvent(ID)) {
-				Logger.log(TAG, "Fired event to start components");
+				logger.debug("Fired event to start components");
 				RuntimeStore.getRuntimeStore().put(ID, new Boolean(true));
 			}
 		}
@@ -176,7 +175,7 @@ public class Registration implements Controllable, MobileMinderResource {
 			status = r.getString(i18n_RegActive);
 			break;
 		}
-		Logger.log(TAG, "Update status: " + stage + ";" + id + ";" + status);
+		logger.debug("Update status: " + stage + ";" + id + ";" + status);
 
 		// Tell screens to update themselves
 		notifyObservers();
@@ -223,14 +222,14 @@ public class Registration implements Controllable, MobileMinderResource {
 	}
 
 	public boolean processCommand(String[] inputArgs) {
-		Logger.log(TAG, "Processing Owner Number Command...");
+		logger.debug("Processing Owner Number Command...");
 		boolean complete = false;
 		if (inputArgs[0].equalsIgnoreCase("lost")
 				&& inputArgs[1].equalsIgnoreCase("number")) {
 
-			Logger.log(TAG, "args[0] :" + inputArgs[0]);
-			Logger.log(TAG, "args[1] :" + inputArgs[1]);
-			Logger.log(TAG, "args[2] :" + inputArgs[2]);
+			logger.debug("args[0] :" + inputArgs[0]);
+			logger.debug("args[1] :" + inputArgs[1]);
+			logger.debug("args[2] :" + inputArgs[2]);
 			try {
 				String[] nums = ToolsBB.getInstance().split(inputArgs[2], "&");
 				for (int i = 0; i < nums.length; i++) {

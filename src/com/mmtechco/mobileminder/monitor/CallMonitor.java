@@ -16,18 +16,17 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
  * Monitors and registers call based events.
  */
 public class CallMonitor extends AbstractPhoneListener {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(CallMonitor.class);
+	private static Logger logger = Logger.getLogger(CallMonitor.class);
 
 	private CallMessage callMessage;
 
 	public CallMonitor() {
 		Phone.addPhoneListener(this);
-		Logger.log(TAG, "Started");
+		logger.debug("Started");
 	}
 
 	public void callAnswered(int callId) {
-		Logger.log(TAG, "Call answered");
+		logger.debug("Call answered");
 
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
@@ -41,7 +40,7 @@ public class CallMonitor extends AbstractPhoneListener {
 	}
 
 	public void callInitiated(int callId) {
-		Logger.log(TAG, "Call initiated");
+		logger.debug("Call initiated");
 		
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
@@ -55,19 +54,19 @@ public class CallMonitor extends AbstractPhoneListener {
 	}
 
 	public void callEndedByUser(int callId) {
-		Logger.log(TAG, "Call ended by user");
+		logger.debug("Call ended by user");
 
 		callMessage.callEnded(CallMessage.FINISHED);
 		ActivityLog.addMessage(callMessage);
-		Logger.log(TAG, "Call message added to log");
+		logger.debug("Call message added to log");
 	}
 
 	public void callDisconnected(int callId) {
-		Logger.log(TAG, "Call disconnected");
+		logger.debug("Call disconnected");
 
 		callMessage.callEnded(CallMessage.DROPPED);
 		ActivityLog.addMessage(callMessage);
-		Logger.log(TAG, "Call message added to log");
+		logger.debug("Call message added to log");
 	}
 
 	public static class CallMessage extends Message {

@@ -5,19 +5,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import com.mmtechco.mobileminder.MobileMinderResource;
-import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.monitor.LocationMonitor;
-import com.mmtechco.mobileminder.prototypes.ObserverScreen;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
-
-//#ifndef VER_4.5.0
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
-import net.rim.device.api.ui.decor.BackgroundFactory;
-//#endif
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EncodedImage;
@@ -39,14 +29,19 @@ import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+import net.rim.device.api.ui.decor.BackgroundFactory;
+
+import com.mmtechco.mobileminder.MobileMinderResource;
+import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.monitor.LocationMonitor;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.prototypes.ObserverScreen;
+import com.mmtechco.util.ToolsBB;
 
 public class InfoScreen extends MainScreen implements ObserverScreen,
 		MobileMinderResource {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(InfoScreen.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
-
-	private static Logger logger = Logger.getInstance();
 
 	// GUI widgets
 	private TextField statusTextField = new TextField(Field.NON_FOCUSABLE);
@@ -215,8 +210,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					.getInstance();
 			ApplicationIndicator indicator = reg.register(notifyIcon, false,
 					true);
-		} catch (Exception e) {
-			logger.log(TAG, "Could not register notification icon");
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage("Could not register notification icon", e));
 		}
 	}
 
@@ -225,8 +220,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
 					.getInstance();
 			reg.unregister();
-		} catch (Exception e) {
-			logger.log(TAG, "Could not unregister notification icon");
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage("Could not unregister notification icon", e));
 		}
 	}
 
@@ -236,8 +231,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					.getInstance();
 			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
 			appIndicator.setValue(value);
-		} catch (Exception e) {
-			logger.log(TAG, "Could not update notification icon value");
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon value", e));
 		}
 	}
 
@@ -247,8 +242,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					.getInstance();
 			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
 			appIndicator.setIcon(icon);
-		} catch (Exception e) {
-			logger.log(TAG, "Could not update notification icon");
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon", e));
 		}
 	}
 	//#endif
@@ -297,11 +292,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		}
 
 		protected void fieldChangeNotify(int context) {
-			try {
-				this.getChangeListener().fieldChanged(this, context);
-			} catch (Exception e) {
-				logger.log(TAG, e.getMessage());
-			}
+			this.getChangeListener().fieldChanged(this, context);
 		}
 
 		// Button is rounded so fill in edges with colors to match screen

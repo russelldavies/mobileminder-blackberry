@@ -12,6 +12,7 @@ import com.mmtechco.util.Logger;
 
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.EventLogger;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.system.RuntimeStore;
@@ -20,6 +21,7 @@ import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
@@ -106,6 +108,16 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			}
 
 		};
+		
+		MenuItem eventloggerMenu = new MenuItem("Event Logger", 0x100040, 3) {
+			public void run() {
+				if (!EventLogger.startEventLogViewer()) {
+					Dialog.alert("Sorry, couldn't start Event Logger. Don't know why...");
+				}
+			}
+
+		};
+		
 		menu.add(clearMenu);
 		menu.add(delRegMenu);
 		menu.add(delStoreMenu);

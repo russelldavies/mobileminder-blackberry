@@ -19,8 +19,7 @@ import com.mmtechco.util.ToolsBB;
  * Monitors and registers application based events.
  */
 public class AppMonitor extends Thread {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(AppMonitor.class);
+	private static Logger logger = Logger.getLogger(AppMonitor.class);
 
 	// Interval that polling is done, in milliseconds
 	private static int interval = 1 * 1000;
@@ -36,7 +35,7 @@ public class AppMonitor extends Thread {
 			if (id != foregroundProcessId) {
 				foregroundProcessId = id;
 				getAppNameByProcessId(foregroundProcessId);
-				Logger.log(TAG, "Current running app name is: " + name);
+				logger.debug("Current running app name is: " + name);
 				ActivityLog.addMessage(new AppMessage(name, moduleName));
 
 				// If system browser is open, close it and start custom browser

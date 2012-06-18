@@ -8,13 +8,14 @@ import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.MessageListener;
 import javax.wireless.messaging.TextMessage;
 
+import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
+import net.rim.blackberry.api.sms.OutboundMessageListener;
+
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
-
-import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
-import net.rim.blackberry.api.sms.OutboundMessageListener;
 
 /**
  * 
@@ -22,10 +23,8 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
  * 
  */
 public class SMSMonitor implements OutboundMessageListener, MessageListener {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(SMSMonitor.class);
-
-	private static Logger logger = Logger.getInstance();
+	private static Logger logger = Logger.getLogger(SMSMonitor.class);
+	
 	private static MessageConnection receiver;
 	private MMTools tools = ToolsBB.getInstance();
 
@@ -37,7 +36,7 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	 *            log of actions
 	 */
 	public SMSMonitor() {
-		logger.log(TAG, "Started");
+		logger.debug("Started");
 		
 		try {
 			receiver = (MessageConnection)Connector.open("sms://:0");
@@ -45,7 +44,7 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 				receiver.setMessageListener(this);
 			}
 		} catch (IOException e) {
-			logger.log(TAG, e.getMessage());
+			ActivityLog.addMessage(new ErrorMessage(e));
 		}
 	}
 
@@ -61,32 +60,32 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	 */
 	private void addToLog(String inputStatus, String contactNumber,
 			String date, String messageBody) {
-		logger.log(TAG, "Adding message to log");
+		logger.debug("Adding message to log");
 
 		boolean isOutgoing = inputStatus.equalsIgnoreCase("Outgoing Message") ? true
 				: false;
 		boolean delivered = false;
 
-		logger.log(TAG, "inputStatus is: " + inputStatus);
-		logger.log(TAG, "SMS Address: " + contactNumber);
-		logger.log(TAG, "Direction is: "
+		logger.debug("inputStatus is: " + inputStatus);
+		logger.debug("SMS Address: " + contactNumber);
+		logger.debug("Direction is: "
 				+ (isOutgoing ? "Outgoing" : "Incoming"));
-		logger.log(TAG, "Date: " + date);
-		logger.log(TAG, "SMS Body: " + messageBody);
+		logger.debug("Date: " + date);
+		logger.debug("SMS Body: " + messageBody);
 
 		// set contact name seperately
 		String contactName = new PhoneCallLogID(contactNumber).getName();
 		contactName= (null == contactName) ? "" : contactName;
 		
 
-		logger.log(TAG, "Adding message to log...");
+		logger.debug("Adding message to log...");
 		ActivityLog.addMessage(new SMSMessage(contactNumber, contactName,
 				isOutgoing, delivered, date, messageBody));
-		logger.log(TAG, "Message added to log...");
+		logger.debug("Message added to log...");
 	}
 
 	public void notifyOutgoingMessage(Message message) {
-		logger.log(TAG, "SMS message outgoing");
+		logger.debug("SMS message outgoing");
 
 		String messageBody = "";
 		// If "message" is an object of type "TextMessage"
@@ -103,13 +102,13 @@ public class SMSMonitor implements OutboundMessageListener, MessageListener {
 	// the Network menu, this way you will receive the text you just sent, and
 	// can test notifyIncomingMessage
 	public void notifyIncomingMessage(MessageConnection conn) {
-		logger.log(TAG, "SMS message incoming");
+		logger.debug("SMS message incoming");
 
 		TextMessage message = null;
 		try {
 			message = (TextMessage) conn.receive();
 		} catch (Exception e) {
-			logger.log(TAG, "Could not read SMS");
+			ActivityLog.addMessage(new ErrorMessage(e));
 		}
 		String sender = message.getAddress();
 		// Strip off 'sms://'

@@ -27,12 +27,13 @@ import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
 public class FileLog {
-	private static final String TAG = ToolsBB.getSimpleClassName(FileLog.class);
 	public static final long ID = StringUtilities
 			.stringHashToLong(FileLog.class.getName());
 
 	private static PersistentObject store;
 	private static ContentProtectedVector files;
+	
+	private static Logger logger = Logger.getLogger(FileLog.class);
 
 	public static boolean mobileSync = false;
 
@@ -74,11 +75,11 @@ public class FileLog {
 
 		// Check if file exists in db
 		if (exists(path)) {
-			Logger.log(TAG, "File already in DB: " + path);
+			logger.debug("File already in DB: " + path);
 			return;
 		}
-		Logger.log(TAG, "Adding file to DB: " + path);
-		Logger.log(TAG, "Number of files in log: " + files.size());
+		logger.debug("Adding file to DB: " + path);
+		logger.debug("Number of files in log: " + files.size());
 
 		FileConnection fc = null;
 		try {
@@ -92,14 +93,14 @@ public class FileLog {
 				commit();
 			}
 		} catch (IOException e) {
-			Logger.log(TAG, e.toString());
+			ActivityLog.addMessage(new ErrorMessage(e));
 		} finally {
 			try {
 				if (fc != null) {
 					fc.close();
 				}
 			} catch (Exception e) {
-				Logger.log(TAG, e.toString());
+				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}
@@ -142,7 +143,7 @@ public class FileLog {
 			throw new IllegalArgumentException();
 		}
 
-		Logger.log(TAG, newPath + " has been renamed from: " + oldPath);
+		logger.debug(newPath + " has been renamed from: " + oldPath);
 
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
@@ -194,14 +195,14 @@ public class FileLog {
 					ObjectGroup.createGroup(fileholder);
 					commit();
 				} catch (IOException e) {
-					Logger.log(TAG, e.toString());
+					ActivityLog.addMessage(new ErrorMessage(e));
 				} finally {
 					try {
 						if (fc != null) {
 							fc.close();
 						}
 					} catch (Exception e) {
-						Logger.log(TAG, e.toString());
+						ActivityLog.addMessage(new ErrorMessage(e));
 					}
 				}
 				break;
@@ -248,8 +249,7 @@ public class FileLog {
 								ObjectGroup.createGroup(fileholder);
 							}
 						} catch (IOException e) {
-							Logger.log(TAG,
-									"Connection problem: " + e.getMessage());
+							logger.warn("Connection problem: " + e.getMessage());
 						} catch (ParseException e) {
 							ActivityLog.addMessage(new ErrorMessage(e));
 						}
@@ -320,14 +320,14 @@ public class FileLog {
 						.substring(1);
 			}
 		} catch (Exception e) {
-			Logger.log(TAG, e.toString());
+			ActivityLog.addMessage(new ErrorMessage(e));
 		} finally {
 			try {
 				if (dis != null) {
 					dis.close();
 				}
 			} catch (IOException e) {
-				Logger.log(TAG, e.toString());
+				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 		return md5;

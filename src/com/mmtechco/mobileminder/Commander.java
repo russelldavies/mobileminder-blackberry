@@ -21,15 +21,13 @@ import com.mmtechco.util.ToolsBB;
  * responsible for processing responses.
  */
 public class Commander {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(Commander.class);
-
 	private static final int time = 1000 * 60 * 5; // 5 mins
 	private static final int noCommandIndex = 0;
 
 	private static Controllable components[];
 
 	private static MMTools tools = ToolsBB.getInstance();
+	private static Logger logger = Logger.getLogger(Commander.class);
 
 	public Commander(Controllable[] components) {
 		Commander.components = components;
@@ -48,7 +46,7 @@ public class Commander {
 					Reply.Command reply = new Reply.Command(response.getContent());
 					// No more commands to process
 					if (reply.index == noCommandIndex) {
-						Logger.log(TAG, "No Commands to Process");
+						logger.debug("No Commands to Process");
 						return;
 					}
 
@@ -65,19 +63,18 @@ public class Commander {
 						if (target.processCommand(reply.getArgs())) {
 							// Command executed successfully
 							message.succeeded(true);
-							Logger.log(TAG,
-									"Executed command " + reply.index
+							logger.debug("Executed command " + reply.index
 											+ ": " + reply.getArgs());
 						} else {
 							// Command failed
-							Logger.log(TAG, "Failed to execute command "
+							logger.debug("Failed to execute command "
 									+ reply.index + ": " + reply.getArgs());
 							message.succeeded(false);
 						}
 						Server.get(message.toString());
 					}
 				} catch (IOException e) {
-					Logger.log(TAG, "Connection problem: " + e.getMessage());
+					logger.warn("Connection problem: " + e.getMessage());
 					return;
 				} catch (ParseException e) {
 					ActivityLog.addMessage(new ErrorMessage(e));

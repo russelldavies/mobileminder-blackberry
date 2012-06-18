@@ -1,9 +1,5 @@
 package com.mmtechco.mobileminder.monitor;
 
-import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
-
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
@@ -18,11 +14,14 @@ import net.rim.blackberry.api.mail.event.StoreListener;
 import net.rim.device.api.servicebook.ServiceBook;
 import net.rim.device.api.servicebook.ServiceRecord;
 
-public class MailMonitor implements FolderListener, StoreListener {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(MailMonitor.class);
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.util.Logger;
+import com.mmtechco.util.ToolsBB;
 
-	Logger logger = Logger.getInstance();
+public class MailMonitor implements FolderListener, StoreListener {
+	private static Logger logger = Logger.getLogger(MailMonitor.class);
+	
 	boolean _hasSupportedAttachment = false;
 	boolean _hasUnsupportedAttachment = false;
 
@@ -60,8 +59,7 @@ public class MailMonitor implements FolderListener, StoreListener {
 	public void recurse(Folder folder) {
 		// Add listener if it matches
 		if (folder.getType() == Folder.INBOX || folder.getType() == Folder.SENT) {
-			logger.log(TAG,
-					"Folder matching INBOX found! " + folder.getFullName());
+			logger.debug("Folder matching INBOX found! " + folder.getFullName());
 			folder.addFolderListener(this);
 		}
 		Folder[] farray = folder.list();
@@ -74,7 +72,7 @@ public class MailMonitor implements FolderListener, StoreListener {
 	// Folders and listeners should all be taken care of at this stage
 	// Now we get onto handling the incoming message
 	public void messagesAdded(FolderEvent e) {
-		logger.log(TAG, "Email message "
+		logger.debug("Email message "
 				+ (e.getMessage().isInbound() ? "received" : "sent"));
 		Message emailMessage = e.getMessage();
 
@@ -82,7 +80,7 @@ public class MailMonitor implements FolderListener, StoreListener {
 
 		MailMessage message = null;
 		try {
-			logger.log(TAG, "Setting Message");
+			logger.debug("Setting Message");
 			if (isInbound) {
 				// If it is inbound it should also only have 1 "from",
 				// but maybe other TO or CCs
@@ -139,19 +137,18 @@ public class MailMonitor implements FolderListener, StoreListener {
 						_hasSupportedAttachment);
 			}
 		} catch (MessagingException e1) {
-			logger.log( TAG, e1.getMessage());
-			e1.printStackTrace();
+			ActivityLog.addMessage(new ErrorMessage(e1));
 		}
-		logger.log(TAG, "Adding message to log");
+		logger.debug("Adding message to log");
 		ActivityLog.addMessage(message);
 	}
 
 	public void messagesRemoved(FolderEvent e) {
-		logger.log(TAG, "Messages deleted");
+		logger.debug("Messages deleted");
 	}
 
 	public void batchOperation(StoreEvent e) {
-		logger.log(TAG, "Batch operation");
+		logger.debug("Batch operation");
 	}
 }
 

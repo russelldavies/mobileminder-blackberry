@@ -27,7 +27,7 @@ public interface MMTools {
 	 *             generic exception (instead of ParseException) for BlackBerry
 	 *             compatibility reasons when input date format is not correct.
 	 */
-	public long getDate(String date) throws Exception;
+	public long getDate(String date) throws RuntimeException;
 
 	/**
 	 * Takes an date in epoch and returns it formatted.
