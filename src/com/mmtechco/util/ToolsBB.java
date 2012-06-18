@@ -26,8 +26,7 @@ import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.system.RadioInfo;
 
-import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
-import com.mmtechco.mobileminder.prototypes.MMTools;
+import com.mmtechco.mobileminder.data.FILESYSTEM;
 
 /**
  * Tools which are BlackBerry specific.

@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes;
+package com.mmtechco.mobileminder.command;
 
 public class COMMAND_TARGETS {
 	public static final COMMAND_TARGETS SHOW = new COMMAND_TARGETS("Show");

@@ -9,15 +9,15 @@ import javax.microedition.io.file.FileConnection;
 import net.rim.device.api.io.MIMETypeAssociations;
 import net.rim.device.api.ui.UiApplication;
 
+import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
+import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.data.FILESYSTEM;
 import com.mmtechco.mobileminder.data.FileListener;
 import com.mmtechco.mobileminder.data.FileLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
-import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 /**

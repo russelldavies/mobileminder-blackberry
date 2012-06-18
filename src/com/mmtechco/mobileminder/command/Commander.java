@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder;
+package com.mmtechco.mobileminder.command;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -11,9 +11,8 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.Controllable;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 /**

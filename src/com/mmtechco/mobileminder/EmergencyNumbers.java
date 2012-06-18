@@ -7,10 +7,10 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
+import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
+import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
-import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 

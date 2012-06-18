@@ -13,6 +13,8 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.device.api.io.Base64InputStream;
 import net.rim.device.api.system.EncodedImage;
 
+import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
+import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Message;
@@ -20,8 +22,6 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.util.CRC32;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;

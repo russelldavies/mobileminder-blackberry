@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes;
+package com.mmtechco.util;
 
 public interface MMTools {
 	/**

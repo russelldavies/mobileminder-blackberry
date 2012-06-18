@@ -3,7 +3,6 @@ package com.mmtechco.util;
 import java.util.Date;
 import java.util.Random;
 
-import com.mmtechco.mobileminder.prototypes.MMTools;
 
 /**
  * Cross platform tools that can be used anywhere in the app.

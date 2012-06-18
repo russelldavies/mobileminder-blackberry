@@ -14,8 +14,8 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 /**

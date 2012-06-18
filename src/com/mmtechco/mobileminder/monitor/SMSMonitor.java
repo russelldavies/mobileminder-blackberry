@@ -13,8 +13,8 @@ import net.rim.blackberry.api.sms.OutboundMessageListener;
 
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
-import com.mmtechco.mobileminder.prototypes.MMTools;
 import com.mmtechco.util.Logger;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 public class SMSMonitor implements MessageListener, OutboundMessageListener {

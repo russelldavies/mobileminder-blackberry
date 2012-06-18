@@ -3,9 +3,10 @@ package com.mmtechco.mobileminder;
 
 import javax.microedition.location.LocationException;
 
+import com.mmtechco.mobileminder.command.Commander;
+import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.contacts.ContactPic;
 import com.mmtechco.mobileminder.monitor.*;
-import com.mmtechco.mobileminder.prototypes.Controllable;
 import com.mmtechco.mobileminder.sync.CallSync;
 import com.mmtechco.mobileminder.sync.FileSync;
 //#ifdef DEBUG

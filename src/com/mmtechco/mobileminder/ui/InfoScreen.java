@@ -37,7 +37,6 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.net.ErrorMessage;
-import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.util.ToolsBB;
 
 public class InfoScreen extends MainScreen implements ObserverScreen,

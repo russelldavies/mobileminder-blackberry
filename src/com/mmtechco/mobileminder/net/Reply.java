@@ -1,7 +1,7 @@
 package com.mmtechco.mobileminder.net;
 
-import com.mmtechco.mobileminder.prototypes.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.prototypes.MMTools;
+import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 public abstract class Reply {

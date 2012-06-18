@@ -24,7 +24,7 @@ import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
 import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.ObserverScreen;
+import com.mmtechco.mobileminder.ui.ObserverScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
 
