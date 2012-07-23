@@ -96,6 +96,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				UiApplication.getUiApplication().pushScreen(
 						new RegPopupScreen());
 				PersistentStore.destroyPersistentObject(Registration.ID);
+				RuntimeStore.getRuntimeStore().remove(Registration.ID);
 			}
 		};
 
@@ -107,6 +108,12 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			}
 		};
 		
+		MenuItem emergnumsMenu = new MenuItem("View Emergency Numbers", 0x100040, 3) {
+			public void run() {
+				Dialog.inform(EmergencyNumbers.getNumbers().toString());
+			}
+		};
+		
 		MenuItem eventloggerMenu = new MenuItem("Event Logger", 0x100040, 3) {
 			public void run() {
 				if (!EventLogger.startEventLogViewer()) {
@@ -115,17 +122,11 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			}
 		};
 		
-		MenuItem emergnumsMenu = new MenuItem("View Emergency Numbers", 0x100040, 3) {
-			public void run() {
-				Dialog.inform(EmergencyNumbers.getNumbers().toString());
-			}
-		};
-		
 		menu.add(clearMenu);
 		menu.add(delRegMenu);
 		menu.add(delStoreMenu);
-		menu.add(eventloggerMenu);
 		menu.add(emergnumsMenu);
+		menu.add(eventloggerMenu);
 
 		super.makeMenu(menu, instance);
 	}
