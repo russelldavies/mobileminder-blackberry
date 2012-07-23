@@ -149,6 +149,12 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	public void powerUp() {
 		logger.debug("Started from powerup");
 		removeSystemListener(this);
+		// Wait for 30 seconds so OS network is initialized
+		try {
+			Thread.sleep(30000);
+		} catch (InterruptedException e) {
+			logger.warn(e.getMessage());
+		}
 		initialize();
 	}
 
