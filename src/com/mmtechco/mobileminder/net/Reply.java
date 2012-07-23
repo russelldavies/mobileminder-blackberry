@@ -1,10 +1,12 @@
 package com.mmtechco.mobileminder.net;
 
 import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
+import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 public abstract class Reply {
+	private static Logger logger = Logger.getLogger(Reply.class);
 	private static final MMTools tools = ToolsBB.getInstance();
 
 	String[] fields;
@@ -18,6 +20,8 @@ public abstract class Reply {
 			throw new ParseException("Content is null or empty");
 		}
 		try {
+			logger.debug("Server Reply:" + content);
+
 			this.content = content;
 			fields = tools.split(content, Message.SEPARATOR);
 
