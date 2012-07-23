@@ -34,8 +34,8 @@ import com.mmtechco.util.ToolsBB;
 public class Registration implements MobileMinderResource {
 	private static Logger logger = Logger.getLogger(Registration.class);
 	static ResourceBundle r = ResourceBundle.getBundle(BUNDLE_ID, BUNDLE_NAME);
-	public static final long ID = StringUtilities
-			.stringHashToLong(Registration.class.getName());
+	public static final long ID = StringUtilities .stringHashToLong(Registration.class.getName());
+	private static final long ID_REG = ID + 32L;
 
 	public final static String KEY_STAGE = "registration_stage";
 	public final static String KEY_ID = "registration_id";
@@ -125,6 +125,11 @@ public class Registration implements MobileMinderResource {
 				id = (String) regTable.get(KEY_ID);
 			}
 		}
+		if (RuntimeStore.getRuntimeStore().get(ID_REG) == null) {
+			RuntimeStore.getRuntimeStore().put(ID_REG, id);
+		} else {
+			RuntimeStore.getRuntimeStore().replace(ID_REG, id);
+		}
 	}
 
 	private static void storeDetails() {
@@ -140,7 +145,7 @@ public class Registration implements MobileMinderResource {
 		// Also store id in RuntimeStore so different processes can read it
 		// since the BB class loader doesn't handle static class variables
 		// properly
-		RuntimeStore.getRuntimeStore().put(ID + 32, id);
+		RuntimeStore.getRuntimeStore().replace(ID_REG, id);
 		logger.debug("Stored details");
 	}
 
@@ -201,7 +206,7 @@ public class Registration implements MobileMinderResource {
 	 * @return registration ID string. <strong>"0"</strong> if not available.
 	 */
 	public static String getRegID() {
-		return (String) RuntimeStore.getRuntimeStore().get(ID + 32);
+		return (String) RuntimeStore.getRuntimeStore().get(ID_REG);
 	}
 
 	public static String getStatus() {
