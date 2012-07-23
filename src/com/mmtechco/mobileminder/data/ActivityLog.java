@@ -83,15 +83,12 @@ public class ActivityLog {
 		new Thread() {
 			public void run() {
 				try {
-					for (Enumeration enum = log.elements(); enum
-							.hasMoreElements();) {
-						String msg = (String) enum.nextElement();
-						// response = Server.get((String) enum.nextElement());
-						Response response = Server.get(msg);
-						Reply.Regular reply = new Reply.Regular(
-								response.getContent());
+					for (Enumeration messages = log.elements(); messages.hasMoreElements();) {
+						String message = (String) messages.nextElement();
+						Response response = Server.get(message);
+						Reply.Regular reply = new Reply.Regular(response.getContent());
 						if (!reply.error) {
-							log.removeElement(enum.nextElement());
+							log.removeElement(message);
 						}
 					}
 					commit();
