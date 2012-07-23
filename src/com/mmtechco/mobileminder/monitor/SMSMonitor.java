@@ -97,8 +97,8 @@ class SMSMessage extends com.mmtechco.mobileminder.net.Message {
 	// delivered, String time, String content) {
 	public SMSMessage(String time, String number, String name,
 			boolean outgoing, boolean delivered, String content) {
-		super(com.mmtechco.mobileminder.net.Message.SMS,
-				new String[] { number, name, (outgoing ? "1" : "0"),
-						(delivered ? "1" : "0"), content });
+		super(com.mmtechco.mobileminder.net.Message.SMS, new String[] {
+				ToolsBB.getInstance().getDate(), number, name,
+				(outgoing ? "1" : "0"), (delivered ? "1" : "0"), content });
 	}
 }
