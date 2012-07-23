@@ -41,7 +41,7 @@ public class Commander {
 		public void run() {
 			while (true) {
 				try {
-					Response response = Server.get(new CommandMessage(0).toString());
+					Response response = Server.get(new CommandMessage().toString());
 					Reply.Command reply = new Reply.Command(response.getContent());
 					// No more commands to process
 					if (reply.index == noCommandIndex) {
@@ -99,6 +99,11 @@ public class Commander {
 			super(Message.COMMAND);
 			add(String.valueOf(index));
 			startTime = tools.getDate();
+		}
+		
+		public CommandMessage() {
+			this(0);
+			succeeded(false);
 		}
 
 		public void succeeded(boolean completed) {
