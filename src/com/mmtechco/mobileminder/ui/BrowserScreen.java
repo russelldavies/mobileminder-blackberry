@@ -10,6 +10,7 @@ import org.w3c.dom.Document;
 
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Message;
+import com.mmtechco.util.ToolsBB;
 
 import net.rim.device.api.browser.field.ContentReadEvent;
 import net.rim.device.api.browser.field2.BrowserField;
@@ -248,6 +249,7 @@ class BrowserFieldLoadProgressTracker {
 
 class WebMessage extends Message {
 	private Date startTime;
+	private String url, pageTitle;
 	
 	/**
 	 * Message format:
@@ -260,14 +262,17 @@ class WebMessage extends Message {
 	 */
 	public WebMessage(String url, String pageTitle) {
 		super(Message.WEB_HISTORY);
-		add(url);
-		add(pageTitle);
+		add(ToolsBB.getInstance().getDate());
 		startTime = new Date();
+		this.url = url;
+		this.pageTitle = pageTitle;
 	}
 	
 	public void finished() {
 		int viewTime = (int) (new Date().getTime() - startTime.getTime()) / 1000;
 		add(String.valueOf(viewTime));
+		add(pageTitle);
+		add(url);
 		
 		ActivityLog.addMessage(this);
 	}
