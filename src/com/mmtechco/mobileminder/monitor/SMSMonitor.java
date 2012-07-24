@@ -46,7 +46,7 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 			TextMessage message = (TextMessage) conn.receive();
 			String sender = message.getAddress();
 			// Strip off 'sms://'
-			sender = sender.substring(sender.lastIndexOf('/')) + 1;
+			sender = sender.substring(sender.lastIndexOf('/') + 1);
 			addToLog(false, sender,
 					tools.getDate(message.getTimestamp().getTime()),
 					message.getPayloadText());
@@ -61,7 +61,7 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 		if (message instanceof TextMessage) {
 			String recipient = message.getAddress();
 			// Strip off 'sms://'
-			recipient = recipient.substring(recipient.lastIndexOf('/')) + 1;
+			recipient = recipient.substring(recipient.lastIndexOf('/') + 1);
 			String messageBody = ((TextMessage) message).getPayloadText();
 			addToLog(true, recipient,
 					tools.getDate(message.getTimestamp().getTime()),
