@@ -115,16 +115,16 @@ public class LocationMonitor implements LocationListener {
 		// Polls GPS service based on interval specified in constructor. When
 		// location changes record in activity log.
 		if (location.isValid()) {
-			float speed;
+			float speed = 0;
 			// Check if coordinates have changed
 			if (longitude != location.getQualifiedCoordinates().getLongitude()
 					|| latitude != location.getQualifiedCoordinates()
 							.getLatitude()) {
-				speed = location.getSpeed();
-				longitude = location.getQualifiedCoordinates().getLongitude();
 				latitude = location.getQualifiedCoordinates().getLatitude();
+				longitude = location.getQualifiedCoordinates().getLongitude();
+				speed = location.getSpeed();
 
-				Message locMsg = new LocationMessage(longitude, latitude, speed);
+				Message locMsg = new LocationMessage(latitude, longitude, speed);
 				ActivityLog.addMessage(locMsg);
 			}
 		}
