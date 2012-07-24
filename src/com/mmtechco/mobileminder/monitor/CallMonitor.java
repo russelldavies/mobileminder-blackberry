@@ -34,7 +34,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		String number = Phone.getCall(callId).getDisplayPhoneNumber();
 		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
-		contactName = (contactName == null ? "Unknown" : contactName);
+		contactName = (contactName == null ? "" : contactName);
 		
 		callMessage = new CallMessage(number, contactName, true);
 	}
@@ -48,7 +48,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		String number = Phone.getCall(callId).getDisplayPhoneNumber();
 		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
-		contactName = (contactName == null ? "Unknown" : contactName);
+		contactName = (contactName == null ? "" : contactName);
 		
 		callMessage = new CallMessage(number, contactName, true);
 	}
@@ -107,7 +107,7 @@ public class CallMonitor extends AbstractPhoneListener {
 			super(Message.CALL_SYNC, new String[] {
 					callTimeStamp,
 					number,
-					(contactName == null) ? "Unknown" : contactName,
+					(contactName == null) ? "" : contactName,
 					String.valueOf(callDuration),
 					String.valueOf(status),
 					String.valueOf(OTHER)

@@ -74,7 +74,7 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 
 		// Get contact name if exists
 		String contactName = new PhoneCallLogID(contactNumber).getName();
-		contactName = (null == contactName) ? "Unknown" : contactName;
+		contactName = (null == contactName) ? "" : contactName;
 		
 		boolean delivered = true; // No way to check delivery status
 		ActivityLog.addMessage(new SMSMessage(date, contactNumber, contactName, outgoing, delivered, messageBody));
