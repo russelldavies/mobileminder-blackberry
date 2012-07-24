@@ -1,6 +1,5 @@
 package com.mmtechco.mobileminder.data;
 
-import com.mmtechco.mobileminder.sync.FileSync;
 import com.mmtechco.util.Logger;
 
 import net.rim.device.api.io.file.FileSystemJournal;

@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder;
+package com.mmtechco.mobileminder.command;
 
 import java.util.Vector;
 
@@ -7,8 +7,6 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.util.Logger;
@@ -32,11 +30,6 @@ public class EmergencyNumbers implements Controllable {
 			store.setContents(numbers);
 		}
 		numbers = (ContentProtectedVector) store.getContents();
-	}
-
-	public EmergencyNumbers() {
-		logger.debug("Emergency numbers: " + numbers);
-		// regTable.put(KEY_NUMBERS, emergNums = new Vector());
 	}
 
 	/**
