@@ -1,8 +1,10 @@
 package com.mmtechco.mobileminder.command;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
@@ -23,21 +25,23 @@ public class Commander {
 	private static final int time = 1000 * 60 * 5; // 5 mins
 	private static final int noCommandIndex = 0;
 
-	private static Controllable components[];
+	private static Vector components;
 
 	private static MMTools tools = ToolsBB.getInstance();
 	private static Logger logger = Logger.getLogger(Commander.class);
 
-	public Commander(Controllable[] components) {
-		Commander.components = components;
+	public static void addComponent(Controllable component) {
+		components.addElement(component);
+	}
+	
+	public static void startProcessing() {
 		new Timer().schedule(new CommandTask(), time);
-
 	}
 
 	/**
 	 * Contacts to server and gets reply from server. Process reply if valid.
 	 */
-	private class CommandTask extends TimerTask {
+	private static class CommandTask extends TimerTask {
 		public void run() {
 			while (true) {
 				try {
@@ -51,14 +55,14 @@ public class Commander {
 
 					// There are commands so find appropriate target and process
 					// command
-					for (int i = 0; i < components.length; i++) {
-						Controllable target = components[i];
+					for (Enumeration e = components.elements(); e.hasMoreElements();) {
+						Controllable target = (Controllable) e.nextElement();
+						
 						if (!target.isTarget(reply.getTarget())) {
 							break;
 						}
 
-						CommandMessage message = new CommandMessage(
-								reply.index);
+						CommandMessage message = new CommandMessage( reply.index);
 						if (target.processCommand(reply.getArgs())) {
 							// Command executed successfully
 							message.succeeded(true);
@@ -83,7 +87,7 @@ public class Commander {
 		}
 	}
 
-	class CommandMessage extends Message {
+	private static class CommandMessage extends Message {
 		private String startTime;
 
 		/**

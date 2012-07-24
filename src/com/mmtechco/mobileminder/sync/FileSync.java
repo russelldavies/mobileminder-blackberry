@@ -30,6 +30,10 @@ public class FileSync extends Thread implements Controllable {
 
 	private static final String storeDir = "file:///store/";
 	private static final String sdcardDir = "file:///SDCard/";
+	
+	public FileSync() {
+		this.start();
+	}
 
 	public void run() {
 		logger.debug("Running");
