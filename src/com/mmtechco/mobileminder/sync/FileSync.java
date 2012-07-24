@@ -84,7 +84,7 @@ public class FileSync extends Thread implements Controllable {
 					// Only add supported filetypes
 					if (supportedType(path)) {
 						// Add file but don't commit yet
-						FileLog.add(path, false);
+						FileLog.addBatch(path);
 					}
 				}
 			} catch (IOException e) {

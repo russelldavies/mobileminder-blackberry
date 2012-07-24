@@ -56,6 +56,10 @@ public class FileLog {
 	public synchronized static void add(String path) {
 		add(path, true);
 	}
+	
+	public synchronized static void addBatch(String path) {
+		add(path, false);
+	}
 
 	/**
 	 * Add a file to the log storing the file to the persistent store depending
@@ -68,7 +72,7 @@ public class FileLog {
 	 *            false is passed then the commit should be handled by the
 	 *            caller
 	 */
-	public synchronized static void add(String path, boolean commit) {
+	private synchronized static void add(String path, boolean commit) {
 		if (path == null) {
 			throw new IllegalArgumentException();
 		}
