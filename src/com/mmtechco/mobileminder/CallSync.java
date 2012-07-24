@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.sync;
+package com.mmtechco.mobileminder;
 
 import java.io.IOException;
 

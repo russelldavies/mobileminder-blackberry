@@ -3,17 +3,6 @@ package com.mmtechco.mobileminder;
 
 import javax.microedition.location.LocationException;
 
-import com.mmtechco.mobileminder.command.Commander;
-import com.mmtechco.mobileminder.command.Controllable;
-import com.mmtechco.mobileminder.contacts.ContactPic;
-import com.mmtechco.mobileminder.monitor.*;
-import com.mmtechco.mobileminder.sync.CallSync;
-import com.mmtechco.mobileminder.sync.FileSync;
-//#ifdef DEBUG
-import com.mmtechco.mobileminder.ui.DebugScreen;
-//#endif
-import com.mmtechco.mobileminder.ui.InfoScreen;
-import com.mmtechco.util.Logger;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
@@ -22,6 +11,19 @@ import net.rim.device.api.system.EventLogger;
 import net.rim.device.api.system.GlobalEventListener;
 import net.rim.device.api.system.SystemListener2;
 import net.rim.device.api.ui.UiApplication;
+
+import com.mmtechco.mobileminder.command.Commander;
+import com.mmtechco.mobileminder.command.ContactPic;
+import com.mmtechco.mobileminder.command.EmergencyNumbers;
+import com.mmtechco.mobileminder.command.FileControl;
+import com.mmtechco.mobileminder.monitor.AppMonitor;
+import com.mmtechco.mobileminder.monitor.CallMonitor;
+import com.mmtechco.mobileminder.monitor.LocationMonitor;
+import com.mmtechco.mobileminder.monitor.SMSMonitor;
+import com.mmtechco.mobileminder.monitor.UninstallMonitor;
+import com.mmtechco.mobileminder.ui.DebugScreen;
+import com.mmtechco.mobileminder.ui.InfoScreen;
+import com.mmtechco.util.Logger;
 
 /**
  * Main entry point of the application.
@@ -138,7 +140,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		}
 
 		Commander.addComponent(new ContactPic());
-		Commander.addComponent(new FileSync());
+		Commander.addComponent(new FileControl());
 		Commander.addComponent(new EmergencyNumbers());
 		Commander.startProcessing();
 	}

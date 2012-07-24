@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.contacts;
+package com.mmtechco.mobileminder.command;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -13,8 +13,6 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 import net.rim.device.api.io.Base64InputStream;
 import net.rim.device.api.system.EncodedImage;
 
-import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
-import com.mmtechco.mobileminder.command.Controllable;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.mobileminder.net.Message;
