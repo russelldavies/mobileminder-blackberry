@@ -97,7 +97,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		
 		public void callEnded(int endStatus) {
 			add(String.valueOf((int) (new Date().getTime() - callStart.getTime()) / 1000));
-			add(outgoing ? "1" : "0");
+			add(outgoing ? "true" : "false");
 			add(String.valueOf(endStatus));
 		}
 

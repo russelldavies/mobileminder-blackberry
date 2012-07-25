@@ -75,9 +75,10 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 		// Get contact name if exists
 		String contactName = new PhoneCallLogID(contactNumber).getName();
 		contactName = (null == contactName) ? "" : contactName;
-		
-		boolean delivered = true; // No way to check delivery status
-		ActivityLog.addMessage(new SMSMessage(date, contactNumber, contactName, outgoing, delivered, messageBody));
+
+		String delivered = "true"; // No way to check delivery status
+		ActivityLog.addMessage(new SMSMessage(date, contactNumber, contactName,
+				outgoing, delivered, messageBody));
 	}
 }
 
@@ -93,12 +94,10 @@ class SMSMessage extends com.mmtechco.mobileminder.net.Message {
 	 * <li>SMS content
 	 * </ul>
 	 */
-	// public SMSMessage(String number, String name, boolean outgoing, boolean
-	// delivered, String time, String content) {
 	public SMSMessage(String time, String number, String name,
-			boolean outgoing, boolean delivered, String content) {
+			boolean outgoing, String delivered, String content) {
 		super(com.mmtechco.mobileminder.net.Message.SMS, new String[] {
 				ToolsBB.getInstance().getDate(), number, name,
-				(outgoing ? "1" : "0"), (delivered ? "1" : "0"), content });
+				(outgoing ? "true" : "false"), delivered, content });
 	}
 }

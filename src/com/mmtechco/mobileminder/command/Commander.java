@@ -111,7 +111,7 @@ public class Commander {
 		}
 
 		public void succeeded(boolean completed) {
-			add(completed ? "1" : "0");
+			add(completed ? "true" : "false");
 			add(startTime);
 			add(tools.getDate());
 		}

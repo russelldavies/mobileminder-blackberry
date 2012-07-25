@@ -171,8 +171,8 @@ class MailMessage extends com.mmtechco.mobileminder.net.Message {
 				email,
 				contact,
 				timestamp,
-				(outgoing ? "1" : "0"),
-				(attachment ? "1" : "0")
+				(outgoing ? "true" : "false"),
+				(attachment ? "true" : "false")
 		});
 	}
 }
