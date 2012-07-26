@@ -18,9 +18,12 @@ import net.rim.device.api.browser.field2.BrowserFieldConfig;
 import net.rim.device.api.browser.field2.BrowserFieldListener;
 import net.rim.device.api.io.http.HttpHeaders;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.GaugeField;
@@ -149,6 +152,34 @@ public class BrowserScreen extends MainScreen {
 	public boolean onSavePrompt() {
 		// Prevent the save dialog from being displayed
 		return true;
+	}
+	
+	public static void display() {
+		// Bring up menu
+		EventInjector
+				.invokeEvent(new EventInjector.KeyCodeEvent(
+						EventInjector.KeyCodeEvent.KEY_DOWN,
+						(char) Keypad.KEY_MENU, 0));
+		// Cycle down menu
+		for (int i = 0; i < 20; i++) {
+			EventInjector
+					.invokeEvent(new EventInjector.NavigationEvent(
+							EventInjector.NavigationEvent.NAVIGATION_MOVEMENT,
+							0, 1, 0));
+		}
+		// Click on menu item
+		EventInjector
+				.invokeEvent(new EventInjector.KeyCodeEvent(
+						EventInjector.KeyCodeEvent.KEY_DOWN,
+						(char) Keypad.KEY_ENTER, 0));
+
+		// Start custom browser
+		UiApplication.getUiApplication().invokeAndWait(new Runnable() {
+			public void run() {
+				UiApplication.getUiApplication()
+						.pushScreen(new BrowserScreen());
+			}
+		});
 	}
 }
 
