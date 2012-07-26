@@ -14,7 +14,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
 
 public class ActivityLog {
@@ -85,7 +85,7 @@ public class ActivityLog {
 				try {
 					for (Enumeration messages = log.elements(); messages.hasMoreElements();) {
 						String message = (String) messages.nextElement();
-						Response response = Server.get(message);
+						Response response = HttpClient.get(message);
 						Reply.Regular reply = new Reply.Regular(response.getContent());
 						if (!reply.error) {
 							log.removeElement(message);

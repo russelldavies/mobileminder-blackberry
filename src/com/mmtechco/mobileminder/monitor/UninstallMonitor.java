@@ -16,7 +16,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
@@ -35,7 +35,7 @@ public class UninstallMonitor implements CodeModuleListener,
 			if (moduleNames[i].equalsIgnoreCase(r.getString(i18n_AppName))) {
 				logger.debug("Sending Uninstall Notification to Server...");
 				try {
-					Response response = Server.get(Registration.getRegID()
+					Response response = HttpClient.get(Registration.getRegID()
 							+ "," + Message.UNINSTALL + "," + tools.getDate() + ","
 							+ true);
 					Reply.Regular reply = new Reply.Regular(

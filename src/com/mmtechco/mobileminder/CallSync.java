@@ -13,7 +13,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
@@ -32,7 +32,7 @@ public class CallSync {
 			public void run() {
 				try {
 					logger.info("Syncing");
-					Response response = Server.get(new Message(
+					Response response = HttpClient.get(new Message(
 							Message.CALL_SYNC).toString());
 					Reply.Regular reply = new Reply.Regular(
 							response.getContent());
@@ -86,7 +86,7 @@ public class CallSync {
 									callLogEntry.getStatus());
 
 							// Contact server with the call log entry
-							Server.get(message.toString());
+							HttpClient.get(message.toString());
 						}
 					}
 					logger.debug("Finished sync");

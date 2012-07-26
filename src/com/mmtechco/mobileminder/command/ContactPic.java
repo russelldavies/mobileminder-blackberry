@@ -19,7 +19,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.CRC32;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
@@ -60,7 +60,7 @@ public class ContactPic implements Controllable {
 			crc.update(picContainer.stream.getBytes());
 			keyvalPairs.put("crc", String.valueOf(crc.getValue()));
 			keyvalPairs.put("pic", picContainer.stream);
-			Response response = Server.post(message.toString(), keyvalPairs);
+			Response response = HttpClient.post(message.toString(), keyvalPairs);
 			Reply.Regular reply = new Reply.Regular(response.getContent());
 			if (!reply.error) {
 				return true;

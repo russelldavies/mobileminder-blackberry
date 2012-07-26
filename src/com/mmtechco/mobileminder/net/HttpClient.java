@@ -26,10 +26,10 @@ import rimx.network.URLFactory;
 
 import com.mmtechco.util.Logger;
 
-public class Server {
+public class HttpClient {
 	private static final String URL = "https://www.mobileminder.net/WebService.php?";
 	
-	private static Logger logger = Logger.getLogger(Server.class);
+	private static Logger logger = Logger.getLogger(HttpClient.class);
 
 	public static Response get(String queryString) throws IOException {
 		logger.debug("GET query string: " + queryString);

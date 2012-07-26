@@ -21,7 +21,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
@@ -237,7 +237,7 @@ public class FileLog {
 						fm.add(path, fileholder.getModTime(),
 								fileholder.getMd5());
 						try {
-							Response response = Server.postMultiPart(
+							Response response = HttpClient.postMultiPart(
 									fm.toString(), fc, "userfile");
 							Reply.Regular reply = new Reply.Regular(
 									response.getContent());

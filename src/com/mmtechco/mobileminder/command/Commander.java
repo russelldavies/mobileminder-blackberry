@@ -12,7 +12,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
@@ -46,7 +46,7 @@ public class Commander {
 		public void run() {
 			while (true) {
 				try {
-					Response response = Server.get(new CommandMessage().toString());
+					Response response = HttpClient.get(new CommandMessage().toString());
 					Reply.Command reply = new Reply.Command(response.getContent());
 					// No more commands to process
 					if (reply.index == noCommandIndex) {
@@ -75,7 +75,7 @@ public class Commander {
 									+ reply.index + ": " + reply.getArgs());
 							message.succeeded(false);
 						}
-						Server.get(message.toString());
+						HttpClient.get(message.toString());
 					}
 				} catch (IOException e) {
 					logger.warn("Connection problem: " + e.getMessage());

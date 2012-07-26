@@ -23,7 +23,7 @@ import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
 import com.mmtechco.mobileminder.net.Reply.ParseException;
 import com.mmtechco.mobileminder.net.Response;
-import com.mmtechco.mobileminder.net.Server;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.mobileminder.ui.ObserverScreen;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
@@ -62,7 +62,7 @@ public class Registration implements MobileMinderResource {
 			// Contact server and get new values, if any, otherwise sleep
 			logger.debug("Requesting reg details from server");
 
-			Response response = Server.get(new RegistrationMessage(stage)
+			Response response = HttpClient.get(new RegistrationMessage(stage)
 					.toString());
 			Reply.Regular reply = new Reply.Regular(response.getContent());
 			logger.debug("Registration reply: " + reply.content);
