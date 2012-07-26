@@ -90,6 +90,9 @@ public class HttpClient {
 				HttpProtocolConstants.HEADER_CONTENT_TYPE,
 				HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
 						+ ";boundary=" + boundary);
+		connection.setRequestProperty(
+				HttpProtocolConstants.HEADER_CONTENT_LENGTH,
+				String.valueOf(file.fileSize()));
 
 		// Send data via POST
 		OutputStream output = connection.openOutputStream();
