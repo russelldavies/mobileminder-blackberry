@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes;
+package com.mmtechco.util;
 
 public interface MMTools {
 	/**
@@ -27,7 +27,7 @@ public interface MMTools {
 	 *             generic exception (instead of ParseException) for BlackBerry
 	 *             compatibility reasons when input date format is not correct.
 	 */
-	public long getDate(String date) throws Exception;
+	public long getDate(String date) throws RuntimeException;
 
 	/**
 	 * Takes an date in epoch and returns it formatted.
@@ -145,6 +145,4 @@ public interface MMTools {
 	public String getRandomString(int length);
 	
 	public String[] split(String strString, String strDelimiter);
-	
-	public boolean isConnected();
 }

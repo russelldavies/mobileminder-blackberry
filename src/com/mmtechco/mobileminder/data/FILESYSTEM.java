@@ -1,4 +1,4 @@
-package com.mmtechco.mobileminder.prototypes;
+package com.mmtechco.mobileminder.data;
 
 public class FILESYSTEM {
 	private String name;

@@ -16,24 +16,24 @@ import net.rim.device.api.system.WLANInfo;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.mobileminder.net.Reply;
-import com.mmtechco.mobileminder.net.Server;
-import com.mmtechco.mobileminder.prototypes.MMTools;
-import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
+import com.mmtechco.mobileminder.net.Response;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
+import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
 
 public class FileLog {
-	private static final String TAG = ToolsBB.getSimpleClassName(FileLog.class);
 	public static final long ID = StringUtilities
 			.stringHashToLong(FileLog.class.getName());
 
 	private static PersistentObject store;
 	private static ContentProtectedVector files;
-
-	protected static Logger logger = Logger.getInstance();
+	
+	private static Logger logger = Logger.getLogger(FileLog.class);
 
 	public static boolean mobileSync = false;
 
@@ -56,6 +56,10 @@ public class FileLog {
 	public synchronized static void add(String path) {
 		add(path, true);
 	}
+	
+	public synchronized static void addBatch(String path) {
+		add(path, false);
+	}
 
 	/**
 	 * Add a file to the log storing the file to the persistent store depending
@@ -68,18 +72,18 @@ public class FileLog {
 	 *            false is passed then the commit should be handled by the
 	 *            caller
 	 */
-	public synchronized static void add(String path, boolean commit) {
+	private synchronized static void add(String path, boolean commit) {
 		if (path == null) {
 			throw new IllegalArgumentException();
 		}
 
 		// Check if file exists in db
 		if (exists(path)) {
-			logger.log(TAG, "File already in DB: " + path);
+			logger.debug("File already in DB: " + path);
 			return;
 		}
-		logger.log(TAG, "Adding file to DB: " + path);
-		logger.log(TAG, "Number of files in log: " + files.size());
+		logger.debug("Adding file to DB: " + path);
+		logger.debug("Number of files in log: " + files.size());
 
 		FileConnection fc = null;
 		try {
@@ -93,14 +97,14 @@ public class FileLog {
 				commit();
 			}
 		} catch (IOException e) {
-			logger.log(TAG, e.toString());
+			ActivityLog.addMessage(new ErrorMessage(e));
 		} finally {
 			try {
 				if (fc != null) {
 					fc.close();
 				}
 			} catch (Exception e) {
-				logger.log(TAG, e.toString());
+				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 	}
@@ -143,7 +147,7 @@ public class FileLog {
 			throw new IllegalArgumentException();
 		}
 
-		logger.log(TAG, newPath + " has been renamed from: " + oldPath);
+		logger.debug(newPath + " has been renamed from: " + oldPath);
 
 		for (Enumeration e = files.elements(); e.hasMoreElements();) {
 			FileHolder fileholder = (FileHolder) e.nextElement();
@@ -195,14 +199,14 @@ public class FileLog {
 					ObjectGroup.createGroup(fileholder);
 					commit();
 				} catch (IOException e) {
-					logger.log(TAG, e.toString());
+					ActivityLog.addMessage(new ErrorMessage(e));
 				} finally {
 					try {
 						if (fc != null) {
 							fc.close();
 						}
 					} catch (Exception e) {
-						logger.log(TAG, e.toString());
+						ActivityLog.addMessage(new ErrorMessage(e));
 					}
 				}
 				break;
@@ -220,8 +224,8 @@ public class FileLog {
 				|| (WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED)
 				|| DeviceInfo.isSimulator()) {
 			// Get all files that have no been uploaded
-			for (Enumeration e = files.elements(); e.hasMoreElements();) {
-				FileHolder fileholder = (FileHolder) e.nextElement();
+			for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
+				FileHolder fileholder = (FileHolder) enum.nextElement();
 				if (!fileholder.isUploaded()) {
 					FileConnection fc = null;
 					try {
@@ -232,27 +236,36 @@ public class FileLog {
 						FileMessage fm = new FileMessage();
 						fm.add(path, fileholder.getModTime(),
 								fileholder.getMd5());
-						Reply reply = new Server().contactServer(fm.getREST(), fc);
-						// If server successfully processed mark as uploaded
-						if (!reply.isError()) {
-							// Object must be ungrouped to modify it
-							if (ObjectGroup.isInGroup(fileholder)) {
-								fileholder = (FileHolder) ObjectGroup
-										.expandGroup(fileholder);
+						try {
+							Response response = HttpClient.postMultiPart(
+									fm.toString(), fc, "userfile");
+							Reply.Regular reply = new Reply.Regular(
+									response.getContent());
+							// If server successfully processed mark as uploaded
+							if (!reply.error) {
+								// Object must be ungrouped to modify it
+								if (ObjectGroup.isInGroup(fileholder)) {
+									fileholder = (FileHolder) ObjectGroup
+											.expandGroup(fileholder);
+								}
+								fileholder.setUploaded(true);
+								// Regroup object
+								ObjectGroup.createGroup(fileholder);
 							}
-							fileholder.setUploaded(true);
-							// Regroup object
-							ObjectGroup.createGroup(fileholder);
+						} catch (IOException e) {
+							logger.warn("Connection problem: " + e.getMessage());
+						} catch (ParseException e) {
+							ActivityLog.addMessage(new ErrorMessage(e));
 						}
-					} catch (IOException e1) {
-						logger.log(TAG, e1.getMessage());
+					} catch (IOException e) {
+						ActivityLog.addMessage(new ErrorMessage(e));
 					} finally {
 						try {
 							if (fc != null) {
 								fc.close();
 							}
 						} catch (IOException e1) {
-							logger.log(TAG, e1.getMessage());
+							ActivityLog.addMessage(new ErrorMessage(e1));
 						}
 					}
 				}
@@ -311,61 +324,56 @@ public class FileLog {
 						.substring(1);
 			}
 		} catch (Exception e) {
-			logger.log(TAG, e.toString());
+			ActivityLog.addMessage(new ErrorMessage(e));
 		} finally {
 			try {
 				if (dis != null) {
 					dis.close();
 				}
 			} catch (IOException e) {
-				logger.log(TAG, e.toString());
+				ActivityLog.addMessage(new ErrorMessage(e));
 			}
 		}
 		return md5;
 	}
 }
 
-class FileMessage implements Message {
-	private final int type = 22;
-	private String action;
-	private String path;
-	private String modtimeORoldpath;
-	private String md5;
-	private MMTools tools = ToolsBB.getInstance();
+class FileMessage extends Message {
+	private static MMTools tools = ToolsBB.getInstance();
+
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>Device time
+	 * <li>Action: ADD, UPD or DEL
+	 * <li>File path
+	 * <li>File modification time or old path (if renamed)
+	 * <li>File MD5 hex checksum
+	 * </ul>
+	 */
+	public FileMessage() {
+		super(Message.FILE);
+		add(tools.getDate());
+	}
 
 	public void add(String path, long modTime, String md5) {
-		action = "ADD";
-		this.path = path;
-		this.modtimeORoldpath = tools.getDate(modTime);
-		this.md5 = md5;
+		add("ADD");
+		fill(path, String.valueOf(modTime), md5);
 	}
 
 	public void update(String path, String oldPath, String md5) {
-		action = "UPD";
-		this.path = path;
-		this.modtimeORoldpath = oldPath;
-		this.md5 = md5;
+		add("UPD");
+		fill(path, oldPath, md5);
 	}
 
 	public void delete(String path, long modTime, String md5) {
-		action = "DEL";
-		add(path, modTime, md5);
+		add("DEL");
+		fill(path, String.valueOf(modTime), md5);
 	}
 
-	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator
-				+ type + Tools.ServerQueryStringSeparator + tools.getDate()
-				+ Tools.ServerQueryStringSeparator + action
-				+ Tools.ServerQueryStringSeparator + path
-				+ Tools.ServerQueryStringSeparator + modtimeORoldpath
-				+ Tools.ServerQueryStringSeparator + md5;
-	}
-
-	public String getTime() {
-		return modtimeORoldpath;
-	}
-
-	public int getType() {
-		return type;
+	private void fill(String path, String pathORmodtime, String md5) {
+		add(path);
+		add(pathORmodtime);
+		add(md5);
 	}
 }

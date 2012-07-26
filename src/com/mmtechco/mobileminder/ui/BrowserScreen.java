@@ -8,10 +8,8 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.Tools;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.util.ToolsBB;
 
 import net.rim.device.api.browser.field.ContentReadEvent;
@@ -20,9 +18,12 @@ import net.rim.device.api.browser.field2.BrowserFieldConfig;
 import net.rim.device.api.browser.field2.BrowserFieldListener;
 import net.rim.device.api.io.http.HttpHeaders;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.ui.Field;
+import net.rim.device.api.ui.Keypad;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
+import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.EditField;
 import net.rim.device.api.ui.component.GaugeField;
@@ -152,6 +153,34 @@ public class BrowserScreen extends MainScreen {
 		// Prevent the save dialog from being displayed
 		return true;
 	}
+	
+	public static void display() {
+		// Bring up menu
+		EventInjector
+				.invokeEvent(new EventInjector.KeyCodeEvent(
+						EventInjector.KeyCodeEvent.KEY_DOWN,
+						(char) Keypad.KEY_MENU, 0));
+		// Cycle down menu
+		for (int i = 0; i < 20; i++) {
+			EventInjector
+					.invokeEvent(new EventInjector.NavigationEvent(
+							EventInjector.NavigationEvent.NAVIGATION_MOVEMENT,
+							0, 1, 0));
+		}
+		// Click on menu item
+		EventInjector
+				.invokeEvent(new EventInjector.KeyCodeEvent(
+						EventInjector.KeyCodeEvent.KEY_DOWN,
+						(char) Keypad.KEY_ENTER, 0));
+
+		// Start custom browser
+		UiApplication.getUiApplication().invokeAndWait(new Runnable() {
+			public void run() {
+				UiApplication.getUiApplication()
+						.pushScreen(new BrowserScreen());
+			}
+		});
+	}
 }
 
 /**
@@ -249,44 +278,33 @@ class BrowserFieldLoadProgressTracker {
 	}
 }
 
-class WebMessage implements Message {
-	private final int type = 4;
-	private String pageTitle;
-	private String url;
-	private int viewTime;
+class WebMessage extends Message {
 	private Date startTime;
+	private String url, pageTitle;
 	
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>Device time
+	 * <li>Time page was viewed
+	 * <li>Page title
+	 * <li>Page URL
+	 * </ul>
+	 */
 	public WebMessage(String url, String pageTitle) {
+		super(Message.WEB_HISTORY);
+		add(ToolsBB.getInstance().getDate());
+		startTime = new Date();
 		this.url = url;
 		this.pageTitle = pageTitle;
-		startTime = new Date();
 	}
 	
 	public void finished() {
-		viewTime = (int) (new Date().getTime() - startTime.getTime()) / 1000;
+		int viewTime = (int) (new Date().getTime() - startTime.getTime()) / 1000;
+		add(String.valueOf(viewTime));
+		add(pageTitle);
+		add(url);
+		
 		ActivityLog.addMessage(this);
-	}
-	
-	public int getType() {
-		return type;
-	}
-	
-	public String getTime() {
-		return ToolsBB.getInstance().getDate();
-	}
-
-	public String getREST() {
-		return
-				Registration.getRegID() +
-				Tools.ServerQueryStringSeparator +
-				"0" + type +
-				Tools.ServerQueryStringSeparator +
-				ToolsBB.getInstance().getDate() +
-				Tools.ServerQueryStringSeparator +
-				viewTime +
-				Tools.ServerQueryStringSeparator +
-				pageTitle +
-				Tools.ServerQueryStringSeparator +
-				url;
 	}
 }

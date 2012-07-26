@@ -1,5 +1,7 @@
 package com.mmtechco.mobileminder.data;
 
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
 import net.rim.device.api.system.PersistentObject;
@@ -7,18 +9,22 @@ import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.ContentProtectedVector;
 import net.rim.device.api.util.StringUtilities;
 
-import com.mmtechco.mobileminder.prototypes.Message;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
+import com.mmtechco.mobileminder.net.Reply;
+import com.mmtechco.mobileminder.net.Reply.ParseException;
+import com.mmtechco.mobileminder.net.Response;
+import com.mmtechco.mobileminder.net.HttpClient;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.ToolsBB;
 
 public class ActivityLog {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(ActivityLog.class);
 	public static final long ID = StringUtilities
 			.stringHashToLong(ActivityLog.class.getName());
 
 	private static PersistentObject store;
 	private static ContentProtectedVector log;
+	
+	private static Logger logger = Logger.getLogger(ActivityLog.class);
 
 	static {
 		store = PersistentStore.getPersistentObject(ID);
@@ -29,11 +35,11 @@ public class ActivityLog {
 		log = (ContentProtectedVector) store.getContents();
 	}
 
-	private static Logger logger = Logger.getInstance();
-
 	public static synchronized void addMessage(Message message) {
-		log.addElement(message.getREST());
+		logger.debug(message.toString());
+		log.addElement(message.toString());
 		commit();
+		sendMessages();
 	}
 
 	public static synchronized boolean removeMessage() {
@@ -51,7 +57,7 @@ public class ActivityLog {
 		try {
 			msg = (String) log.firstElement();
 		} catch (NoSuchElementException e) {
-			logger.log(TAG, e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return msg;
 	}
@@ -71,5 +77,27 @@ public class ActivityLog {
 	private static void commit() {
 		store.setContents(log);
 		store.commit();
+	}
+
+	private static synchronized void sendMessages() {
+		new Thread() {
+			public void run() {
+				try {
+					for (Enumeration messages = log.elements(); messages.hasMoreElements();) {
+						String message = (String) messages.nextElement();
+						Response response = HttpClient.get(message);
+						Reply.Regular reply = new Reply.Regular(response.getContent());
+						if (!reply.error) {
+							log.removeElement(message);
+						}
+					}
+					commit();
+				} catch (IOException e) {
+					logger.warn("Connection problem: " + e.getMessage());
+				} catch (ParseException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
+				}
+			}
+		}.start();
 	}
 }

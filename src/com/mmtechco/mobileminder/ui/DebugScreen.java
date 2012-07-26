@@ -1,17 +1,17 @@
 package com.mmtechco.mobileminder.ui;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.command.EmergencyNumbers;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.data.FileLog;
-import com.mmtechco.mobileminder.prototypes.ObserverScreen;
 import com.mmtechco.util.Logger;
 
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;
+import net.rim.device.api.system.EventLogger;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.system.RuntimeStore;
@@ -20,6 +20,7 @@ import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.ButtonField;
+import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
@@ -95,6 +96,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				UiApplication.getUiApplication().pushScreen(
 						new RegPopupScreen());
 				PersistentStore.destroyPersistentObject(Registration.ID);
+				RuntimeStore.getRuntimeStore().remove(Registration.ID);
 			}
 		};
 
@@ -104,11 +106,27 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				PersistentStore.destroyPersistentObject(FileLog.ID);
 				System.exit(0);
 			}
-
 		};
+		
+		MenuItem emergnumsMenu = new MenuItem("View Emergency Numbers", 0x100040, 3) {
+			public void run() {
+				Dialog.inform(EmergencyNumbers.getNumbers().toString());
+			}
+		};
+		
+		MenuItem eventloggerMenu = new MenuItem("Event Logger", 0x100040, 3) {
+			public void run() {
+				if (!EventLogger.startEventLogViewer()) {
+					Dialog.alert("Sorry, couldn't start Event Logger. Don't know why...");
+				}
+			}
+		};
+		
 		menu.add(clearMenu);
 		menu.add(delRegMenu);
 		menu.add(delStoreMenu);
+		menu.add(emergnumsMenu);
+		menu.add(eventloggerMenu);
 
 		super.makeMenu(menu, instance);
 	}
@@ -136,12 +154,10 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					String stage = (String) regTable.get(Registration.KEY_STAGE);
 					String id = (String) regTable.get(Registration.KEY_ID);
 					Boolean compStatus = (Boolean) RuntimeStore.getRuntimeStore().get(Registration.ID);
-					Vector nums = (Vector) regTable.get(Registration.KEY_NUMBERS);
 					
 					add(new LabelField("Stage: " + stage));
 					add(new LabelField("ID: " + id.toString()));
 					add(new LabelField("Components started: " + compStatus));
-					add(new LabelField("Emergency nums: " + nums));
 				}
 			}
 

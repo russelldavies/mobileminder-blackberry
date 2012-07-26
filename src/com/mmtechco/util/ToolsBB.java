@@ -2,14 +2,12 @@
 package com.mmtechco.util;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Enumeration;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
 import javax.microedition.io.DatagramConnection;
-import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
@@ -22,24 +20,13 @@ import net.rim.blackberry.api.mail.MessagingException;
 import net.rim.blackberry.api.mail.Session;
 import net.rim.blackberry.api.mail.Store;
 import net.rim.device.api.i18n.SimpleDateFormat;
-import net.rim.device.api.io.IOUtilities;
 import net.rim.device.api.io.http.HttpDateParser;
-//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-import net.rim.device.api.io.transport.ConnectionDescriptor;
-import net.rim.device.api.io.transport.ConnectionFactory;
-import net.rim.device.api.io.transport.TransportInfo;
-//#else
-import rimx.network.TransportDetective;
-import rimx.network.URLFactory;
-//#endif
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
-import net.rim.device.api.system.DeviceInfo;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.system.RadioInfo;
 
-import com.mmtechco.mobileminder.prototypes.FILESYSTEM;
-import com.mmtechco.mobileminder.prototypes.MMTools;
+import com.mmtechco.mobileminder.data.FILESYSTEM;
 
 /**
  * Tools which are BlackBerry specific.
@@ -79,7 +66,7 @@ public class ToolsBB extends Tools {
 		return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(date));
 	}
 
-	public long getDate(String date) throws Exception {
+	public long getDate(String date) throws RuntimeException {
 		date = date.trim();
 		if (!(date.equals("0") || date.equals(""))) {
 			// Yes this is horrible but so is RIM's SimpleDateFormat
@@ -229,7 +216,7 @@ public class ToolsBB extends Tools {
 			msg.setSubject("Mobile Minder Registration Info");
 			inbox.appendMessage(msg);
 		} catch (MessagingException e) {
-			logger.log(TAG, "Could not add message to inbox");
+			Logger.getLogger(getClass()).info("Could not add message to inbox");
 		}
 	}
 
@@ -265,72 +252,6 @@ public class ToolsBB extends Tools {
 				cdmaConnection.close();
 			}
 		}
-	}
-	
-	public HttpConnection setupConnection(String url) throws IOException {
-		if (DeviceInfo.isSimulator()) {
-			// If running the MDS simulator append ";deviceside=false"
-			return (HttpConnection) Connector.open(url + ";deviceside=true",
-					Connector.READ_WRITE);
-		}
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-		ConnectionFactory cf = new ConnectionFactory();
-		// Ordered list of preferred transports
-		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
-				TransportInfo.TRANSPORT_TCP_CELLULAR,
-				TransportInfo.TRANSPORT_WAP2, TransportInfo.TRANSPORT_WAP,
-				TransportInfo.TRANSPORT_MDS, TransportInfo.TRANSPORT_BIS_B };
-		cf.setPreferredTransportTypes(transportPrefs);
-		ConnectionDescriptor cd = cf.getConnection(url);
-		return (HttpConnection) cd.getConnection();
-		//#else
-		TransportDetective td = new TransportDetective();
-		URLFactory urlFactory = new URLFactory(url);
-		String connectionUrl;
-		if(td.isCoverageAvailable(TransportDetective.TRANSPORT_TCP_WIFI)) {
-		   connectionUrl = urlFactory.getHttpTcpWiFiUrl();
-		} else if (td.isCoverageAvailable(TransportDetective.DEFAULT_TCP_CELLULAR)) {
-			connectionUrl = urlFactory.getHttpDefaultTcpCellularUrl(td.getDefaultTcpCellularServiceRecord());
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_WAP2)) {
-			connectionUrl = urlFactory.getHttpWap2Url(td.getWap2ServiceRecord());
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_MDS)) {
-			connectionUrl = urlFactory.getHttpMdsUrl(false);
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_BIS_B)) {
-			connectionUrl = urlFactory.getHttpBisUrl();
-		} else {
-			connectionUrl = urlFactory.getHttpDefaultUrl();
-		}
-		return (HttpConnection)Connector.open(connectionUrl, Connector.READ_WRITE);
-		//#endif
-	}
-	
-	/**
-	 * Checks if there is a valid internet connection.
-	 * 
-	 * @return true if connected.
-	 */
-	public boolean isConnected() {
-		String url = "http://www.msftncsi.com/ncsi.txt";
-		String expectedResponse = "Microsoft NCSI";
-		
-		logger.log(TAG, "Checking connectivity");
-		
-		try {
-			HttpConnection connection = setupConnection(url);
-			connection.setRequestMethod(HttpConnection.GET);
-
-			int status = connection.getResponseCode();
-			if (status == HttpConnection.HTTP_OK) {
-				InputStream input = connection.openInputStream();
-				byte[] reply = IOUtilities.streamToBytes(input);
-				input.close();
-				connection.close();
-				return expectedResponse.equals(new String(reply));
-			}
-		} catch (Exception e) {
-			logger.log(TAG, "Connectivity test failed");
-		}
-		return false;
 	}
 	
 	public static String getSimpleClassName(Class _class) {

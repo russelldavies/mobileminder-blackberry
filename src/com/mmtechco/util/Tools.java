@@ -3,17 +3,12 @@ package com.mmtechco.util;
 import java.util.Date;
 import java.util.Random;
 
-import com.mmtechco.mobileminder.prototypes.MMTools;
 
 /**
  * Cross platform tools that can be used anywhere in the app.
  * 
  */
 public abstract class Tools implements MMTools {
-	protected static final String TAG = ToolsBB.getSimpleClassName(Tools.class);
-	
-	public static final String ServerQueryStringSeparator = ",";
-	protected Logger logger = Logger.getInstance();
 	private final String charSet = "!$&()*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz~";
 
 	public String getDate() {

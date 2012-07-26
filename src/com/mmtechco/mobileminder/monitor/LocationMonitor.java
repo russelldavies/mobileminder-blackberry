@@ -18,22 +18,17 @@ import net.rim.device.api.gps.GPSInfo;
 import net.rim.device.api.gps.LocationInfo;
 //#endif
 
-import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.prototypes.Message;
-import com.mmtechco.util.ErrorMessage;
+import com.mmtechco.mobileminder.net.ErrorMessage;
+import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.util.Logger;
-import com.mmtechco.util.Tools;
 import com.mmtechco.util.ToolsBB;
 
 /**
  * Monitors and registers location based events.
  */
 public class LocationMonitor implements LocationListener {
-	private static final String TAG = ToolsBB
-			.getSimpleClassName(LocationMonitor.class);
-
-	private Logger logger = Logger.getInstance();
+	private static Logger logger = Logger.getLogger(LocationMonitor.class);
 
 	// Represents the period of the position query, in seconds
 	private static int interval = 120;
@@ -56,17 +51,18 @@ public class LocationMonitor implements LocationListener {
 		//#endif
 			// Attempt to start the listening thread
 			if (startLocationUpdate()) {
-				logger.log(TAG,
-						"Location status: " + locationProvider.getState());
+				logger.info("Location status: " + locationProvider.getState());
 			}
 		} else {
-			logger.log(TAG, "Could not start location services");
+			logger.info("Could not start location services");
 			return;
 		}
-
+        
 		// Initialize lat/long
 		latitude = 0;
 		longitude = 0;
+		
+        logger.info("Location services started");
 	}
 
 	public boolean startLocationUpdate() {
@@ -107,10 +103,10 @@ public class LocationMonitor implements LocationListener {
 				locationProvider.setLocationListener(this, interval, -1, -1);
 				started = true;
 			} else {
-				logger.log(TAG, "Failed to obtain a location provider.");
+				logger.warn("Failed to obtain a location provider.");
 			}
 		} catch (final LocationException le) {
-			logger.log(TAG, "Failed to instantiate LocationProvider object:"
+			logger.warn("Failed to instantiate LocationProvider object:"
 					+ le.toString());
 			ActivityLog.addMessage(new ErrorMessage(le));
 		}
@@ -121,23 +117,23 @@ public class LocationMonitor implements LocationListener {
 		// Polls GPS service based on interval specified in constructor. When
 		// location changes record in activity log.
 		if (location.isValid()) {
-			float speed;
+			float speed = 0;
 			// Check if coordinates have changed
 			if (longitude != location.getQualifiedCoordinates().getLongitude()
 					|| latitude != location.getQualifiedCoordinates()
 							.getLatitude()) {
-				speed = location.getSpeed();
-				longitude = location.getQualifiedCoordinates().getLongitude();
 				latitude = location.getQualifiedCoordinates().getLatitude();
+				longitude = location.getQualifiedCoordinates().getLongitude();
+				speed = location.getSpeed();
 
-				Message locMsg = new LocationMessage(longitude, latitude, speed);
+				Message locMsg = new LocationMessage(latitude, longitude, speed);
 				ActivityLog.addMessage(locMsg);
 			}
 		}
 	}
 
 	public void providerStateChanged(LocationProvider provider, int newState) {
-		logger.log(TAG, "GPS Provider changed");
+		logger.debug("GPS Provider changed");
 		if (newState == LocationProvider.TEMPORARILY_UNAVAILABLE) {
 			provider.reset();
 		}
@@ -151,49 +147,22 @@ public class LocationMonitor implements LocationListener {
 	}
 }
 
-/**
- * Holds GPS messages
- */
-class LocationMessage implements Message {
-	private final int type = 6;
-	private double latitude, longitude;
-	private String deviceTime;
-	private float speed;
-
-	public LocationMessage(double lat, double lon, float speed) {
-		latitude = lat;
-		longitude = lon;
-		this.speed = speed;
-		deviceTime = ToolsBB.getInstance().getDate();
-	}
-
+class LocationMessage extends Message {
 	/**
-	 * Retrieves the message formatted in to a single string value. Location
-	 * message consists of:
+	 * Message format:
 	 * <ul>
-	 * <li>Registration Serial number.
-	 * <li>Location message type which is '06' (two digits number).
-	 * <li>Device time.
-	 * <li>Latitude.
-	 * <li>Longitude.
-	 * <li>Speed. *<i>Warning</i> not implemented
+	 * <li>Device time
+	 * <li>Latitude
+	 * <li>Longitude
+	 * <li>Speed
 	 * </ul>
-	 * 
-	 * @return a single string containing the entire message.
 	 */
-	public String getREST() {
-		return Registration.getRegID() + Tools.ServerQueryStringSeparator + '0'
-				+ type + Tools.ServerQueryStringSeparator + deviceTime
-				+ Tools.ServerQueryStringSeparator + latitude
-				+ Tools.ServerQueryStringSeparator + longitude
-				+ Tools.ServerQueryStringSeparator + speed;
-	}
-
-	public String getTime() {
-		return deviceTime;
-	}
-
-	public int getType() {
-		return type;
+	public LocationMessage(double lat, double lon, float speed) {
+		super(Message.LOCATION, new String[] {
+				ToolsBB.getInstance().getDate(),
+				String.valueOf(lat),
+				String.valueOf(lon),
+				String.valueOf(speed)
+		});
 	}
 }
