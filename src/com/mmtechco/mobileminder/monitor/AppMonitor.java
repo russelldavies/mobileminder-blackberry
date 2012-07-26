@@ -49,6 +49,7 @@ public class AppMonitor extends Thread {
 	};
 
 	public AppMonitor() {
+		logger.info("Running");
 		new Timer().scheduleAtFixedRate(checkAppsTask, 0, interval);
 	}
 

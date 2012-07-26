@@ -57,10 +57,12 @@ public class LocationMonitor implements LocationListener {
 			logger.info("Could not start location services");
 			return;
 		}
-
+        
 		// Initialize lat/long
 		latitude = 0;
 		longitude = 0;
+		
+        logger.info("Location services started");
 	}
 
 	public boolean startLocationUpdate() {

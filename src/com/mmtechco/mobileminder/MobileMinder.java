@@ -16,6 +16,7 @@ import com.mmtechco.mobileminder.command.Commander;
 import com.mmtechco.mobileminder.command.ContactPic;
 import com.mmtechco.mobileminder.command.EmergencyNumbers;
 import com.mmtechco.mobileminder.command.FileControl;
+import com.mmtechco.mobileminder.data.FileSync;
 import com.mmtechco.mobileminder.monitor.AppMonitor;
 import com.mmtechco.mobileminder.monitor.CallMonitor;
 import com.mmtechco.mobileminder.monitor.LocationMonitor;
@@ -125,7 +126,8 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 
 		// Start call sync. Note that there is no faculty to access existing SMS
 		// messages stored on the device.
-		new Thread(new CallSync()).start();
+		CallSync.sync();
+		FileSync.sync();
 
 		// Start monitors
 		logger.debug("Starting monitors...");
@@ -138,7 +140,9 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		} catch (LocationException e) {
 			logger.warn(e.getMessage());
 		}
+		
 
+		logger.debug("Adding components to Commander");
 		Commander.addComponent(new ContactPic());
 		Commander.addComponent(new FileControl());
 		Commander.addComponent(new EmergencyNumbers());

@@ -35,6 +35,7 @@ public class Commander {
 	}
 	
 	public static void startProcessing() {
+		logger.info("Started processing");
 		new Timer().schedule(new CommandTask(), time);
 	}
 

@@ -23,70 +23,82 @@ import com.mmtechco.util.ToolsBB;
  * server call time. If the value the server holds is less than device call
  * time, it sends call messages to the server.
  */
-public class CallSync implements Runnable {
+public class CallSync {
 	private static Logger logger = Logger.getLogger(CallSync.class);
-	private MMTools tools = ToolsBB.getInstance();
+	private static MMTools tools = ToolsBB.getInstance();
 
-	public void run() {
-		try {
-			logger.info("Running");
-			Response response = Server.get(new Message(Message.CALL_SYNC)
-					.toString());
-			Reply.Regular reply = new Reply.Regular(response.getContent());
-			logger.debug("Contacted server. Reply: " + reply.content);
+	public static void sync() {
+		new Thread() {
+			public void run() {
+				try {
+					logger.info("Syncing");
+					Response response = Server.get(new Message(
+							Message.CALL_SYNC).toString());
+					Reply.Regular reply = new Reply.Regular(
+							response.getContent());
+					logger.debug("Contacted server. Reply: " + reply.content);
 
-			// Check if the reply contained a valid server command
-			if (reply.type != Message.CALL_SYNC) {
-				logger.warn("No valid server reply");
-				return;
-			}
+					// Check if the reply contained a valid server command
+					if (reply.type != Message.CALL_SYNC) {
+						logger.warn("No valid server reply");
+						return;
+					}
 
-			// Get the list of calls in the call log
-			PhoneLogs phoneLog = PhoneLogs.getInstance();
-			int numCalls = phoneLog
-					.numberOfCalls(PhoneLogs.FOLDER_NORMAL_CALLS);
-			logger.debug("Number of calls in call log: " + numCalls);
+					// Get the list of calls in the call log
+					PhoneLogs phoneLog = PhoneLogs.getInstance();
+					int numCalls = phoneLog
+							.numberOfCalls(PhoneLogs.FOLDER_NORMAL_CALLS);
+					logger.debug("Number of calls in call log: " + numCalls);
 
-			// Convert server timestamp to unix time
-			long serverTimestamp = tools.getDate(reply.info);
+					// Convert server timestamp to unix time
+					long serverTimestamp = tools.getDate(reply.info);
 
-			// Loop through call list backwards
-			logger.debug("Looping through call log");
-			for (int i = numCalls - 1; i >= 0; i--) {
-				PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog.callAt(i,
-						PhoneLogs.FOLDER_NORMAL_CALLS);
-				// Unix timestamp of call
-				long callTimestamp = callLogEntry.getDate().getTime();
-				// Phone number of call
-				PhoneCallLogID callParticipant = callLogEntry.getParticipant();
+					// Loop through call list backwards
+					logger.debug("Looping through call log");
+					for (int i = numCalls - 1; i >= 0; i--) {
+						PhoneCallLog callLogEntry = (PhoneCallLog) phoneLog
+								.callAt(i, PhoneLogs.FOLDER_NORMAL_CALLS);
+						// Unix timestamp of call
+						long callTimestamp = callLogEntry.getDate().getTime();
+						// Phone number of call
+						PhoneCallLogID callParticipant = callLogEntry
+								.getParticipant();
 
-				// Server timestamp must be less than last call timestamp and
-				// calls must be placed or received (not missed)
-				if (serverTimestamp < callTimestamp
-						&& callLogEntry.getStatus() <= PhoneCallLog.TYPE_PLACED_CALL) {
-					logger.debug("Found newer call entry: server:"
-							+ serverTimestamp + "; call" + callTimestamp);
-					// Passing the call status directly to the CallMessage works
-					// because the server expects a '1' for placed or outgoing
-					// and '0' for incoming/received
-					CallMonitor.CallMessage message = new CallMonitor.CallMessage(
-							tools.getDate(callTimestamp),
-							callParticipant.getAddressBookFormattedNumber(),
-							callParticipant.getName(),
-							callLogEntry.getDuration(),
-							callLogEntry.getStatus());
+						// Server timestamp must be less than last call
+						// timestamp and
+						// calls must be placed or received (not missed)
+						if (serverTimestamp < callTimestamp
+								&& callLogEntry.getStatus() <= PhoneCallLog.TYPE_PLACED_CALL) {
+							logger.debug("Found newer call entry: server:"
+									+ serverTimestamp + "; call"
+									+ callTimestamp);
+							// Passing the call status directly to the
+							// CallMessage works
+							// because the server expects a '1' for placed or
+							// outgoing
+							// and '0' for incoming/received
+							CallMonitor.CallMessage message = new CallMonitor.CallMessage(
+									tools.getDate(callTimestamp),
+									callParticipant
+											.getAddressBookFormattedNumber(),
+									callParticipant.getName(),
+									callLogEntry.getDuration(),
+									callLogEntry.getStatus());
 
-					// Contact server with the call log entry
-					Server.get(message.toString());
+							// Contact server with the call log entry
+							Server.get(message.toString());
+						}
+					}
+					logger.debug("Finished sync");
+				} catch (IOException e) {
+					logger.warn("Connection problem: " + e.getMessage());
+				} catch (ParseException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
+				} catch (RuntimeException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
 				}
+
 			}
-			logger.debug("Finished sync");
-		} catch (IOException e) {
-			logger.warn("Connection problem: " + e.getMessage());
-		} catch (ParseException e) {
-			ActivityLog.addMessage(new ErrorMessage(e));
-		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage(e));
-		}
+		}.start();
 	}
 }

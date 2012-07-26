@@ -26,7 +26,7 @@ public class FileSync {
 	public static void sync() {
 		new Thread() {
 			public void run() {
-				logger.debug("Running");
+				logger.debug("Syncing");
 				// Find files on eMMC
 				if (ToolsBB.fsMounted(FILESYSTEM.STORE)) {
 					logger.debug("Finding files on eMMC");
