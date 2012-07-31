@@ -130,6 +130,7 @@ public class Registration implements MobileMinderResource {
 		} else {
 			RuntimeStore.getRuntimeStore().replace(ID_REG, id);
 		}
+		updateStatus();
 	}
 
 	private static void storeDetails() {
