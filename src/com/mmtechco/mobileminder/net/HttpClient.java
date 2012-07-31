@@ -18,6 +18,7 @@ import net.rim.device.api.io.http.HttpProtocolConstants;
 import net.rim.device.api.io.transport.ConnectionDescriptor;
 import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
+import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.DeviceInfo;
 //#ifdef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 import rimx.network.TransportDetective;
@@ -122,10 +123,19 @@ public class HttpClient {
 	}
 
 	private static  HttpConnection setupConnection(String url) throws IOException {
+		String info = DeviceInfo.getDeviceName()
+				+ ", app_ver "
+				+ ApplicationDescriptor.currentApplicationDescriptor()
+						.getVersion();
+		
 		if (DeviceInfo.isSimulator()) {
 			// If running the MDS simulator append ";deviceside=false"
-			return (HttpConnection) Connector.open(url + ";deviceside=true",
+			HttpConnection connection = (HttpConnection) Connector.open(url + ";deviceside=true",
 					Connector.READ_WRITE);
+			connection.setRequestProperty(HttpProtocolConstants.HEADER_USER_AGENT,
+					"BlackBerry Simulator " + info);
+			connection.setRequestProperty("x-rim-transcode-content", "none");
+			return connection;
 		}
 		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 		ConnectionFactory cf = new ConnectionFactory();
@@ -136,7 +146,11 @@ public class HttpClient {
 				TransportInfo.TRANSPORT_MDS, TransportInfo.TRANSPORT_BIS_B };
 		cf.setPreferredTransportTypes(transportPrefs);
 		ConnectionDescriptor cd = cf.getConnection(url);
-		return (HttpConnection) cd.getConnection();
+		HttpConnection connection = (HttpConnection) cd.getConnection();
+		connection.setRequestProperty(HttpProtocolConstants.HEADER_USER_AGENT,
+				"BlackBerry " + info);
+		connection.setRequestProperty("x-rim-transcode-content", "none");
+		return connection;
 		//#else
 		TransportDetective td = new TransportDetective();
 		URLFactory urlFactory = new URLFactory(url);
@@ -154,7 +168,12 @@ public class HttpClient {
 		} else {
 			connectionUrl = urlFactory.getHttpDefaultUrl();
 		}
-		return (HttpConnection)Connector.open(connectionUrl, Connector.READ_WRITE);
+		HttpConnection connection = (HttpConnection) Connector.open(
+				connectionUrl, Connector.READ_WRITE);
+		connection.setRequestProperty(HttpProtocolConstants.HEADER_USER_AGENT,
+				"BlackBerry " + info);
+		connection.setRequestProperty("x-rim-transcode-content", "none");
+		return connection;
 		//#endif
 	}
 	
