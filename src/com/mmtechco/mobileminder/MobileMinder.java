@@ -1,8 +1,6 @@
 //#preprocess
 package com.mmtechco.mobileminder;
 
-import javax.microedition.location.LocationException;
-
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
@@ -135,13 +133,8 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		//new MailMonitor();
 		new CallMonitor();
 		new SMSMonitor();
-		try {
-			new LocationMonitor();
-		} catch (LocationException e) {
-			logger.warn(e.getMessage());
-		}
+		LocationMonitor.start();
 		
-
 		logger.debug("Adding components to Commander");
 		Commander.addComponent(new ContactPic());
 		Commander.addComponent(new FileControl());

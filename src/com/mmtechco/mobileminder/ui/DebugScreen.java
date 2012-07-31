@@ -7,6 +7,7 @@ import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.command.EmergencyNumbers;
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.data.FileLog;
+import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.util.Logger;
 
 import net.rim.device.api.i18n.ResourceBundle;
@@ -104,7 +105,8 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			public void run() {
 				PersistentStore.destroyPersistentObject(ActivityLog.ID);
 				PersistentStore.destroyPersistentObject(FileLog.ID);
-				System.exit(0);
+				//System.exit(0);
+				close();
 			}
 		};
 		
@@ -133,6 +135,8 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 
 	public void close() {
 		// TODO: remove filesystem listener, remove call and sms listeners.
+		RuntimeStore.getRuntimeStore().remove(Registration.ID);
+		LocationMonitor.stop();
 		super.close();
 	}
 
@@ -168,6 +172,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 					// Delete details
 					PersistentStore.destroyPersistentObject(Registration.ID);
 					RuntimeStore.getRuntimeStore().remove(Registration.ID);
+					close();
 					System.exit(0);
 				}
 			});
