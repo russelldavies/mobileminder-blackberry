@@ -18,7 +18,7 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 public class CallMonitor extends AbstractPhoneListener {
 	private static Logger logger = Logger.getLogger(CallMonitor.class);
 
-	private CallMessage callMessage;
+	private static CallMessage callMessage;
 
 	public CallMonitor() {
 		Phone.addPhoneListener(this);
@@ -36,7 +36,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		String contactName = new PhoneCallLogID(number).getName();
 		contactName = (contactName == null ? "" : contactName);
 		
-		callMessage = new CallMessage(number, contactName, true);
+		callMessage = new CallMessage(number, contactName, false);
 	}
 
 	public void callInitiated(int callId) {
@@ -83,7 +83,7 @@ public class CallMonitor extends AbstractPhoneListener {
 		 * <li>Phone number (received or dialled)
 		 * <li>Contact name
 		 * <li>Call duration
-		 * <li>Direction: outgoing = 1, incoming = 0
+		 * <li>Direction: outgoing = true, incoming = false
 		 * <li>Call end status (unanswered, finished, etc)
 		 * </ul>
 		 */
@@ -93,6 +93,7 @@ public class CallMonitor extends AbstractPhoneListener {
 			add(number);
 			add(contactName);
 			this.outgoing = outgoing;
+			this.callStart = new Date();
 		}
 		
 		public void callEnded(int endStatus) {
