@@ -27,7 +27,7 @@ import rimx.network.URLFactory;
 import com.mmtechco.util.Logger;
 
 public class HttpClient {
-	private static final String URL = "https://www.mobileminder.net/WebService.php?";
+	private static final String BASE_URL = "https://client.mobileminder.com/WebService.php?";
 	
 	private static Logger logger = Logger.getLogger(HttpClient.class);
 
@@ -38,7 +38,7 @@ public class HttpClient {
 		String queryStringEncoded = URLUTF8Encoder.encode(queryString);
 
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(URL + queryStringEncoded);
+		HttpConnection connection = setupConnection(BASE_URL + queryStringEncoded);
 		connection.setRequestMethod(HttpConnection.GET);
 		connection.setRequestProperty(
 						HttpProtocolConstants.HEADER_CONTENT_TYPE,
@@ -52,7 +52,7 @@ public class HttpClient {
 		logger.debug("POST data: " + queryString);
 		
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(URL + queryString);
+		HttpConnection connection = setupConnection(BASE_URL + queryString);
 		connection.setRequestMethod(HttpConnection.POST);
 		connection.setRequestProperty(
 						HttpProtocolConstants.HEADER_CONTENT_TYPE,
@@ -83,7 +83,7 @@ public class HttpClient {
 		logger.debug("POST multipart query string: " + queryString);
 		
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(URL + queryString);
+		HttpConnection connection = setupConnection(BASE_URL + queryString);
 		connection.setRequestMethod(HttpConnection.POST);
 		String boundary = Long.toString(System.currentTimeMillis());
 		connection.setRequestProperty(
