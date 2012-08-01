@@ -1,4 +1,3 @@
-//#preprocess
 package com.mmtechco.mobileminder.ui;
 
 import java.io.IOException;
@@ -48,14 +47,12 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private TextField idTextField = new TextField(Field.NON_FOCUSABLE);
 
 	
-	//#ifndef VER_4.5.0
 	// Notification icons
 	ApplicationIcon icon_reg = new ApplicationIcon(
 			EncodedImage.getEncodedImageResource("notify_reg.png"));
 	ApplicationIcon icon_unreg = new ApplicationIcon(
 			EncodedImage.getEncodedImageResource("notify_unreg.png"));
 	ApplicationIcon notifyIcon = icon_unreg;
-	//#endif
 
 	public InfoScreen() {
 		super(Manager.NO_VERTICAL_SCROLL);
@@ -118,10 +115,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		 */
 		vfm.add(helpButton);
 
-		//#ifndef VER_4.5.0
 		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
-		//#endif
 		add(vfm);
 	}
 
@@ -203,7 +198,6 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		return true;
 	}
 
-	//#ifndef VER_4.5.0
 	public void registerIndicator() {
 		try {
 			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
@@ -246,7 +240,6 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon", e));
 		}
 	}
-	//#endif
 
 	// Custom private class that creates the button and switches the image
 	// depending on the return value of onFocus()

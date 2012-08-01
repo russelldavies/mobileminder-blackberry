@@ -45,11 +45,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		
 		// Listen for registration events
 		app.addGlobalEventListener(app);
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-		// Setup listener for removal of app. This needs to be set here before
-		// the app enters the event dispatcher.
 		CodeModuleManager.addListener(app, new UninstallMonitor());
-		//#endif
 		
 		// If system startup is still in progress when this
 		// application is run.
@@ -117,10 +113,8 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	public void startComponents() {
 		logger.debug("Starting components");
 		
-		//#ifndef VER_4.5.0
 		// Register application indicator
 		//infoscreen.registerIndicator();
-		//#endif
 
 		// Start call sync. Note that there is no faculty to access existing SMS
 		// messages stored on the device.

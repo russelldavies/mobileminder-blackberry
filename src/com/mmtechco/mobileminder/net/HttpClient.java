@@ -1,4 +1,3 @@
-//#preprocess
 package com.mmtechco.mobileminder.net;
 
 import java.io.IOException;
@@ -20,10 +19,6 @@ import net.rim.device.api.io.transport.ConnectionFactory;
 import net.rim.device.api.io.transport.TransportInfo;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.DeviceInfo;
-//#ifdef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
-import rimx.network.TransportDetective;
-import rimx.network.URLFactory;
-//#endif
 
 import com.mmtechco.util.Logger;
 
@@ -137,7 +132,6 @@ public class HttpClient {
 			connection.setRequestProperty("x-rim-transcode-content", "none");
 			return connection;
 		}
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1 | VER_4.7.0
 		ConnectionFactory cf = new ConnectionFactory();
 		// Ordered list of preferred transports
 		int[] transportPrefs = { TransportInfo.TRANSPORT_TCP_WIFI,
@@ -151,30 +145,6 @@ public class HttpClient {
 				"BlackBerry " + info);
 		connection.setRequestProperty("x-rim-transcode-content", "none");
 		return connection;
-		//#else
-		TransportDetective td = new TransportDetective();
-		URLFactory urlFactory = new URLFactory(url);
-		String connectionUrl;
-		if(td.isCoverageAvailable(TransportDetective.TRANSPORT_TCP_WIFI)) {
-		   connectionUrl = urlFactory.getHttpTcpWiFiUrl();
-		} else if (td.isCoverageAvailable(TransportDetective.DEFAULT_TCP_CELLULAR)) {
-			connectionUrl = urlFactory.getHttpDefaultTcpCellularUrl(td.getDefaultTcpCellularServiceRecord());
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_WAP2)) {
-			connectionUrl = urlFactory.getHttpWap2Url(td.getWap2ServiceRecord());
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_MDS)) {
-			connectionUrl = urlFactory.getHttpMdsUrl(false);
-		} else if (td.isCoverageAvailable(TransportDetective.TRANSPORT_BIS_B)) {
-			connectionUrl = urlFactory.getHttpBisUrl();
-		} else {
-			connectionUrl = urlFactory.getHttpDefaultUrl();
-		}
-		HttpConnection connection = (HttpConnection) Connector.open(
-				connectionUrl, Connector.READ_WRITE);
-		connection.setRequestProperty(HttpProtocolConstants.HEADER_USER_AGENT,
-				"BlackBerry " + info);
-		connection.setRequestProperty("x-rim-transcode-content", "none");
-		return connection;
-		//#endif
 	}
 	
 	/**

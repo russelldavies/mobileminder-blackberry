@@ -1,4 +1,3 @@
-//#preprocess
 package com.mmtechco.mobileminder.monitor;
 
 import java.util.Date;
@@ -28,10 +27,7 @@ public class CallMonitor extends AbstractPhoneListener {
 	public void callAnswered(int callId) {
 		logger.info("Call answered");
 
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
-		//#else
-		String number = Phone.getCall(callId).getDisplayPhoneNumber();
 		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
 		contactName = (contactName == null ? "" : contactName);
@@ -42,11 +38,7 @@ public class CallMonitor extends AbstractPhoneListener {
 	public void callInitiated(int callId) {
 		logger.info("Call initiated");
 		
-		//#ifndef VER_4.5.0 | VER_4.6.0 | VER_4.6.1
 		String number = Phone.getCall(callId).getPhoneNumber();
-		//#else
-		String number = Phone.getCall(callId).getDisplayPhoneNumber();
-		//#endif
 		String contactName = new PhoneCallLogID(number).getName();
 		contactName = (contactName == null ? "" : contactName);
 		
