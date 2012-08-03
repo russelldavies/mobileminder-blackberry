@@ -30,11 +30,8 @@ public class HttpClient {
 	public static Response get(String queryString) throws IOException {
 		logger.debug("GET query string: " + queryString);
 
-		// URL encode the query string
-		String queryStringEncoded = URLUTF8Encoder.encode(queryString);
-
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(BASE_URL + queryStringEncoded);
+		HttpConnection connection = setupConnection(BASE_URL + URLUTF8Encoder.encode(queryString));
 		connection.setRequestMethod(HttpConnection.GET);
 		connection.setRequestProperty(
 						HttpProtocolConstants.HEADER_CONTENT_TYPE,
@@ -48,7 +45,7 @@ public class HttpClient {
 		logger.debug("POST data: " + queryString);
 		
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(BASE_URL + queryString);
+		HttpConnection connection = setupConnection(BASE_URL + URLUTF8Encoder.encode(queryString));
 		connection.setRequestMethod(HttpConnection.POST);
 		connection.setRequestProperty(
 						HttpProtocolConstants.HEADER_CONTENT_TYPE,
@@ -79,7 +76,7 @@ public class HttpClient {
 		logger.debug("POST multipart query string: " + queryString);
 		
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(BASE_URL + queryString);
+		HttpConnection connection = setupConnection(BASE_URL + URLUTF8Encoder.encode(queryString));
 		connection.setRequestMethod(HttpConnection.POST);
 		String boundary = Long.toString(System.currentTimeMillis());
 		connection.setRequestProperty(
