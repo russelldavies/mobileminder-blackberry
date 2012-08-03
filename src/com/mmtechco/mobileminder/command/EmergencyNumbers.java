@@ -53,6 +53,7 @@ public class EmergencyNumbers implements Controllable {
 				return false;
 			}
 
+			numbers.removeAllElements();
 			for (int i = 0; i < nums.length; i++) {
 				numbers.addElement(nums[i]);
 			}
@@ -71,8 +72,8 @@ public class EmergencyNumbers implements Controllable {
 		return false;
 	}
 
-	public boolean isTarget(COMMAND_TARGETS targets) {
-		if (targets == COMMAND_TARGETS.OWNER) {
+	public boolean isTarget(String target) {
+		if (target.equalsIgnoreCase(Commander.TARGET.OWNER)) {
 			return true;
 		}
 		return false;

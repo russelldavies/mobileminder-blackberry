@@ -113,15 +113,10 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 	public void startComponents() {
 		logger.debug("Starting components");
 		
-		// Register application indicator
-		//infoscreen.registerIndicator();
-
-		// Start call sync. Note that there is no faculty to access existing SMS
-		// messages stored on the device.
-		CallSync.sync();
+		CallSync.sync(); // No SMS sync facility on BB, only call sync
 		FileSync.sync();
 
-		// Start monitors
+		// Monitors
 		logger.debug("Starting monitors...");
 		new AppMonitor();
 		//new MailMonitor();

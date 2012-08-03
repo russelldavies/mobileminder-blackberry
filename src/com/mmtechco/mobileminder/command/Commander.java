@@ -22,10 +22,10 @@ import com.mmtechco.util.ToolsBB;
  * responsible for processing responses.
  */
 public class Commander {
-	private static final int time = 1000 * 60 * 5; // 5 mins
+	private static final int period = 1000 * 60 * 5; // 5 mins
 	private static final int noCommandIndex = 0;
 
-	private static Vector components;
+	private static Vector components = new Vector();
 
 	private static MMTools tools = ToolsBB.getInstance();
 	private static Logger logger = Logger.getLogger(Commander.class);
@@ -36,7 +36,7 @@ public class Commander {
 	
 	public static void startProcessing() {
 		logger.info("Started processing");
-		new Timer().schedule(new CommandTask(), time);
+		new Timer().scheduleAtFixedRate(new CommandTask(), 0, period);
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class Commander {
 					for (Enumeration e = components.elements(); e.hasMoreElements();) {
 						Controllable target = (Controllable) e.nextElement();
 						
-						if (!target.isTarget(reply.getTarget())) {
-							break;
+						if (!target.isTarget(reply.target)) {
+							continue;
 						}
 
 						CommandMessage message = new CommandMessage( reply.index);
@@ -68,7 +68,7 @@ public class Commander {
 							// Command executed successfully
 							message.succeeded(true);
 							logger.debug("Executed command " + reply.index
-											+ ": " + reply.getArgs());
+									+ ": " + reply.args);
 						} else {
 							// Command failed
 							logger.debug("Failed to execute command "
@@ -76,6 +76,7 @@ public class Commander {
 							message.succeeded(false);
 						}
 						HttpClient.get(message.toString());
+						break;
 					}
 				} catch (IOException e) {
 					logger.warn("Connection problem: " + e.getMessage());
@@ -116,5 +117,16 @@ public class Commander {
 			add(startTime);
 			add(tools.getDate());
 		}
+	}
+	
+	public static class TARGET {
+		public static final String SHOW = "SHOW";
+		public static final String CALL = "CALL";
+		public static final String SMS = "SMS";
+		public static final String APP = "APP";
+		public static final String WEB = "WEB";
+		public static final String CONTACTS = "CONTS";
+		public static final String OWNER = "OWNER";
+		public static final String FILES = "FILES";
 	}
 }

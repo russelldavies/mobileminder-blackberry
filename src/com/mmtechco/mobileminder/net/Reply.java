@@ -1,6 +1,5 @@
 package com.mmtechco.mobileminder.net;
 
-import com.mmtechco.mobileminder.command.COMMAND_TARGETS;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.MMTools;
 import com.mmtechco.util.ToolsBB;
@@ -53,8 +52,8 @@ public abstract class Reply {
 
 	public static class Command extends Reply {
 		public int index;
-		private String target;
-		private String args;
+		public String target;
+		public String args;
 
 		public Command(String content) throws ParseException {
 			super(content);
@@ -66,16 +65,12 @@ public abstract class Reply {
 				index = Integer.parseInt(fields[2]);
 				// Message contains additional fields
 				if (index != 0) {
-					target = fields[3];
+					target = new String(fields[3]).toUpperCase();
 					args = fields[4];
 				}
 			} catch (RuntimeException e) {
 				throw new ParseException(e);
 			}
-		}
-
-		public COMMAND_TARGETS getTarget() {
-			return COMMAND_TARGETS.from(target);
 		}
 
 		public String[] getArgs() {

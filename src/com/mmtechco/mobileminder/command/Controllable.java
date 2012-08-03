@@ -21,5 +21,5 @@ public interface Controllable {
 	 * @param targets - passed to be checked.
 	 * @return true if this is the desired target.
 	 */
-	public boolean isTarget(COMMAND_TARGETS targets);
+	public boolean isTarget(String target);
 }

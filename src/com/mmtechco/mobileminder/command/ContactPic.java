@@ -39,7 +39,7 @@ public class ContactPic implements Controllable {
 		try {
 			String type = args[0];
 			String verb = args[1];
-			String number = String.valueOf(Long.parseLong(args[2]));
+			String number = args[2];
 
 			// Check type and verb are matching
 			if (!(type.equalsIgnoreCase(TYPE) && verb.equalsIgnoreCase(VERB))) {
@@ -79,8 +79,8 @@ public class ContactPic implements Controllable {
 		return false;
 	}
 
-	public boolean isTarget(COMMAND_TARGETS targets) {
-		if (targets == COMMAND_TARGETS.CONTACTS) {
+	public boolean isTarget(String target) {
+		if (target.equalsIgnoreCase(Commander.TARGET.CONTACTS)) {
 			return true;
 		}
 		return false;
@@ -131,7 +131,7 @@ public class ContactPic implements Controllable {
 		public ContactPicContainer(byte[] byteStream, String filetype,
 				String email) {
 			this.stream = byteArrayToHexString(byteStream);
-			this.filetype = filetype;
+			this.filetype = filetype.substring(filetype.indexOf('/') + 1);
 			this.email = email;
 		}
 	}
@@ -150,6 +150,16 @@ public class ContactPic implements Controllable {
 }
 
 class ContactPicMessage extends Message {
+	/**
+	 * Message format:
+	 * <ul>
+	 * <li>device date
+	 * <li>file type (mime type)
+	 * <li>contact name
+	 * <li>contact number
+	 * <li>contact email
+	 * </ul>
+	 */
 	public ContactPicMessage(String fileType, String contactNumber,
 			String contactEmail) {
 		super(Message.CONTACT_PIC, new String[] {
@@ -159,11 +169,11 @@ class ContactPicMessage extends Message {
 	}
 
 	private static String getContactNameFromNumber(String contactNum) {
-		String thePhoneNumber = "<no name>";
+		String name = "";
 		PhoneCallLogID callLog = new PhoneCallLogID(contactNum);
 		if (callLog.getName() != null) {
-			thePhoneNumber = callLog.getName();
+			name = callLog.getName();
 		}
-		return thePhoneNumber;
+		return name;
 	}
 }

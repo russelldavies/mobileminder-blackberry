@@ -71,11 +71,10 @@ public class FileControl implements Controllable {
 		return false;
 	}
 
-	public boolean isTarget(COMMAND_TARGETS targets) {
-		if (targets == COMMAND_TARGETS.FILES) {
+	public boolean isTarget(String target) {
+		if (target.equalsIgnoreCase(Commander.TARGET.FILES)) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 }
