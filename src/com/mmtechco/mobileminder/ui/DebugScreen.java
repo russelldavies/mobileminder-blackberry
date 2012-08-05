@@ -104,7 +104,7 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 			}
 		};
 
-		MenuItem delStoreMenu = new MenuItem("Delete Store", 0x100040, 3) {
+		MenuItem delStoreMenu = new MenuItem("Delete FileLog", 0x100040, 3) {
 			public void run() {
 				PersistentStore.destroyPersistentObject(ActivityLog.ID);
 				PersistentStore.destroyPersistentObject(FileLog.ID);

@@ -243,6 +243,8 @@ public class FileLog {
 									response.getContent());
 							// If server successfully processed mark as uploaded
 							if (!reply.error) {
+								files.removeElement(fileholder);
+								
 								// Object must be ungrouped to modify it
 								if (ObjectGroup.isInGroup(fileholder)) {
 									fileholder = (FileHolder) ObjectGroup
@@ -251,6 +253,9 @@ public class FileLog {
 								fileholder.setUploaded(true);
 								// Regroup object
 								ObjectGroup.createGroup(fileholder);
+								
+								logger.debug(fileholder.getFileName() + " marked as uploaded");
+								files.addElement(fileholder);
 							}
 						} catch (IOException e) {
 							logger.warn("Connection problem: " + e.getMessage());

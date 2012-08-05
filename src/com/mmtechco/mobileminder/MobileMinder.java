@@ -145,7 +145,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 
 	public void powerOff() {
 	}
-
+	
 	public void rootChanged(int state, String rootName) {
 		// TODO: implement
 	}

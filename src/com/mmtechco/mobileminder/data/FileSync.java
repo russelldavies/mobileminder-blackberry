@@ -20,7 +20,7 @@ import com.mmtechco.util.ToolsBB;
 public class FileSync {
 	private static Logger logger = Logger.getLogger(FileSync.class);
 
-	private static final String storeDir = "file:///store/";
+	private static final String storeDir = "file:///store/home/user/";
 	private static final String sdcardDir = "file:///SDCard/";
 	
 	private static final FileListener fileListener = new FileListener();
@@ -99,6 +99,11 @@ public class FileSync {
 	}
 
 	public static boolean supportedType(String filePath) {
+		// Don't look in the /system dir
+		if (filePath.startsWith("file:///system/")) {
+			return false;
+		}
+		
 		boolean supported = false;
 		String contentType = MIMETypeAssociations.getMIMEType(filePath);
 		// Normalize and strip off parameters
