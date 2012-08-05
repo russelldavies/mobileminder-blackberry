@@ -80,24 +80,21 @@ public class ActivityLog {
 	}
 
 	private static synchronized void sendMessages() {
-		new Thread() {
-			public void run() {
-				try {
-					for (Enumeration messages = log.elements(); messages.hasMoreElements();) {
-						String message = (String) messages.nextElement();
-						Response response = HttpClient.get(message);
-						Reply.Regular reply = new Reply.Regular(response.getContent());
-						if (!reply.error) {
-							log.removeElement(message);
-						}
-					}
-					commit();
-				} catch (IOException e) {
-					logger.warn("Connection problem: " + e.getMessage());
-				} catch (ParseException e) {
-					ActivityLog.addMessage(new ErrorMessage(e));
+		try {
+			for (Enumeration messages = log.elements(); messages
+					.hasMoreElements();) {
+				String message = (String) messages.nextElement();
+				Response response = HttpClient.get(message);
+				Reply.Regular reply = new Reply.Regular(response.getContent());
+				if (!reply.error) {
+					log.removeElement(message);
 				}
 			}
-		}.start();
+			commit();
+		} catch (IOException e) {
+			logger.warn("Connection problem: " + e.getMessage());
+		} catch (ParseException e) {
+			ActivityLog.addMessage(new ErrorMessage(e));
+		}
 	}
 }
