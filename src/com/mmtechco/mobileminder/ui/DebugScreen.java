@@ -2,14 +2,6 @@ package com.mmtechco.mobileminder.ui;
 
 import java.util.Hashtable;
 
-import com.mmtechco.mobileminder.MobileMinderResource;
-import com.mmtechco.mobileminder.Registration;
-import com.mmtechco.mobileminder.command.EmergencyNumbers;
-import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.data.FileLog;
-import com.mmtechco.mobileminder.monitor.LocationMonitor;
-import com.mmtechco.util.Logger;
-
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Characters;
 import net.rim.device.api.system.EventLogger;
@@ -29,6 +21,17 @@ import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.PopupScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
+
+import com.mmtechco.mobileminder.MobileMinderResource;
+import com.mmtechco.mobileminder.Registration;
+import com.mmtechco.mobileminder.command.EmergencyNumbers;
+import com.mmtechco.mobileminder.data.ActivityLog;
+import com.mmtechco.mobileminder.data.FileLog;
+import com.mmtechco.mobileminder.data.FileSync;
+import com.mmtechco.mobileminder.monitor.CallMonitor;
+import com.mmtechco.mobileminder.monitor.LocationMonitor;
+import com.mmtechco.mobileminder.monitor.SMSMonitor;
+import com.mmtechco.util.Logger;
 
 /**
  * Screen that displays all the logging info. Useful for debugging. Enable by
@@ -134,14 +137,21 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 	}
 
 	public void close() {
-		// TODO: remove filesystem listener, remove call and sms listeners.
-		RuntimeStore.getRuntimeStore().remove(Registration.ID);
-		LocationMonitor.stop();
+		cleanup();
 		super.close();
+	}
+	
+	public static void cleanup() {
+		// Remove all listeners and clear components start flag
+		Logger.getLogger(DebugScreen.class).info("Stopping listeners");
+		SMSMonitor.stop();
+		CallMonitor.stop();
+		LocationMonitor.stop();
+		FileSync.stop();
+		RuntimeStore.getRuntimeStore().remove(Registration.ID);
 	}
 
 	final class RegPopupScreen extends PopupScreen {
-
 		public RegPopupScreen() {
 			super(new VerticalFieldManager());
 
@@ -165,15 +175,14 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 				}
 			}
 
-			ButtonField exitButton = new ButtonField("Exit",
+			ButtonField exitButton = new ButtonField("Clear registration details",
 					ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 			exitButton.setChangeListener(new FieldChangeListener() {
 				public void fieldChanged(Field field, int context) {
-					// Delete details
+					// Delete registration details
 					PersistentStore.destroyPersistentObject(Registration.ID);
-					RuntimeStore.getRuntimeStore().remove(Registration.ID);
+					DebugScreen.cleanup();
 					close();
-					System.exit(0);
 				}
 			});
 			add(exitButton);

@@ -35,6 +35,14 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 		}
 		logger.info("Started listening");
 	}
+	
+	public static void stop() {
+		try {
+			receiver.setMessageListener(null);
+		} catch (IOException e) {
+			logger.warn(e.getMessage());
+		}
+	}
 
 	// In the simulator, ensure source and destination SMS ports are the same in
 	// the Network menu, this way you will receive the text you just sent, and

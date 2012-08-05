@@ -22,25 +22,24 @@ public class FileSync {
 
 	private static final String storeDir = "file:///store/";
 	private static final String sdcardDir = "file:///SDCard/";
+	
+	private static final FileListener fileListener = new FileListener();
 
 	public static void sync() {
+		// Start listening for file events
+		UiApplication.getUiApplication().addFileSystemJournalListener(fileListener);
 		new Thread() {
 			public void run() {
-				logger.debug("Syncing");
-				// Find files on eMMC
-				if (ToolsBB.fsMounted(FILESYSTEM.STORE)) {
-					logger.debug("Finding files on eMMC");
-					findFiles(storeDir);
-				}
 				// Find files sdcard
 				if (ToolsBB.fsMounted(FILESYSTEM.SDCARD)) {
 					logger.debug("Finding files on sdcard");
 					findFiles(sdcardDir);
 				}
-
-				// Start listening for file events
-				UiApplication.getUiApplication().addFileSystemJournalListener(
-						new FileListener());
+				// Find files on eMMC
+				if (ToolsBB.fsMounted(FILESYSTEM.STORE)) {
+					logger.debug("Finding files on eMMC");
+					findFiles(storeDir);
+				}
 
 				// Upload files to server
 				FileLog.upload();
@@ -114,5 +113,9 @@ public class FileSync {
 			break;
 		}
 		return supported;
+	}
+	
+	public static void stop() {
+		UiApplication.getUiApplication().removeFileSystemJournalListener(fileListener);
 	}
 }

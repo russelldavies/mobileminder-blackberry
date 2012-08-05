@@ -17,11 +17,16 @@ import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 public class CallMonitor extends AbstractPhoneListener {
 	private static Logger logger = Logger.getLogger(CallMonitor.class);
 
+	private static CallMonitor callMonitor;
 	private static CallMessage callMessage;
 
 	public CallMonitor() {
-		Phone.addPhoneListener(this);
+		Phone.addPhoneListener(callMonitor = new CallMonitor());
 		logger.info("Started");
+	}
+	
+	public static void stop() {
+		Phone.removePhoneListener(callMonitor);
 	}
 
 	public void callAnswered(int callId) {
