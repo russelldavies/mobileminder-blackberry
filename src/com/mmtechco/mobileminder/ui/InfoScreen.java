@@ -118,6 +118,9 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
 		add(vfm);
+
+		// TODO: enable
+		//registerIndicator();
 	}
 
 	/*
