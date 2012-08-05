@@ -1,3 +1,4 @@
+//#preprocess
 package com.mmtechco.mobileminder.net;
 
 import java.io.IOException;
@@ -23,7 +24,11 @@ import net.rim.device.api.system.DeviceInfo;
 import com.mmtechco.util.Logger;
 
 public class HttpClient {
+	//#ifndef DEBUG
 	private static final String BASE_URL = "https://client.mobileminder.com/WebService.php?";
+	//#else
+	private static final String BASE_URL = "http://client.mobileminder.net/WebService.php?";
+	//#endif
 	
 	private static Logger logger = Logger.getLogger(HttpClient.class);
 
