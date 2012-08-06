@@ -2,17 +2,16 @@ package com.mmtechco.mobileminder.ui;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
+import net.rim.device.api.system.Display;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Color;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
@@ -22,7 +21,6 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
-import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
@@ -44,7 +42,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private TextField idTextField = new TextField(Field.NON_FOCUSABLE);
 
 	public InfoScreen() {
-		super(Manager.NO_VERTICAL_SCROLL);
+		super(NO_VERTICAL_SCROLL | USE_ALL_HEIGHT | USE_ALL_WIDTH);
 
 		// Give reference of self to Registration so fields can be updated
 		Registration.addObserver(this);
@@ -56,23 +54,17 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		idTextField.setText("[none]");
 
 		// Define layout manager
-		VerticalFieldManager vfm = new VerticalFieldManager(
-				VerticalFieldManager.USE_ALL_HEIGHT
-						| VerticalFieldManager.USE_ALL_WIDTH
-						| VerticalFieldManager.FIELD_HCENTER);
+		VerticalFieldManager vfm = new VerticalFieldManager(USE_ALL_HEIGHT
+				| USE_ALL_WIDTH | FIELD_HCENTER);
 
-		// Add logo
-		vfm.add(new BitmapField(Bitmap.getBitmapResource("logo.png"),
-				Field.FIELD_HCENTER));
-
-		// Info blurb and icon
-		HorizontalFieldManager info_hfm = new HorizontalFieldManager(
-				HorizontalFieldManager.USE_ALL_WIDTH);
-		info_hfm.add(new BitmapField(Bitmap.getBitmapResource("icon_72.png")));
-		info_hfm.add(new LabelField(r.getString(i18n_Description)));
-		info_hfm.setPadding(20, 0, 0, 0);
-		vfm.add(info_hfm);
-		vfm.add(new SeparatorField());
+		// Logo
+		Bitmap logoBitmap = Bitmap.getBitmapResource("mobileminder.png");
+		float ratio = (float) logoBitmap.getWidth() / logoBitmap.getHeight();
+		int newWidth = (int) (Display.getWidth() * 0.9);
+		int newHeight = (int) (newWidth / ratio);
+		BitmapField logoField = new BitmapField(ToolsBB.resizeBitmap( logoBitmap, newWidth, newHeight, Bitmap.FILTER_LANCZOS, Bitmap.SCALE_TO_FIT), Field.FIELD_HCENTER);
+		logoField.setPadding(0, 0, 10, 0);
+		vfm.add(logoField);
 
 		// Registration fields
 		vfm.add(statusTextField);
@@ -87,9 +79,9 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				sendHelpMe();
 			}
 		});
-		vfm.add(helpButton);
+		setStatus(helpButton);
 
-		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
+		setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
 		add(vfm);
 
