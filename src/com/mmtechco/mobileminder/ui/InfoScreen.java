@@ -84,15 +84,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 		helpButton.setChangeListener(new FieldChangeListener() {
 			public void fieldChanged(Field field, int context) {
-				if (EmergencyNumbers.getNumbers().size() > 0) {
-					if (sendHelpMe()) {
-						Dialog.inform(r.getString(i18n_HelpSent));
-					} else {
-						Dialog.inform("Could not send help message");
-					}
-				} else {
-					Dialog.inform("No emergency numbers have been set");
-				}
+				sendHelpMe();
 			}
 		});
 		vfm.add(helpButton);
@@ -116,7 +108,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					idTextField.setText(regId);
 				}
 				statusTextField.setText(Registration.getStatus());
-				
+
 				if (Registration.isRegistered()) {
 					updateIcon(icon_reg);
 				} else {
@@ -136,48 +128,45 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
-		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010, 0) {
+		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010,
+				0) {
 			public void run() {
-				// TODO: make modalless
-				// Dialog.inform(r.getString(i18n_HelpSending));
-				(new Thread() {
-					boolean sendStatus = false;
-
-					public void run() {
-						sendStatus = sendHelpMe();
-						if (sendStatus) {
-							Dialog.inform(r.getString(i18n_HelpSent));
-						}
-					}
-				}).start();
+				sendHelpMe();
 			}
 		};
-
-		// Only display menu if there are emergency numbers
-		if (EmergencyNumbers.getNumbers().size() > 0) {
-			menu.add(helpMenu);
-		}
+		menu.add(helpMenu);
 
 		super.makeMenu(menu, instance);
 	}
 
-	private boolean sendHelpMe() {
-		String mapLocation = "http://www.mobileminder.net/findme.php?"
-				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
-		Vector emergNums = EmergencyNumbers.getNumbers();
-		for (Enumeration nums = emergNums.elements(); nums.hasMoreElements();) {
-			try {
-				((ToolsBB) ToolsBB.getInstance()).sendSMS(
-						(String) nums.nextElement(), r.getString(i18n_HelpMsg)
-								+ mapLocation);
-			} catch (IOException e) {
-				ActivityLog.addMessage(new ErrorMessage(e));
-				return false;
-			}
+	private void sendHelpMe() {
+		if (EmergencyNumbers.getNumbers().size() < 1) {
+			Dialog.inform("No emergency numbers have been set");
+			return;
 		}
-		return true;
+
+		new Thread() {
+			public void run() {
+				String mapLocation = "http://www.mobileminder.net/findme.php?"
+						+ LocationMonitor.latitude + ","
+						+ LocationMonitor.longitude;
+				for (Enumeration nums = EmergencyNumbers.getNumbers()
+						.elements(); nums.hasMoreElements();) {
+					try {
+						String number = (String) nums.nextElement();
+						ToolsBB.sendSMS(number, r.getString(i18n_HelpMsg)
+								+ mapLocation);
+					} catch (IOException e) {
+						Dialog.inform("Could not send help message");
+						ActivityLog.addMessage(new ErrorMessage(e));
+						return;
+					}
+				}
+				Dialog.inform(r.getString(i18n_HelpSent));
+			}
+		}.start();
 	}
-	
+
 	public void close() {
 		// App is pushed to background rather than terminated when screen is
 		// closed.
@@ -197,25 +186,30 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 
 	public void registerIndicator() {
 		try {
-			ApplicationIndicatorRegistry.getInstance().register(icon_unreg, true, true);
+			ApplicationIndicatorRegistry.getInstance().register(icon_unreg,
+					true, true);
 		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not register notification icon", e));
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not register notification icon", e));
 		}
 	}
 
 	public void updateIcon(ApplicationIcon icon) {
 		try {
-			ApplicationIndicatorRegistry.getInstance().getApplicationIndicator().setIcon(icon);
+			ApplicationIndicatorRegistry.getInstance()
+					.getApplicationIndicator().setIcon(icon);
 		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon", e));
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not update notification icon", e));
 		}
 	}
-	
+
 	public void unregisterIndicator() {
 		try {
 			ApplicationIndicatorRegistry.getInstance().unregister();
 		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not unregister notification icon", e));
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not unregister notification icon", e));
 		}
 	}
 }

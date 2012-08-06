@@ -220,7 +220,7 @@ public class ToolsBB extends Tools {
 		}
 	}
 
-	public void sendSMS(String number, String message) throws IOException {
+	public static void sendSMS(String number, String message) throws IOException {
 		// Note that send() is a blocking synchronous method so when calling
 		// this method spawn a new thread.
 		MessageConnection gsmConnection = null;
