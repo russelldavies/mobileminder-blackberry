@@ -12,7 +12,6 @@ import javax.microedition.io.file.FileSystemRegistry;
 import javax.wireless.messaging.MessageConnection;
 import javax.wireless.messaging.TextMessage;
 
-
 import net.rim.blackberry.api.mail.Address;
 import net.rim.blackberry.api.mail.Folder;
 import net.rim.blackberry.api.mail.Message;
@@ -23,8 +22,11 @@ import net.rim.device.api.i18n.SimpleDateFormat;
 import net.rim.device.api.io.http.HttpDateParser;
 import net.rim.device.api.system.ApplicationDescriptor;
 import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EventInjector;
 import net.rim.device.api.system.RadioInfo;
+import net.rim.device.api.ui.Color;
+import net.rim.device.api.ui.Graphics;
 
 import com.mmtechco.mobileminder.data.FILESYSTEM;
 
@@ -220,7 +222,7 @@ public class ToolsBB extends Tools {
 		}
 	}
 
-	public void sendSMS(String number, String message) throws IOException {
+	public static void sendSMS(String number, String message) throws IOException {
 		// Note that send() is a blocking synchronous method so when calling
 		// this method spawn a new thread.
 		MessageConnection gsmConnection = null;
@@ -262,5 +264,122 @@ public class ToolsBB extends Tools {
 			return classname.substring(index + 1, classname.length());
 		}
 		return classname;
+	}
+	
+	/**
+	 * Resizes a bitmap with an alpha channel (transparency) without the
+	 * artifacts introduced by <code>Bitmap.scaleInto()</code>.
+	 * 
+	 * @param bitmap
+	 *            Source Bitmap
+	 * @param width
+	 *            New Width
+	 * @param height
+	 *            New Height
+	 * @param filterType
+	 *            Filter quality to use. Can be
+	 *            <code>Bitmap.FILTER_LANCZOS</code>,
+	 *            <code>Bitmap.FILTER_BILINEAR</code> or
+	 *            <code>Bitmap.FILTER_BOX</code>.
+	 * @param aspectRatio
+	 *            Specifies how the picture is resized. Can be
+	 *            <code>Bitmap.SCALE_TO_FIT</code>,
+	 *            <code>Bitmap.SCALE_TO_FILL</code> or
+	 *            <code>Bitmap.SCALE_STRETCH</code>.
+	 * @return The resized Bitmap in a new object.
+	 */
+	public static Bitmap resizeBitmap(Bitmap bitmap, int width, int height,
+			int filterType, int aspectRatio) {
+		if (bitmap == null)
+			return null;
+
+		// Get the original dimensions of the bitmap
+		int nOriginWidth = bitmap.getWidth();
+		int nOriginHeight = bitmap.getHeight();
+		if (width == nOriginWidth && height == nOriginHeight)
+			return bitmap;
+
+		// Prepare a drawing bitmap and graphic object
+		Bitmap bmpOrigin = new Bitmap(nOriginWidth, nOriginHeight);
+		Graphics graph = Graphics.create(bmpOrigin);
+
+		// Create a line of transparent pixels for later use
+		int[] aEmptyLine = new int[width];
+		for (int x = 0; x < width; x++)
+			aEmptyLine[x] = 0x00000000;
+		// Create two scaled bitmaps
+		Bitmap[] bmpScaled = new Bitmap[2];
+		for (int i = 0; i < 2; i++) {
+			// Draw the bitmap on a white background first, then on a black
+			// background
+			graph.setColor((i == 0) ? Color.WHITE : Color.BLACK);
+			graph.fillRect(0, 0, nOriginWidth, nOriginHeight);
+			graph.drawBitmap(0, 0, nOriginWidth, nOriginHeight, bitmap, 0, 0);
+
+			// Create a new bitmap with the desired size
+			bmpScaled[i] = new Bitmap(width, height);
+			if (aspectRatio == Bitmap.SCALE_TO_FIT) {
+				// Set the alpha channel of all pixels to 0 to ensure
+				// transparency is
+				// applied around the picture, if needed by the transformation
+				for (int y = 0; y < height; y++)
+					bmpScaled[i].setARGB(aEmptyLine, 0, width, 0, y, width, 1);
+			}
+
+			// Scale the bitmap
+			bmpOrigin.scaleInto(bmpScaled[i], filterType, aspectRatio);
+		}
+
+		// Prepare objects for final iteration
+		Bitmap bmpFinal = bmpScaled[0];
+		int[][] aPixelLine = new int[2][width];
+
+		// Iterate every line of the two scaled bitmaps
+		for (int y = 0; y < height; y++) {
+			bmpScaled[0].getARGB(aPixelLine[0], 0, width, 0, y, width, 1);
+			bmpScaled[1].getARGB(aPixelLine[1], 0, width, 0, y, width, 1);
+
+			// Check every pixel one by one
+			for (int x = 0; x < width; x++) {
+				// If the pixel was untouched (alpha channel still at 0), keep
+				// it transparent
+				if (((aPixelLine[0][x] >> 24) & 0xff) == 0)
+					aPixelLine[0][x] = 0x00000000;
+				else {
+					// Compute the alpha value based on the difference of
+					// intensity
+					// in the red channel
+					int nAlpha = ((aPixelLine[1][x] >> 16) & 0xff)
+							- ((aPixelLine[0][x] >> 16) & 0xff) + 255;
+					if (nAlpha == 0)
+						aPixelLine[0][x] = 0x00000000; // Completely transparent
+					else if (nAlpha >= 255)
+						aPixelLine[0][x] |= 0xff000000; // Completely opaque
+					else {
+						// Compute the value of the each channel one by one
+						int nRed = ((aPixelLine[0][x] >> 16) & 0xff);
+						int nGreen = ((aPixelLine[0][x] >> 8) & 0xff);
+						int nBlue = (aPixelLine[0][x] & 0xff);
+
+						nRed = (int) (255 + (255.0 * ((double) (nRed - 255) / (double) nAlpha)));
+						nGreen = (int) (255 + (255.0 * ((double) (nGreen - 255) / (double) nAlpha)));
+						nBlue = (int) (255 + (255.0 * ((double) (nBlue - 255) / (double) nAlpha)));
+
+						if (nRed < 0)
+							nRed = 0;
+						if (nGreen < 0)
+							nGreen = 0;
+						if (nBlue < 0)
+							nBlue = 0;
+						aPixelLine[0][x] = nBlue | (nGreen << 8) | (nRed << 16)
+								| (nAlpha << 24);
+					}
+				}
+			}
+
+			// Change the pixels of this line to their final value
+			bmpFinal.setARGB(aPixelLine[0], 0, width, 0, y, width, 1);
+		}
+		return bmpFinal;
 	}
 }

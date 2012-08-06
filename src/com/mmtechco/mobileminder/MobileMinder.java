@@ -1,7 +1,6 @@
 //#preprocess
 package com.mmtechco.mobileminder;
 
-import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Application;
 import net.rim.device.api.system.ApplicationManager;
 import net.rim.device.api.system.CodeModuleManager;
@@ -20,16 +19,17 @@ import com.mmtechco.mobileminder.monitor.CallMonitor;
 import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.monitor.SMSMonitor;
 import com.mmtechco.mobileminder.monitor.UninstallMonitor;
+//#ifdef DEBUG
 import com.mmtechco.mobileminder.ui.DebugScreen;
+//#else
 import com.mmtechco.mobileminder.ui.InfoScreen;
+//#endif
 import com.mmtechco.util.Logger;
 
 /**
  * Main entry point of the application.
  */
 class MobileMinder extends UiApplication implements SystemListener2, GlobalEventListener {
-	public static ResourceBundle r = ResourceBundle.getBundle(
-			MobileMinderResource.BUNDLE_ID, MobileMinderResource.BUNDLE_NAME);
 	private Logger logger = Logger.getLogger(MobileMinder.class);
 
 	private InfoScreen infoscreen;

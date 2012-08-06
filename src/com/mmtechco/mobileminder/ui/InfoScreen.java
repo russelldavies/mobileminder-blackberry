@@ -2,20 +2,16 @@ package com.mmtechco.mobileminder.ui;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
-import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
+import net.rim.device.api.system.Display;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Color;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Graphics;
-import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
@@ -25,7 +21,6 @@ import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
-import net.rim.device.api.ui.container.HorizontalFieldManager;
 import net.rim.device.api.ui.container.MainScreen;
 import net.rim.device.api.ui.container.VerticalFieldManager;
 import net.rim.device.api.ui.decor.BackgroundFactory;
@@ -46,16 +41,8 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	private TextField statusTextField = new TextField(Field.NON_FOCUSABLE);
 	private TextField idTextField = new TextField(Field.NON_FOCUSABLE);
 
-	
-	// Notification icons
-	ApplicationIcon icon_reg = new ApplicationIcon(
-			EncodedImage.getEncodedImageResource("notify_reg.png"));
-	ApplicationIcon icon_unreg = new ApplicationIcon(
-			EncodedImage.getEncodedImageResource("notify_unreg.png"));
-	ApplicationIcon notifyIcon = icon_unreg;
-
 	public InfoScreen() {
-		super(Manager.NO_VERTICAL_SCROLL);
+		super(NO_VERTICAL_SCROLL | USE_ALL_HEIGHT | USE_ALL_WIDTH);
 
 		// Give reference of self to Registration so fields can be updated
 		Registration.addObserver(this);
@@ -67,23 +54,17 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		idTextField.setText("[none]");
 
 		// Define layout manager
-		VerticalFieldManager vfm = new VerticalFieldManager(
-				VerticalFieldManager.USE_ALL_HEIGHT
-						| VerticalFieldManager.USE_ALL_WIDTH
-						| VerticalFieldManager.FIELD_HCENTER);
+		VerticalFieldManager vfm = new VerticalFieldManager(USE_ALL_HEIGHT
+				| USE_ALL_WIDTH | FIELD_HCENTER);
 
-		// Add logo
-		vfm.add(new BitmapField(Bitmap.getBitmapResource("logo.png"),
-				Field.FIELD_HCENTER));
-
-		// Info blurb and icon
-		HorizontalFieldManager info_hfm = new HorizontalFieldManager(
-				HorizontalFieldManager.USE_ALL_WIDTH);
-		info_hfm.add(new BitmapField(Bitmap.getBitmapResource("icon_72.png")));
-		info_hfm.add(new LabelField(r.getString(i18n_Description)));
-		info_hfm.setPadding(20, 0, 0, 0);
-		vfm.add(info_hfm);
-		vfm.add(new SeparatorField());
+		// Logo
+		Bitmap logoBitmap = Bitmap.getBitmapResource("mobileminder.png");
+		float ratio = (float) logoBitmap.getWidth() / logoBitmap.getHeight();
+		int newWidth = (int) (Display.getWidth() * 0.9);
+		int newHeight = (int) (newWidth / ratio);
+		BitmapField logoField = new BitmapField(ToolsBB.resizeBitmap( logoBitmap, newWidth, newHeight, Bitmap.FILTER_LANCZOS, Bitmap.SCALE_TO_FIT), Field.FIELD_HCENTER);
+		logoField.setPadding(0, 0, 10, 0);
+		vfm.add(logoField);
 
 		// Registration fields
 		vfm.add(statusTextField);
@@ -95,32 +76,16 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 		helpButton.setChangeListener(new FieldChangeListener() {
 			public void fieldChanged(Field field, int context) {
-				if (EmergencyNumbers.getNumbers().size() > 0) {
-					if (sendHelpMe()) {
-						Dialog.inform(r.getString(i18n_HelpSent));
-					} else {
-						Dialog.inform("Could not send help message");
-					}
-				} else {
-					Dialog.inform("No emergency numbers have been set");
-				}
+				sendHelpMe();
 			}
 		});
-		/*
-		 * FieldChangeListener buttonListener = new FieldChangeListener() {
-		 * public void fieldChanged(Field field, int context) {
-		 * Dialog.alert("Success!!! You clicked the Custom Button!!!"); } };
-		 * ImageButton helpButton = new ImageButton("icon_help.png",
-		 * "notify_unreg.png"); helpButton.setChangeListener(buttonListener);
-		 */
-		vfm.add(helpButton);
+		setStatus(helpButton);
 
-		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
+		setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
 		add(vfm);
 
-		// TODO: enable
-		//registerIndicator();
+		registerIndicator();
 	}
 
 	/*
@@ -135,6 +100,12 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					idTextField.setText(regId);
 				}
 				statusTextField.setText(Registration.getStatus());
+
+				if (Registration.isRegistered()) {
+					updateIcon(icon_reg);
+				} else {
+					updateIcon(icon_unreg);
+				}
 			}
 		});
 	}
@@ -148,6 +119,46 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		});
 	}
 
+	protected void makeMenu(Menu menu, int instance) {
+		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010,
+				0) {
+			public void run() {
+				sendHelpMe();
+			}
+		};
+		menu.add(helpMenu);
+
+		super.makeMenu(menu, instance);
+	}
+
+	private void sendHelpMe() {
+		if (EmergencyNumbers.getNumbers().size() < 1) {
+			Dialog.inform("No emergency numbers have been set");
+			return;
+		}
+
+		new Thread() {
+			public void run() {
+				String mapLocation = "http://www.mobileminder.net/findme.php?"
+						+ LocationMonitor.latitude + ","
+						+ LocationMonitor.longitude;
+				for (Enumeration nums = EmergencyNumbers.getNumbers()
+						.elements(); nums.hasMoreElements();) {
+					try {
+						String number = (String) nums.nextElement();
+						ToolsBB.sendSMS(number, r.getString(i18n_HelpMsg)
+								+ mapLocation);
+					} catch (IOException e) {
+						Dialog.inform("Could not send help message");
+						ActivityLog.addMessage(new ErrorMessage(e));
+						return;
+					}
+				}
+				Dialog.inform(r.getString(i18n_HelpSent));
+			}
+		}.start();
+	}
+
 	public void close() {
 		// App is pushed to background rather than terminated when screen is
 		// closed.
@@ -159,151 +170,38 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		return true;
 	}
 
-	protected void makeMenu(Menu menu, int instance) {
-		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010, 0) {
-			public void run() {
-				// TODO: make modalless
-				// Dialog.inform(r.getString(i18n_HelpSending));
-				(new Thread() {
-					boolean sendStatus = false;
-
-					public void run() {
-						sendStatus = sendHelpMe();
-						if (sendStatus) {
-							Dialog.inform(r.getString(i18n_HelpSent));
-						}
-					}
-				}).start();
-			}
-		};
-
-		// Only display menu if there are emergency numbers
-		if (EmergencyNumbers.getNumbers().size() > 0) {
-			menu.add(helpMenu);
-		}
-
-		super.makeMenu(menu, instance);
-	}
-
-	private boolean sendHelpMe() {
-		String mapLocation = "http://www.mobileminder.net/findme.php?"
-				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
-		Vector emergNums = EmergencyNumbers.getNumbers();
-		for (Enumeration e = emergNums.elements(); e.hasMoreElements();) {
-			try {
-				((ToolsBB) ToolsBB.getInstance()).sendSMS(
-						(String) e.nextElement(), r.getString(i18n_HelpMsg)
-								+ mapLocation);
-			} catch (IOException exception) {
-				return false;
-			}
-		}
-		return true;
-	}
+	// Notification icons
+	ApplicationIcon icon_reg = new ApplicationIcon(
+			EncodedImage.getEncodedImageResource("notify_reg.png"));
+	ApplicationIcon icon_unreg = new ApplicationIcon(
+			EncodedImage.getEncodedImageResource("notify_unreg.png"));
 
 	public void registerIndicator() {
 		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator indicator = reg.register(notifyIcon, false,
-					true);
+			ApplicationIndicatorRegistry.getInstance().register(icon_unreg,
+					true, true);
 		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not register notification icon", e));
-		}
-	}
-
-	public void unregisterIndicator() {
-		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			reg.unregister();
-		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not unregister notification icon", e));
-		}
-	}
-
-	public void updateValue(int value) {
-		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
-			appIndicator.setValue(value);
-		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon value", e));
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not register notification icon", e));
 		}
 	}
 
 	public void updateIcon(ApplicationIcon icon) {
 		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
-			appIndicator.setIcon(icon);
+			ApplicationIndicatorRegistry.getInstance()
+					.getApplicationIndicator().setIcon(icon);
 		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon", e));
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not update notification icon", e));
 		}
 	}
 
-	// Custom private class that creates the button and switches the image
-	// depending on the return value of onFocus()
-	private class ImageButton extends Field implements DrawStyle {
-		private Bitmap currentPicture;
-		private Bitmap onPicture; // image for "in focus"
-		private Bitmap offPicture; // image for "not in focus"
-		private int width;
-		private int height;
-
-		ImageButton(String onImage, String offImage) {
-			super();
-			onPicture = Bitmap.getBitmapResource(onImage);
-			offPicture = Bitmap.getBitmapResource(offImage);
-			currentPicture = offPicture;
-		}
-
-		public int getPreferredHeight() {
-			return 80;
-		}
-
-		public int getPreferredWidth() {
-			return 80;
-		}
-
-		public boolean isFocusable() {
-			return true;
-		}
-
-		protected void onFocus(int direction) {
-			currentPicture = onPicture;
-			invalidate();
-		}
-
-		protected void onUnfocus() {
-			currentPicture = offPicture;
-			invalidate();
-		}
-
-		protected void layout(int width, int height) {
-			setExtent(Math.min(width, getPreferredWidth()),
-					Math.min(height, getPreferredHeight()));
-		}
-
-		protected void fieldChangeNotify(int context) {
-			this.getChangeListener().fieldChanged(this, context);
-		}
-
-		// Button is rounded so fill in edges with colors to match screen
-		// background
-		protected void paint(Graphics graphics) {
-			graphics.setColor(Color.GRAY);
-			// graphics.setGlobalAlpha(50);
-			graphics.fillRect(0, 0, getWidth(), getHeight());
-			graphics.drawBitmap(0, 0, getWidth(), getHeight(), currentPicture,
-					0, 0);
-		}
-
-		protected boolean navigationClick(int status, int time) {
-			fieldChangeNotify(1);
-			return true;
+	public void unregisterIndicator() {
+		try {
+			ApplicationIndicatorRegistry.getInstance().unregister();
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage(
+					"Could not unregister notification icon", e));
 		}
 	}
 }
