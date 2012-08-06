@@ -213,6 +213,13 @@ public class Registration implements MobileMinderResource {
 	public static String getStatus() {
 		return status;
 	}
+	
+	public static boolean isRegistered() {
+		if (stage < REGISTERED) {
+			return false;
+		}
+		return true;
+	}
 }
 
 class RegistrationMessage extends Message {

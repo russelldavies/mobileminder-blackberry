@@ -5,16 +5,13 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
-import net.rim.blackberry.api.messagelist.ApplicationIndicator;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.device.api.i18n.ResourceBundle;
 import net.rim.device.api.system.Bitmap;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.ui.Color;
-import net.rim.device.api.ui.DrawStyle;
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
-import net.rim.device.api.ui.Graphics;
 import net.rim.device.api.ui.Manager;
 import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
@@ -45,14 +42,6 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 	// GUI widgets
 	private TextField statusTextField = new TextField(Field.NON_FOCUSABLE);
 	private TextField idTextField = new TextField(Field.NON_FOCUSABLE);
-
-	
-	// Notification icons
-	ApplicationIcon icon_reg = new ApplicationIcon(
-			EncodedImage.getEncodedImageResource("notify_reg.png"));
-	ApplicationIcon icon_unreg = new ApplicationIcon(
-			EncodedImage.getEncodedImageResource("notify_unreg.png"));
-	ApplicationIcon notifyIcon = icon_unreg;
 
 	public InfoScreen() {
 		super(Manager.NO_VERTICAL_SCROLL);
@@ -106,21 +95,13 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				}
 			}
 		});
-		/*
-		 * FieldChangeListener buttonListener = new FieldChangeListener() {
-		 * public void fieldChanged(Field field, int context) {
-		 * Dialog.alert("Success!!! You clicked the Custom Button!!!"); } };
-		 * ImageButton helpButton = new ImageButton("icon_help.png",
-		 * "notify_unreg.png"); helpButton.setChangeListener(buttonListener);
-		 */
 		vfm.add(helpButton);
 
 		vfm.setBackground(BackgroundFactory.createSolidTransparentBackground(
 				Color.GRAY, 50));
 		add(vfm);
 
-		// TODO: enable
-		//registerIndicator();
+		registerIndicator();
 	}
 
 	/*
@@ -135,6 +116,12 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 					idTextField.setText(regId);
 				}
 				statusTextField.setText(Registration.getStatus());
+				
+				if (Registration.isRegistered()) {
+					updateIcon(icon_reg);
+				} else {
+					updateIcon(icon_unreg);
+				}
 			}
 		});
 	}
@@ -146,17 +133,6 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				add(new LabelField(msg));
 			}
 		});
-	}
-
-	public void close() {
-		// App is pushed to background rather than terminated when screen is
-		// closed.
-		UiApplication.getUiApplication().requestBackground();
-	}
-
-	public boolean onSavePrompt() {
-		// Prevent the save dialog from being displayed
-		return true;
 	}
 
 	protected void makeMenu(Menu menu, int instance) {
@@ -189,121 +165,57 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		String mapLocation = "http://www.mobileminder.net/findme.php?"
 				+ LocationMonitor.latitude + "," + LocationMonitor.longitude;
 		Vector emergNums = EmergencyNumbers.getNumbers();
-		for (Enumeration e = emergNums.elements(); e.hasMoreElements();) {
+		for (Enumeration nums = emergNums.elements(); nums.hasMoreElements();) {
 			try {
 				((ToolsBB) ToolsBB.getInstance()).sendSMS(
-						(String) e.nextElement(), r.getString(i18n_HelpMsg)
+						(String) nums.nextElement(), r.getString(i18n_HelpMsg)
 								+ mapLocation);
-			} catch (IOException exception) {
+			} catch (IOException e) {
+				ActivityLog.addMessage(new ErrorMessage(e));
 				return false;
 			}
 		}
 		return true;
 	}
+	
+	public void close() {
+		// App is pushed to background rather than terminated when screen is
+		// closed.
+		UiApplication.getUiApplication().requestBackground();
+	}
+
+	public boolean onSavePrompt() {
+		// Prevent the save dialog from being displayed
+		return true;
+	}
+
+	// Notification icons
+	ApplicationIcon icon_reg = new ApplicationIcon(
+			EncodedImage.getEncodedImageResource("notify_reg.png"));
+	ApplicationIcon icon_unreg = new ApplicationIcon(
+			EncodedImage.getEncodedImageResource("notify_unreg.png"));
 
 	public void registerIndicator() {
 		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator indicator = reg.register(notifyIcon, false,
-					true);
+			ApplicationIndicatorRegistry.getInstance().register(icon_unreg, true, true);
 		} catch (RuntimeException e) {
 			ActivityLog.addMessage(new ErrorMessage("Could not register notification icon", e));
 		}
 	}
 
-	public void unregisterIndicator() {
-		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			reg.unregister();
-		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not unregister notification icon", e));
-		}
-	}
-
-	public void updateValue(int value) {
-		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
-			appIndicator.setValue(value);
-		} catch (RuntimeException e) {
-			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon value", e));
-		}
-	}
-
 	public void updateIcon(ApplicationIcon icon) {
 		try {
-			ApplicationIndicatorRegistry reg = ApplicationIndicatorRegistry
-					.getInstance();
-			ApplicationIndicator appIndicator = reg.getApplicationIndicator();
-			appIndicator.setIcon(icon);
+			ApplicationIndicatorRegistry.getInstance().getApplicationIndicator().setIcon(icon);
 		} catch (RuntimeException e) {
 			ActivityLog.addMessage(new ErrorMessage("Could not update notification icon", e));
 		}
 	}
-
-	// Custom private class that creates the button and switches the image
-	// depending on the return value of onFocus()
-	private class ImageButton extends Field implements DrawStyle {
-		private Bitmap currentPicture;
-		private Bitmap onPicture; // image for "in focus"
-		private Bitmap offPicture; // image for "not in focus"
-		private int width;
-		private int height;
-
-		ImageButton(String onImage, String offImage) {
-			super();
-			onPicture = Bitmap.getBitmapResource(onImage);
-			offPicture = Bitmap.getBitmapResource(offImage);
-			currentPicture = offPicture;
-		}
-
-		public int getPreferredHeight() {
-			return 80;
-		}
-
-		public int getPreferredWidth() {
-			return 80;
-		}
-
-		public boolean isFocusable() {
-			return true;
-		}
-
-		protected void onFocus(int direction) {
-			currentPicture = onPicture;
-			invalidate();
-		}
-
-		protected void onUnfocus() {
-			currentPicture = offPicture;
-			invalidate();
-		}
-
-		protected void layout(int width, int height) {
-			setExtent(Math.min(width, getPreferredWidth()),
-					Math.min(height, getPreferredHeight()));
-		}
-
-		protected void fieldChangeNotify(int context) {
-			this.getChangeListener().fieldChanged(this, context);
-		}
-
-		// Button is rounded so fill in edges with colors to match screen
-		// background
-		protected void paint(Graphics graphics) {
-			graphics.setColor(Color.GRAY);
-			// graphics.setGlobalAlpha(50);
-			graphics.fillRect(0, 0, getWidth(), getHeight());
-			graphics.drawBitmap(0, 0, getWidth(), getHeight(), currentPicture,
-					0, 0);
-		}
-
-		protected boolean navigationClick(int status, int time) {
-			fieldChangeNotify(1);
-			return true;
+	
+	public void unregisterIndicator() {
+		try {
+			ApplicationIndicatorRegistry.getInstance().unregister();
+		} catch (RuntimeException e) {
+			ActivityLog.addMessage(new ErrorMessage("Could not unregister notification icon", e));
 		}
 	}
 }
