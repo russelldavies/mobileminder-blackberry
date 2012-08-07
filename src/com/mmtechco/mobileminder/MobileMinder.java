@@ -19,11 +19,8 @@ import com.mmtechco.mobileminder.monitor.CallMonitor;
 import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.monitor.SMSMonitor;
 import com.mmtechco.mobileminder.monitor.UninstallMonitor;
-//#ifdef DEBUG
 import com.mmtechco.mobileminder.ui.DebugScreen;
-//#else
 import com.mmtechco.mobileminder.ui.InfoScreen;
-//#endif
 import com.mmtechco.util.Logger;
 
 /**
