@@ -38,7 +38,9 @@ public class SMSMonitor implements MessageListener, OutboundMessageListener {
 	
 	public static void stop() {
 		try {
-			receiver.setMessageListener(null);
+			if (receiver != null) {
+				receiver.setMessageListener(null);
+			}
 		} catch (IOException e) {
 			logger.warn(e.getMessage());
 		}

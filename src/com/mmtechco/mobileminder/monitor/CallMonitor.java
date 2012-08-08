@@ -2,14 +2,14 @@ package com.mmtechco.mobileminder.monitor;
 
 import java.util.Date;
 
+import net.rim.blackberry.api.phone.AbstractPhoneListener;
+import net.rim.blackberry.api.phone.Phone;
+import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
+
 import com.mmtechco.mobileminder.data.ActivityLog;
 import com.mmtechco.mobileminder.net.Message;
 import com.mmtechco.util.Logger;
 import com.mmtechco.util.ToolsBB;
-
-import net.rim.blackberry.api.phone.Phone;
-import net.rim.blackberry.api.phone.AbstractPhoneListener;
-import net.rim.blackberry.api.phone.phonelogs.PhoneCallLogID;
 
 /**
  * Monitors and registers call based events.
@@ -20,7 +20,7 @@ public class CallMonitor extends AbstractPhoneListener {
 	private static CallMonitor callMonitor;
 	private static CallMessage callMessage;
 
-	public CallMonitor() {
+	public static void start() {
 		Phone.addPhoneListener(callMonitor = new CallMonitor());
 		logger.info("Started");
 	}

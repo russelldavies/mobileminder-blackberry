@@ -117,7 +117,7 @@ class MobileMinder extends UiApplication implements SystemListener2, GlobalEvent
 		logger.debug("Starting monitors...");
 		new AppMonitor();
 		//new MailMonitor();
-		new CallMonitor();
+		CallMonitor.start();
 		new SMSMonitor();
 		LocationMonitor.start();
 		

@@ -142,13 +142,24 @@ public class DebugScreen extends MainScreen implements ObserverScreen,
 	}
 	
 	public static void cleanup() {
-		// Remove all listeners and clear components start flag
-		Logger.getLogger(DebugScreen.class).info("Stopping listeners");
-		SMSMonitor.stop();
-		CallMonitor.stop();
-		LocationMonitor.stop();
-		FileSync.stop();
-		RuntimeStore.getRuntimeStore().remove(Registration.ID);
+		try {
+			Logger logger = Logger.getLogger(DebugScreen.class);
+
+			// Remove all listeners and clear components start flag
+			Logger.getLogger(DebugScreen.class).info("Stopping listeners");
+			SMSMonitor.stop();
+			logger.debug("stopped sms monitor");
+			CallMonitor.stop();
+			logger.debug("stopped call monitor");
+			LocationMonitor.stop();
+			logger.debug("stopped location monitor");
+			FileSync.stop();
+			logger.debug("stopped file sync");
+			Logger.getLogger(DebugScreen.class).info("Stopped all listeners");
+			RuntimeStore.getRuntimeStore().remove(Registration.ID);
+			logger.debug("Cleared start components flag");
+		} catch (Exception e) {
+		}
 	}
 
 	final class RegPopupScreen extends PopupScreen {
