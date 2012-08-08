@@ -1,8 +1,5 @@
 package com.mmtechco.mobileminder.ui;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
 import net.rim.blackberry.api.messagelist.ApplicationIcon;
 import net.rim.blackberry.api.messagelist.ApplicationIndicatorRegistry;
 import net.rim.device.api.i18n.ResourceBundle;
@@ -16,7 +13,6 @@ import net.rim.device.api.ui.MenuItem;
 import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.ButtonField;
-import net.rim.device.api.ui.component.Dialog;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
 import net.rim.device.api.ui.component.SeparatorField;
@@ -29,7 +25,6 @@ import com.mmtechco.mobileminder.MobileMinderResource;
 import com.mmtechco.mobileminder.Registration;
 import com.mmtechco.mobileminder.command.EmergencyNumbers;
 import com.mmtechco.mobileminder.data.ActivityLog;
-import com.mmtechco.mobileminder.monitor.LocationMonitor;
 import com.mmtechco.mobileminder.net.ErrorMessage;
 import com.mmtechco.util.ToolsBB;
 
@@ -76,7 +71,7 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 				ButtonField.FIELD_HCENTER | ButtonField.CONSUME_CLICK);
 		helpButton.setChangeListener(new FieldChangeListener() {
 			public void fieldChanged(Field field, int context) {
-				sendHelpMe();
+				EmergencyNumbers.sendHelpMe();
 			}
 		});
 		setStatus(helpButton);
@@ -123,40 +118,12 @@ public class InfoScreen extends MainScreen implements ObserverScreen,
 		MenuItem helpMenu = new MenuItem(r.getString(i18n_MenuHelp), 0x100010,
 				0) {
 			public void run() {
-				sendHelpMe();
+				EmergencyNumbers.sendHelpMe();
 			}
 		};
 		menu.add(helpMenu);
 
 		super.makeMenu(menu, instance);
-	}
-
-	private void sendHelpMe() {
-		if (EmergencyNumbers.getNumbers().size() < 1) {
-			Dialog.inform("No emergency numbers have been set");
-			return;
-		}
-
-		new Thread() {
-			public void run() {
-				String mapLocation = "http://www.mobileminder.net/findme.php?"
-						+ LocationMonitor.latitude + ","
-						+ LocationMonitor.longitude;
-				for (Enumeration nums = EmergencyNumbers.getNumbers()
-						.elements(); nums.hasMoreElements();) {
-					try {
-						String number = (String) nums.nextElement();
-						ToolsBB.sendSMS(number, r.getString(i18n_HelpMsg)
-								+ mapLocation);
-					} catch (IOException e) {
-						Dialog.inform("Could not send help message");
-						ActivityLog.addMessage(new ErrorMessage(e));
-						return;
-					}
-				}
-				Dialog.inform(r.getString(i18n_HelpSent));
-			}
-		}.start();
 	}
 
 	public void close() {
