@@ -5,6 +5,7 @@ import java.util.Enumeration;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.media.MediaException;
 
 import net.rim.device.api.crypto.DigestInputStream;
 import net.rim.device.api.crypto.MD5Digest;
@@ -32,7 +33,7 @@ public class FileLog {
 
 	private static PersistentObject store;
 	private static ContentProtectedVector files;
-	
+
 	private static Logger logger = Logger.getLogger(FileLog.class);
 
 	public static boolean mobileSync = false;
@@ -56,7 +57,7 @@ public class FileLog {
 	public synchronized static void add(String path) {
 		add(path, true);
 	}
-	
+
 	public synchronized static void addBatch(String path) {
 		add(path, false);
 	}
@@ -226,53 +227,41 @@ public class FileLog {
 			// Get all files that have no been uploaded
 			for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
 				FileHolder fileholder = (FileHolder) enum.nextElement();
-				if (!fileholder.isUploaded()) {
-					FileConnection fc = null;
-					try {
-						// Get handle to file
-						String path = fileholder.getPath();
-						fc = (FileConnection) Connector.open(path);
-						// Upload to server
-						FileMessage fm = new FileMessage();
-						fm.add(path, fileholder.getModTime(),
-								fileholder.getMd5());
-						try {
-							Response response = HttpClient.postMultiPart(
-									fm.toString(), fc, "userfile");
-							Reply.Regular reply = new Reply.Regular(
-									response.getContent());
-							// If server successfully processed mark as uploaded
-							if (!reply.error) {
-								files.removeElement(fileholder);
-								
-								// Object must be ungrouped to modify it
-								if (ObjectGroup.isInGroup(fileholder)) {
-									fileholder = (FileHolder) ObjectGroup
-											.expandGroup(fileholder);
-								}
-								fileholder.setUploaded(true);
-								// Regroup object
-								ObjectGroup.createGroup(fileholder);
-								
-								logger.debug(fileholder.getFileName() + " marked as uploaded");
-								files.addElement(fileholder);
-							}
-						} catch (IOException e) {
-							logger.warn("Connection problem: " + e.getMessage());
-						} catch (ParseException e) {
-							ActivityLog.addMessage(new ErrorMessage(e));
+				if (fileholder.isUploaded()) {
+					continue;
+				}
+				String path = fileholder.getPath();
+				// Upload to server
+				FileMessage fm = new FileMessage();
+				fm.add(path, fileholder.getModTime(), fileholder.getMd5());
+				try {
+					Response response = HttpClient.postMultiPart(fm.toString(),
+							path, "userfile");
+					Reply.Regular reply = new Reply.Regular(
+							response.getContent());
+					// If server successfully processed mark as uploaded
+					if (!reply.error) {
+						files.removeElement(fileholder);
+
+						// Object must be ungrouped to modify it
+						if (ObjectGroup.isInGroup(fileholder)) {
+							fileholder = (FileHolder) ObjectGroup
+									.expandGroup(fileholder);
 						}
-					} catch (IOException e) {
-						ActivityLog.addMessage(new ErrorMessage(e));
-					} finally {
-						try {
-							if (fc != null) {
-								fc.close();
-							}
-						} catch (IOException e1) {
-							ActivityLog.addMessage(new ErrorMessage(e1));
-						}
+						fileholder.setUploaded(true);
+						// Regroup object
+						ObjectGroup.createGroup(fileholder);
+
+						logger.debug(fileholder.getFileName()
+								+ " marked as uploaded");
+						files.addElement(fileholder);
 					}
+				} catch (IOException e) {
+					logger.warn("Connection problem: " + e.getMessage());
+				} catch (ParseException e) {
+					ActivityLog.addMessage(new ErrorMessage(e));
+				} catch (MediaException e) {
+					logger.warn("File problem: " + e.getMessage());
 				}
 			}
 			// Commit outside loop as there might be many changes

@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.media.MediaException;
 
 import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.io.IOUtilities;
@@ -70,18 +71,49 @@ public class HttpClient {
 		// Send data via POST
 		OutputStream output = connection.openOutputStream();
 		output.write(postData);
-		output.flush();
+		output.close();
 
 		// Construct reply
 		return new Response(connection);
 	}
 
-	public static Response postMultiPart(String queryString,
-			FileConnection file, String controlName) throws IOException {
+	public static Response postMultiPart(String queryString, String filePath, String controlName) throws IOException, MediaException {
 		logger.debug("POST multipart query string: " + queryString);
 		
+		FileConnection file = null;
+		String fileSize = null;
+		String fileName = null;
+		byte[] fileStream = null;
+		InputStream input = null;
+		try {
+			file = (FileConnection) Connector.open(filePath);
+			fileSize = String.valueOf(file.fileSize());
+			fileName = file.getName();
+			input = file.openInputStream();
+			fileStream = IOUtilities.streamToBytes(input);
+		} catch (IOException e) {
+			logger.debug("File problem");
+			throw new MediaException(e.getMessage());
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					throw new MediaException("Could not close inputstream: " + e.getMessage());
+				}
+			}
+			if (file != null) {
+				try {
+					file.close();
+				} catch (IOException e) {
+					throw new MediaException("Could not close file: " + e.getMessage());
+				}
+			}
+		}
+		
 		// Setup connection and HTTP headers
-		HttpConnection connection = setupConnection(BASE_URL + URLUTF8Encoder.encode(queryString));
+		HttpConnection connection = setupConnection(BASE_URL
+				+ URLUTF8Encoder.encode(queryString));
 		connection.setRequestMethod(HttpConnection.POST);
 		String boundary = Long.toString(System.currentTimeMillis());
 		connection.setRequestProperty(
@@ -89,19 +121,21 @@ public class HttpClient {
 				HttpProtocolConstants.CONTENT_TYPE_MULTIPART_FORM_DATA
 						+ ";boundary=" + boundary);
 		connection.setRequestProperty(
-				HttpProtocolConstants.HEADER_CONTENT_LENGTH,
-				String.valueOf(file.fileSize()));
+				HttpProtocolConstants.HEADER_CONTENT_LENGTH, fileSize);
 
 		// Send data via POST
 		OutputStream output = connection.openOutputStream();
 		output.write(("\r\n--" + boundary + "\r\n").getBytes());
-		output.write(("Content-Disposition: form-data; name=\"" + controlName + "\"; filename=\""
-				+ file.getName() + "\"\r\n").getBytes());
+		output.write(("Content-Disposition: form-data; name=\"" + controlName
+				+ "\"; filename=\"" + fileName + "\"\r\n").getBytes());
 		output.write(("Content-Type: "
-				+ MIMETypeAssociations.getNormalizedType(file.getPath()
-						+ file.getName()) + "\r\n\r\n").getBytes());
-		output.write(IOUtilities.streamToBytes(file.openInputStream()));
+				+ MIMETypeAssociations.getNormalizedType(filePath + fileName) + "\r\n\r\n")
+				.getBytes());
+		output.write(fileStream);
 		output.write(("\r\n--" + boundary + "--\r\n").getBytes());
+		if (output != null) {
+			output.close();
+		}
 
 		/*
 		// Other, less manual, method
@@ -112,8 +146,8 @@ public class HttpClient {
 		postData.append("name", controlName);
 		postData.append("filename", file.getName());
 		output.write(postData.getBytes());
+		output.close();
 		*/
-		output.flush();
 
 		// Construct reply
 		return new Response(connection);
