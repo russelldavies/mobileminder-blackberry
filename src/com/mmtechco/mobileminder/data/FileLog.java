@@ -225,6 +225,7 @@ public class FileLog {
 				|| (WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED)
 				|| DeviceInfo.isSimulator()) {
 			// Get all files that have no been uploaded
+			int count = 0;
 			for (Enumeration enum = files.elements(); enum.hasMoreElements();) {
 				FileHolder fileholder = (FileHolder) enum.nextElement();
 				if (fileholder.isUploaded()) {
@@ -241,8 +242,6 @@ public class FileLog {
 							response.getContent());
 					// If server successfully processed mark as uploaded
 					if (!reply.error) {
-						files.removeElement(fileholder);
-
 						// Object must be ungrouped to modify it
 						if (ObjectGroup.isInGroup(fileholder)) {
 							fileholder = (FileHolder) ObjectGroup
@@ -253,8 +252,8 @@ public class FileLog {
 						ObjectGroup.createGroup(fileholder);
 
 						logger.debug(fileholder.getFileName()
-								+ " marked as uploaded");
-						files.addElement(fileholder);
+								+ " marked as uploaded. " + ++count + "/"
+								+ files.size());
 					}
 				} catch (IOException e) {
 					logger.warn("Connection problem: " + e.getMessage());
